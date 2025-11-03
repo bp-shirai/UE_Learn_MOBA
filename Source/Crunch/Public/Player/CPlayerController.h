@@ -9,7 +9,7 @@
 /**
  * 
  */
-UCLASS()
+UCLASS(Abstract)
 class CRUNCH_API ACPlayerController : public APlayerController
 {
 	GENERATED_BODY()

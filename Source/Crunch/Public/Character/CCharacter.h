@@ -6,7 +6,7 @@
 #include "GameFramework/Character.h"
 #include "CCharacter.generated.h"
 
-UCLASS()
+UCLASS(Abstract)
 class CRUNCH_API ACCharacter : public ACharacter
 {
 	GENERATED_BODY()

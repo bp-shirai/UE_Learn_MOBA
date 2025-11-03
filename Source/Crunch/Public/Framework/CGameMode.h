@@ -9,7 +9,7 @@
 /**
  * 
  */
-UCLASS()
+UCLASS(Abstract)
 class CRUNCH_API ACGameMode : public AGameModeBase
 {
 	GENERATED_BODY()

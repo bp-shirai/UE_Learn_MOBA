@@ -15,7 +15,7 @@ struct FInputActionValue;
 /**
  *
  */
-UCLASS()
+UCLASS(Abstract)
 class CRUNCH_API ACPlayerCharacter : public ACCharacter
 {
     GENERATED_BODY()

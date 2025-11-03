@@ -3,13 +3,13 @@
 #include "Player/CPlayerCharacter.h"
 
 #include "GameFramework/Character.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
 
 #include "GameFramework/PlayerController.h"
 #include "EnhancedInputSubsystems.h"
 #include "EnhancedInputComponent.h"
-#include "Math/MathFwd.h"
 
 ACPlayerCharacter::ACPlayerCharacter()
 {
@@ -22,9 +22,12 @@ ACPlayerCharacter::ACPlayerCharacter()
     ViewCam->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
     ViewCam->bUsePawnControlRotation = false;
 
-    //bUseControllerRotationPitch = false;
-    bUseControllerRotationYaw   = false;
-    //bUseControllerRotationRoll  = false;
+    // bUseControllerRotationPitch = false;
+    bUseControllerRotationYaw = false;
+    // bUseControllerRotationRoll  = false;
+
+    GetCharacterMovement()->bOrientRotationToMovement = true;
+    GetCharacterMovement()->RotationRate              = FRotator(0.f, 720.f, 0.f);
 }
 
 void ACPlayerCharacter::BeginPlay()
@@ -57,7 +60,6 @@ void ACPlayerCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerI
     EnhancedInputComp->BindAction(Jump_InputAction, ETriggerEvent::Triggered, this, &ACharacter::Jump);
     EnhancedInputComp->BindAction(Look_InputAction, ETriggerEvent::Triggered, this, &ThisClass::HandleLookInput);
     EnhancedInputComp->BindAction(Move_InputAction, ETriggerEvent::Triggered, this, &ThisClass::HandleMoveInput);
-
 }
 
 void ACPlayerCharacter::HandleLookInput(const FInputActionValue& Value)
