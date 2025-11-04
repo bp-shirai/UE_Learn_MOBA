@@ -5,12 +5,19 @@
 
 #include "Components/SkeletalMeshComponent.h"
 
+#include "GAS/CAbilitySystemComponent.h"
+#include "GAS/CAttributeSet.h"
+
 
 ACCharacter::ACCharacter()
 {
 	PrimaryActorTick.bCanEverTick = true;
 
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+	AbilitySystemComponent = CreateDefaultSubobject<UCAbilitySystemComponent>(TEXT("AbilitySystemComponent"));
+	AttributeSet = CreateDefaultSubobject<UCAttributeSet>(TEXT("AttributeSet"));
+
 
 }
 
@@ -35,3 +42,19 @@ void ACCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 
 }
 
+
+UAbilitySystemComponent* ACCharacter::GetAbilitySystemComponent() const
+{
+	return AbilitySystemComponent;
+}
+
+void ACCharacter::ServerSideInit()
+{
+	AbilitySystemComponent->InitAbilityActorInfo(this, this);
+	AbilitySystemComponent->ApplyInitialEffects();
+}
+
+void ACCharacter::ClientSideInit()
+{
+	AbilitySystemComponent->InitAbilityActorInfo(this, this);
+}

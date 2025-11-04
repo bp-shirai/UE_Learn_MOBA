@@ -41,6 +41,7 @@ void UCAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
     if (OwnerMovementComp)
     {
         bIsJumping = OwnerMovementComp->IsFalling();
+        // bShouldMove =  OwnerMovementComp->GetCurrentAcceleration().IsNearlyZero() && Speed > 5.f;
     }
 }
 
