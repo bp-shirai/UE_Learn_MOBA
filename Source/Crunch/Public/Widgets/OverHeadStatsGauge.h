@@ -4,33 +4,25 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "GameplayWidget.generated.h"
+#include "OverHeadStatsGauge.generated.h"
 
-
-class UValueGauge;
 class UAbilitySystemComponent;
+class UValueGauge;
 /**
- * 
+ *
  */
 UCLASS(Abstract)
-class CRUNCH_API UGameplayWidget : public UUserWidget
+class CRUNCH_API UOverHeadStatsGauge : public UUserWidget
 {
-	GENERATED_BODY()
-	
+    GENERATED_BODY()
+
 public:
-	virtual void NativeConstruct() override;
-
-
-
+    void ConfigureWithASC(UAbilitySystemComponent* ASC);
 
 private:
-
 	UPROPERTY(meta=(BindWidget))
 	UValueGauge* HealthBar;
 
 	UPROPERTY(meta=(BindWidget))
 	UValueGauge* ManaBar;
-
-	UPROPERTY(Transient)
-	TWeakObjectPtr<UAbilitySystemComponent> OwnerASC;
 };

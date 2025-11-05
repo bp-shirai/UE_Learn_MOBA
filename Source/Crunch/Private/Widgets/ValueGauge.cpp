@@ -4,7 +4,11 @@
 
 #include "Components/ProgressBar.h"
 #include "Components/TextBlock.h"
-#include "Internationalization/Text.h"
+
+#include "GameplayEffectTypes.h"
+
+#include "GAS/CAbilitySystemComponent.h"
+#include "GAS/CAttributeSet.h"
 
 void UValueGauge::NativePreConstruct()
 {
@@ -14,10 +18,19 @@ void UValueGauge::NativePreConstruct()
     {
         ProgressBar->SetFillColorAndOpacity(BarColor);
     }
+    if (ValueText)
+    {
+        auto Font = ValueText->GetFont();
+        Font.Size = FontSize;
+        ValueText->SetFont(Font);
+    }
 }
 
 void UValueGauge::SetValue(float NewValue, float NewMaxValue)
 {
+    CachedValue    = NewValue;
+    CachedMaxValue = NewMaxValue;
+
     if (NewMaxValue == 0)
     {
         UE_LOG(LogTemp, Warning, TEXT("Value Gauge: %s, NewMaxValue can't be 0"), *GetName());
@@ -35,4 +48,31 @@ void UValueGauge::SetValue(float NewValue, float NewMaxValue)
             FTextFormat::FromString(TEXT("{0}/{1}")),
             FText::AsNumber(NewValue, &Options),
             FText::AsNumber(NewMaxValue, &Options)));
+}
+
+void UValueGauge::SetAndBoundToGameplayAttribute(UAbilitySystemComponent* ASC, const FGameplayAttribute& Attribute, const FGameplayAttribute& MaxAttribute)
+{
+    if (ASC)
+    {
+        bool bFound;
+        float Value    = ASC->GetGameplayAttributeValue(Attribute, bFound);
+        float MaxValue = ASC->GetGameplayAttributeValue(MaxAttribute, bFound);
+        if (bFound)
+        {
+            SetValue(Value, MaxValue);
+        }
+
+        ASC->GetGameplayAttributeValueChangeDelegate(Attribute).AddUObject(this, &ThisClass::ValueChanged);
+        ASC->GetGameplayAttributeValueChangeDelegate(MaxAttribute).AddUObject(this, &ThisClass::MaxValueChanged);
+    }
+}
+
+void UValueGauge::ValueChanged(const FOnAttributeChangeData& ChangedData)
+{
+    SetValue(ChangedData.NewValue, CachedMaxValue);
+}
+
+void UValueGauge::MaxValueChanged(const FOnAttributeChangeData& ChangedData)
+{
+    SetValue(CachedValue, ChangedData.NewValue);
 }

@@ -9,6 +9,9 @@
 
 class UProgressBar;
 class UTextBlock;
+class UAbilitySystemComponent;
+struct FGameplayAttribute;
+struct FOnAttributeChangeData;
 
 /**
  * 
@@ -23,10 +26,17 @@ public:
 
 	virtual void NativePreConstruct() override;
 	
+	void SetAndBoundToGameplayAttribute(UAbilitySystemComponent* ASC, const FGameplayAttribute& Attribute, const FGameplayAttribute& MaxAttribute);
 	void SetValue(float NewValue, float NewMaxValue);
 
 
 private:
+
+	void ValueChanged(const FOnAttributeChangeData& ChangedData);
+	void MaxValueChanged(const FOnAttributeChangeData& ChangedData);
+
+	float CachedValue;
+	float CachedMaxValue;
 
 	UPROPERTY(VisibleAnywhere, meta=(BindWidget))
 	UProgressBar* ProgressBar;
@@ -36,4 +46,6 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "Visual")
 	FLinearColor BarColor;
+	UPROPERTY(EditAnywhere, Category = "Visual")
+	float FontSize{22.f};
 };
