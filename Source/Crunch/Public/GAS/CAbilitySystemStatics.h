@@ -17,6 +17,6 @@ class CRUNCH_API UCAbilitySystemStatics : public UBlueprintFunctionLibrary
     GENERATED_BODY()
 
 public:
-    UFUNCTION(BlueprintPure, Category = "Crunch|GAS")
+    UFUNCTION(BlueprintPure, Category = "Crunch|Utils")
     int32 GetGameplayTagID(const FGameplayTag& Tag);
 };

@@ -26,13 +26,13 @@ public:
     void GiveInitialAbilities();
 
 private:
-    UPROPERTY(EditDefaultsOnly, Category = "Gameplay Effects")
+    UPROPERTY(EditDefaultsOnly, Category = "Crunch|Gameplay Effects")
     TArray<TSubclassOf<UGameplayEffect>> InitialEffects;
 
-    UPROPERTY(EditDefaultsOnly, Category = "Gameplay Abilities")
+    UPROPERTY(EditDefaultsOnly, Category = "Crunch|Gameplay Abilities")
     TMap<ECAbilityInputID, TSubclassOf<UGameplayAbility>> Abilities;
 
-    UPROPERTY(EditDefaultsOnly, Category = "Gameplay Abilities")
+    UPROPERTY(EditDefaultsOnly, Category = "Crunch|Gameplay Abilities")
     TMap<ECAbilityInputID, TSubclassOf<UGameplayAbility>> BaseAbilities;
 
     FORCEINLINE bool HasAuthority() const { return GetOwner() && GetOwner()->HasAuthority(); }

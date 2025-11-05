@@ -20,6 +20,18 @@ public:
     virtual void ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData) override;
 
 private:
-    UPROPERTY(EditDefaultsOnly, Category = "Animation")
+    UPROPERTY(EditDefaultsOnly, Category = "Crunch|Animation")
     UAnimMontage* ComboMontage;
+
+    UFUNCTION()
+    void ComboChangedEventReceived(FGameplayEventData Data);
+
+    void SetupWaitComboInputPress();
+
+    UFUNCTION()
+    void HandleInputPress(float TimeWaited);
+
+    void TryCommitCombo();
+
+    FName NextComboName;
 };
