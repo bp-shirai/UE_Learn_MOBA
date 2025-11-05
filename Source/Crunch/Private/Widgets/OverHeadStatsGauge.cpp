@@ -17,6 +17,6 @@ void UOverHeadStatsGauge::ConfigureWithASC(UAbilitySystemComponent* ASC)
     }
     else
     {
-        UE_LOG(LogTemp, Warning, TEXT("OverHeadStatsGauge: %s, ASC is null"), *GetName());
+        UE_LOG(LogTemp, Warning, TEXT("OverHeadStatsGauge: %s, ASC is null : %s"), *GetName(), *GetOwningPlayer()->GetName());
     }
 }

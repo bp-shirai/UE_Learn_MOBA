@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Character/CCharacter.h"
+#include "GAS/CGameplayAbilityTypes.h"
 #include "CPlayerCharacter.generated.h"
 
 class USpringArmComponent;
@@ -35,6 +36,8 @@ private:
     UPROPERTY(VisibleDefaultsOnly, Category = "Crunch|View")
     UCameraComponent* ViewCam;
 
+#pragma region Input --------------------------------------------------
+private:
     UPROPERTY(EditDefaultsOnly, Category = "Crunch|Input")
     UInputMappingContext* GameplayInputMappingContext;
 
@@ -47,10 +50,16 @@ private:
     UPROPERTY(EditDefaultsOnly, Category = "Crunch|Input")
     UInputAction* Move_InputAction;
 
+    UPROPERTY(EditDefaultsOnly, Category = "Crunch|Input")
+    TMap<ECAbilityInputID, UInputAction*> GameplayAbilityInputActions;
+
     void HandleLookInput(const FInputActionValue& Value);
     void HandleMoveInput(const FInputActionValue& Value);
+    void HandleAbilityInput(const FInputActionValue& Value, ECAbilityInputID InputID);
 
     FVector GetLookRightDir() const;
     FVector GetLookFwdDir() const;
     FVector GetMoveFwdDir() const;
+
+#pragma endregion
 };

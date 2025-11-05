@@ -44,7 +44,7 @@ public:
     virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 
 public:
-    UPROPERTY(VisibleDefaultsOnly, Category = "Crunch|Gameplay Ability")
+    UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "Crunch|Gameplay Ability")
     UCAbilitySystemComponent* AbilitySystemComponent;
 
     UPROPERTY()

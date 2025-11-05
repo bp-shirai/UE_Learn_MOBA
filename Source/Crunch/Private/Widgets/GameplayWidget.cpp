@@ -20,6 +20,6 @@ void UGameplayWidget::NativeConstruct()
     }
     else
     {
-        UE_LOG(LogTemp, Warning, TEXT("GameplayWidget: %s, ASC is null"), *GetName());
+        UE_LOG(LogTemp, Warning, TEXT("GameplayWidget: %s, ASC is null : %s"), *GetName(), *GetOwningPlayer()->GetName());
     }
 }

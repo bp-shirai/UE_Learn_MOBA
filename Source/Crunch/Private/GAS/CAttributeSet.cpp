@@ -6,6 +6,8 @@
 
 UCAttributeSet::UCAttributeSet()
 {
+    MaxHealth = 1.f;
+    MaxMana = 1.f;
 }
 
 void UCAttributeSet::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
