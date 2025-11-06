@@ -2,13 +2,17 @@
 
 #include "GAS/Abilities/CAbility_Combo.h"
 
+#include "Abilities/GameplayAbilityTargetTypes.h"
 #include "Abilities/GameplayAbilityTypes.h"
 #include "Abilities/Tasks/AbilityTask.h"
 #include "Abilities/Tasks/AbilityTask_PlayMontageAndWait.h"
 #include "Abilities/Tasks/AbilityTask_WaitGameplayEvent.h"
 #include "Abilities/Tasks/AbilityTask_WaitInputPress.h"
 #include "AbilitySystemComponent.h"
+#include "AbilitySystemBlueprintLibrary.h"
 
+#include "Engine/HitResult.h"
+#include "GameplayEffectTypes.h"
 #include "GameplayTagsManager.h"
 
 #include "GAS/CGameplayTags.h"
@@ -62,11 +66,12 @@ void UCAbility_Combo::ComboChangedEventReceived(FGameplayEventData Data)
     if (EventTag == Tags::Ability::Combo::Change::End)
     {
         NextComboName = NAME_None;
-        return;
     }
     else
     {
         NextComboName = EventTag.GetTagLeafName();
+
+        // UE_LOG(LogTemp, Warning, TEXT("NextComboName: %s"), *NextComboName.ToString());
     }
 }
 
@@ -94,8 +99,8 @@ void UCAbility_Combo::TryCommitCombo()
 
     if (UAbilitySystemComponent* ASC = GetAbilitySystemComponentFromActorInfo())
     {
-        const FName CurrentSectionName = ASC->GetCurrentMontageSectionName();
-        MontageSetNextSectionName(CurrentSectionName, NextComboName);
+        const FName CurrentComboName = ASC->GetCurrentMontageSectionName();
+        MontageSetNextSectionName(CurrentComboName, NextComboName);
     }
 }
 
@@ -103,5 +108,27 @@ void UCAbility_Combo::ComboDamageEventReceived(FGameplayEventData Data)
 {
     TArray<FHitResult> HitResults = GetHitResultsFromSweepLocationTargetData(Data.TargetData, 30.f, true, true);
 
+    for (const FHitResult& HitResult : HitResults)
+    {
+        const TSubclassOf<UGameplayEffect> DamageEffect  = GetDamageEffectForCurrentCombo();
+        const FGameplayEffectSpecHandle EffectSpecHandle = MakeOutgoingGameplayEffectSpec(DamageEffect, GetAbilityLevel()); // GetCurrentAbilitySpecHandle(), GetCurrentActorInfo()
 
+        const FGameplayAbilityTargetDataHandle TargetData = UAbilitySystemBlueprintLibrary::AbilityTargetDataFromActor(HitResult.GetActor());
+        K2_ApplyGameplayEffectSpecToTarget(EffectSpecHandle, TargetData);
+    }
+}
+
+TSubclassOf<UGameplayEffect> UCAbility_Combo::GetDamageEffectForCurrentCombo() const
+{
+    if (UAbilitySystemComponent* ASC = GetAbilitySystemComponentFromActorInfo())
+    {
+        const FName CurrentComboName                       = ASC->GetCurrentMontageSectionName();
+        const TSubclassOf<UGameplayEffect>* FoundEffectPtr = DamageEffectMap.Find(CurrentComboName);
+        if (FoundEffectPtr)
+        {
+            return *FoundEffectPtr;
+        }
+    }
+
+    return DefaultDamageEffect;
 }

@@ -21,8 +21,17 @@ public:
     virtual void ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData) override;
 
 private:
-    UPROPERTY(EditDefaultsOnly, Category = "Crunch|Animation")
+    UPROPERTY(EditDefaultsOnly, Category = "Animation")
     UAnimMontage* ComboMontage;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Gameplay Effect")
+    TSubclassOf<UGameplayEffect> DefaultDamageEffect;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Gameplay Effect")
+    TMap<FName, TSubclassOf<UGameplayEffect>> DamageEffectMap;
+
+    TSubclassOf<UGameplayEffect> GetDamageEffectForCurrentCombo() const;
+
 
     UFUNCTION()
     void ComboChangedEventReceived(FGameplayEventData Data);

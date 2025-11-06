@@ -3,6 +3,7 @@
 #include "GAS/CGameplayAbility.h"
 
 #include "Components/SkeletalMeshComponent.h"
+#include "Engine/HitResult.h"
 #include "Kismet/KismetSystemLibrary.h"
 
 UAnimInstance* UCGameplayAbility::GetOwnerAnimInstance() const
@@ -21,6 +22,7 @@ UAnimInstance* UCGameplayAbility::GetOwnerAnimInstance() const
 TArray<FHitResult> UCGameplayAbility::GetHitResultsFromSweepLocationTargetData(const FGameplayAbilityTargetDataHandle& TargetDataHandle, float SphereSweepRadius, bool bIgnoreSelf, bool bDrawDebug)
 {
     TArray<FHitResult> OutResults;
+    TSet<AActor*> HitActors;
 
     for (const TSharedPtr<FGameplayAbilityTargetData>& TargetData : TargetDataHandle.Data)
     {
@@ -41,6 +43,13 @@ TArray<FHitResult> UCGameplayAbility::GetHitResultsFromSweepLocationTargetData(c
         TArray<FHitResult> Results;
         UKismetSystemLibrary::SphereTraceMultiForObjects(this, StartLoc, EndLoc, SphereSweepRadius, ObjectTypes, false, ActorsToIgnore, DrawDebugTraceType, Results, false);
 
+        for(const FHitResult& Result : Results)
+        {
+            if (HitActors.Contains(Result.GetActor())) continue;
+            
+            HitActors.Add(Result.GetActor());
+            OutResults.Add(Result);
+        }
     }
 
     return OutResults;
