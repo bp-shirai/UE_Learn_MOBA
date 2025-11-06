@@ -9,6 +9,7 @@ namespace Tags
         namespace Combo
         {
             UE_DEFINE_GAMEPLAY_TAG(_Change, "Ability.Combo.Change");
+            UE_DEFINE_GAMEPLAY_TAG(Damage, "Ability.Combo.Damage");
 
             namespace Change
             {

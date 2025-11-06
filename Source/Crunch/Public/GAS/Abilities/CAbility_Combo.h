@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GAS/CGameplayAbility.h"
+#include "GameplayTagContainer.h"
 #include "CAbility_Combo.generated.h"
 
 /**
@@ -26,6 +27,9 @@ private:
     UFUNCTION()
     void ComboChangedEventReceived(FGameplayEventData Data);
 
+    UFUNCTION()
+    void ComboDamageEventReceived(FGameplayEventData Data);
+
     void SetupWaitComboInputPress();
 
     UFUNCTION()
@@ -34,4 +38,6 @@ private:
     void TryCommitCombo();
 
     FName NextComboName;
+
+    FGameplayTag NextComboTag;
 };

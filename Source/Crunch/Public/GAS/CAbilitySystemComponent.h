@@ -35,5 +35,5 @@ private:
     UPROPERTY(EditDefaultsOnly, Category = "Crunch|Gameplay Abilities")
     TMap<ECAbilityInputID, TSubclassOf<UGameplayAbility>> BaseAbilities;
 
-    FORCEINLINE bool HasAuthority() const { return GetOwner() && GetOwner()->HasAuthority(); }
+    FORCEINLINE bool HasAuthority() const { return IsOwnerActorAuthoritative(); }
 };

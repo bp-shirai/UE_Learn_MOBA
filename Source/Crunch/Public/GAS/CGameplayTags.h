@@ -11,6 +11,8 @@ namespace Tags
         namespace Combo
         {
             UE_DECLARE_GAMEPLAY_TAG_EXTERN(_Change);
+            UE_DECLARE_GAMEPLAY_TAG_EXTERN(Damage);
+
 
             namespace Change
             {

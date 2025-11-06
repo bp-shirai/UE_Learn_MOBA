@@ -2,17 +2,17 @@
 
 #include "Animations/AnimNotify/CAnimNotify_SendGameplayEvent.h"
 #include "AbilitySystemBlueprintLibrary.h"
+#include "AbilitySystemInterface.h"
 #include "GameplayTagsManager.h"
 
 void UCAnimNotify_SendGameplayEvent::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, const FAnimNotifyEventReference& EventReference)
 {
     Super::Notify(MeshComp, Animation, EventReference);
 
-    UAbilitySystemComponent* ASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(MeshComp->GetOwner());
-    
-    if (ASC)
+    AActor* Actor = MeshComp ? MeshComp->GetOwner() : nullptr;
+    if (Actor && Actor->Implements<UAbilitySystemInterface>())
     {
-        UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(MeshComp->GetOwner(), EventTag, FGameplayEventData());
+        UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(Actor, EventTag, FGameplayEventData());
     }
 }
 

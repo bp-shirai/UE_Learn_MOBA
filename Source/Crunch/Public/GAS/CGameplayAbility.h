@@ -14,7 +14,8 @@ class CRUNCH_API UCGameplayAbility : public UGameplayAbility
 {
     GENERATED_BODY()
 
-    protected:
-
+protected:
     UAnimInstance* GetOwnerAnimInstance() const;
+
+    TArray<FHitResult> GetHitResultsFromSweepLocationTargetData(const FGameplayAbilityTargetDataHandle& TargetDataHandle, float SphereSweepRadius = 30.f, bool bIgnoreSelf = true, bool bDrawDebug = false);
 };

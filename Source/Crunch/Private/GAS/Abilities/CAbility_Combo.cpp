@@ -2,10 +2,12 @@
 
 #include "GAS/Abilities/CAbility_Combo.h"
 
+#include "Abilities/GameplayAbilityTypes.h"
 #include "Abilities/Tasks/AbilityTask.h"
 #include "Abilities/Tasks/AbilityTask_PlayMontageAndWait.h"
 #include "Abilities/Tasks/AbilityTask_WaitGameplayEvent.h"
 #include "Abilities/Tasks/AbilityTask_WaitInputPress.h"
+#include "AbilitySystemComponent.h"
 
 #include "GameplayTagsManager.h"
 
@@ -13,7 +15,7 @@
 
 UCAbility_Combo::UCAbility_Combo()
 {
-    InstancingPolicy = EGameplayAbilityInstancingPolicy::InstancedPerActor;
+    InstancingPolicy = EGameplayAbilityInstancingPolicy::InstancedPerExecution;
 
     SetAssetTags(FGameplayTagContainer(Tags::Ability::BasicAttack));
     BlockAbilitiesWithTag.AddTag(Tags::Ability::BasicAttack);
@@ -21,12 +23,13 @@ UCAbility_Combo::UCAbility_Combo()
 
 void UCAbility_Combo::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData)
 {
+    Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
+
     if (!K2_CommitAbility())
     {
         K2_EndAbility();
         return;
     }
-    // Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
 
     if (HasAuthorityOrPredictionKey(ActorInfo, &ActivationInfo))
     {
@@ -40,11 +43,16 @@ void UCAbility_Combo::ActivateAbility(const FGameplayAbilitySpecHandle Handle, c
         UAbilityTask_WaitGameplayEvent* WaitEvent = UAbilityTask_WaitGameplayEvent::WaitGameplayEvent(this, Tags::Ability::Combo::_Change, nullptr, false, false);
         WaitEvent->EventReceived.AddDynamic(this, &ThisClass::ComboChangedEventReceived);
         WaitEvent->ReadyForActivation();
-
-        SetupWaitComboInputPress();
     }
 
-   
+    if (K2_HasAuthority())
+    {
+        UAbilityTask_WaitGameplayEvent* WaitTargetingEventTask = UAbilityTask_WaitGameplayEvent::WaitGameplayEvent(this, Tags::Ability::Combo::Damage);
+        WaitTargetingEventTask->EventReceived.AddDynamic(this, &ThisClass::ComboDamageEventReceived);
+        WaitTargetingEventTask->ReadyForActivation();
+    }
+
+    SetupWaitComboInputPress();
 }
 
 void UCAbility_Combo::ComboChangedEventReceived(FGameplayEventData Data)
@@ -53,19 +61,13 @@ void UCAbility_Combo::ComboChangedEventReceived(FGameplayEventData Data)
 
     if (EventTag == Tags::Ability::Combo::Change::End)
     {
-        // if (Tags::Ability::Combo::Change::End.GetTag().GetTagLeafName() != NextComboName)
-        // {
-        //     UAnimInstance* OwnerAnimInstance = GetOwnerAnimInstance();
-        //     if (!OwnerAnimInstance) return;
-        //     OwnerAnimInstance->Montage_JumpToSection(NextComboName, ComboMontage);
-        //     UE_LOG(LogTemp, Warning, TEXT("Montage_JumpToSection: %s"), *NextComboName.ToString());
-        // }
-
         NextComboName = NAME_None;
         return;
     }
-
-    NextComboName = EventTag.GetTagLeafName();
+    else
+    {
+        NextComboName = EventTag.GetTagLeafName();
+    }
 }
 
 void UCAbility_Combo::SetupWaitComboInputPress()
@@ -84,8 +86,22 @@ void UCAbility_Combo::HandleInputPress(float TimeWaited)
 void UCAbility_Combo::TryCommitCombo()
 {
     if (NextComboName == NAME_None) return;
-    
-    UAnimInstance* OwnerAnimInstance = GetOwnerAnimInstance();
-    if (!OwnerAnimInstance) return;
-    OwnerAnimInstance->Montage_SetNextSection(OwnerAnimInstance->Montage_GetCurrentSection(), NextComboName, ComboMontage);
+
+    // if (UAnimInstance* OwnerAnimInstance = GetOwnerAnimInstance())
+    // {
+    //     OwnerAnimInstance->Montage_SetNextSection(OwnerAnimInstance->Montage_GetCurrentSection(), NextComboName, ComboMontage);
+    // }
+
+    if (UAbilitySystemComponent* ASC = GetAbilitySystemComponentFromActorInfo())
+    {
+        const FName CurrentSectionName = ASC->GetCurrentMontageSectionName();
+        MontageSetNextSectionName(CurrentSectionName, NextComboName);
+    }
+}
+
+void UCAbility_Combo::ComboDamageEventReceived(FGameplayEventData Data)
+{
+    TArray<FHitResult> HitResults = GetHitResultsFromSweepLocationTargetData(Data.TargetData, 30.f, true, true);
+
+
 }
