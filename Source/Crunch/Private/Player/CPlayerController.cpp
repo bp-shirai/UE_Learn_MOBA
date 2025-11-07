@@ -5,6 +5,15 @@
 
 #include "Widgets/GameplayWidget.h"
 
+#include "Net/UnrealNetwork.h"
+
+void ACPlayerController::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+    Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+    DOREPLIFETIME(ThisClass, TeamID);
+}
+
 void ACPlayerController::OnPossess(APawn* NewPawn)
 {
     Super::OnPossess(NewPawn);
@@ -13,6 +22,7 @@ void ACPlayerController::OnPossess(APawn* NewPawn)
     if (PlayerCharacter)
     {
         PlayerCharacter->ServerSideInit();
+        PlayerCharacter->SetGenericTeamId(TeamID);
     }
 }
 
@@ -24,7 +34,7 @@ void ACPlayerController::AcknowledgePossession(APawn* NewPawn)
     if (PlayerCharacter)
     {
         PlayerCharacter->ClientSideInit();
-        
+
         if (IsLocalPlayerController())
         {
             SpawnGameplayWidget();
@@ -48,4 +58,14 @@ void ACPlayerController::SpawnGameplayWidget()
             GameplayWidget->AddToViewport();
         }
     }
+}
+
+void ACPlayerController::SetGenericTeamId(const FGenericTeamId& NewTeamID)
+{
+    TeamID = NewTeamID;
+}
+
+FGenericTeamId ACPlayerController::GetGenericTeamId() const
+{
+    return TeamID;
 }

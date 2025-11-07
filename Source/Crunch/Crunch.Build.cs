@@ -25,7 +25,8 @@ public class Crunch : ModuleRules
 			"UMG",
 			"GameplayTags",
 			"GameplayTasks",
-			"GameplayAbilities"
+			"GameplayAbilities",
+			"AIModule"
 		});
 
 		// Uncomment if you are using online features

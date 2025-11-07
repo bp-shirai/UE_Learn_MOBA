@@ -8,6 +8,7 @@
 #include "Engine/EngineTypes.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "Net/UnrealNetwork.h"
 
 #include "GAS/CGameplayTags.h"
 #include "GAS/CAbilitySystemComponent.h"
@@ -32,11 +33,20 @@ ACCharacter::ACCharacter()
     BindGASChangeDelegates();
 }
 
+void ACCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+    Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+    DOREPLIFETIME(ThisClass, TeamID);
+}
+
 void ACCharacter::BeginPlay()
 {
     Super::BeginPlay();
 
     ConfigureOverHeadWidget();
+
+    MeshRelativeTransform = GetMesh()->GetRelativeTransform();
 }
 
 void ACCharacter::Tick(float DeltaTime)
@@ -66,6 +76,32 @@ void ACCharacter::ClientSideInit()
     AbilitySystemComponent->InitAbilityActorInfo(this, this);
 }
 
+bool ACCharacter::IsLocallyControlledByPlayer() const
+{
+    return GetController() && GetController()->IsLocalPlayerController();
+}
+
+void ACCharacter::PossessedBy(AController* NewController)
+{
+    Super::PossessedBy(NewController);
+
+    // Initialize the AI Controller
+    if (NewController && !NewController->IsPlayerController())
+    {
+        ServerSideInit();
+    }
+}
+
+void ACCharacter::BindGASChangeDelegates()
+{
+    if (AbilitySystemComponent)
+    {
+        AbilitySystemComponent->RegisterGameplayTagEvent(Tags::Stats::Dead).AddUObject(this, &ThisClass::DeathTagUpdated);
+    }
+}
+
+#pragma region------ UI ---------------------------------------------
+
 void ACCharacter::ConfigureOverHeadWidget()
 {
     if (IsLocallyControlledByPlayer())
@@ -86,22 +122,6 @@ void ACCharacter::ConfigureOverHeadWidget()
     else
     {
         UE_LOG(LogTemp, Warning, TEXT("CCharacter: %s, OverHeadStatsWidget is null"), *GetName());
-    }
-}
-
-bool ACCharacter::IsLocallyControlledByPlayer() const
-{
-    return GetController() && GetController()->IsLocalPlayerController();
-}
-
-void ACCharacter::PossessedBy(AController* NewController)
-{
-    Super::PossessedBy(NewController);
-
-    // Initialize the AI Controller
-    if (NewController && !NewController->IsPlayerController())
-    {
-        ServerSideInit();
     }
 }
 
@@ -129,13 +149,9 @@ void ACCharacter::SetStatsGaugeEnable(bool bIsEnable)
     }
 }
 
-void ACCharacter::BindGASChangeDelegates()
-{
-    if (AbilitySystemComponent)
-    {
-        AbilitySystemComponent->RegisterGameplayTagEvent(Tags::Stats::Dead).AddUObject(this, &ThisClass::DeathTagUpdated);
-    }
-}
+#pragma endregion
+
+#pragma region------ Death ---------------------------------------------
 
 void ACCharacter::DeathTagUpdated(const FGameplayTag Tag, int32 NewCount)
 {
@@ -164,6 +180,7 @@ void ACCharacter::Respawn()
 {
     OnRespawn();
 
+    SetRagdollEnable(false);
     GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking);
     GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
     GetMesh()->GetAnimInstance()->StopAllMontages(0.f);
@@ -179,10 +196,49 @@ void ACCharacter::PlayDeathAnimation()
 {
     if (DeathMontage)
     {
-        PlayAnimMontage(DeathMontage);
+        const float MontageDuration = PlayAnimMontage(DeathMontage);
+        GetWorldTimerManager().SetTimer(DeathMontageTimerHandle, this, &ThisClass::DeathMontageFinished, MontageDuration + DeathMontageFinishedTimeShift, false);
     }
 }
 
-void ACCharacter::OnDead(){}
+void ACCharacter::OnDead() {}
 
-void ACCharacter::OnRespawn(){}
+void ACCharacter::OnRespawn() {}
+
+void ACCharacter::DeathMontageFinished()
+{
+    SetRagdollEnable(true);
+}
+
+void ACCharacter::SetRagdollEnable(bool bIsEnable)
+{
+    if (bIsEnable)
+    {
+        GetMesh()->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
+        GetMesh()->SetSimulatePhysics(true);
+        GetMesh()->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
+    }
+    else
+    {
+        GetMesh()->SetSimulatePhysics(false);
+        GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+        GetMesh()->AttachToComponent(GetCapsuleComponent(), FAttachmentTransformRules::KeepWorldTransform);
+        GetMesh()->SetRelativeTransform(MeshRelativeTransform);
+    }
+}
+
+#pragma endregion
+
+#pragma region------ Team ---------------------------------------------
+
+void ACCharacter::SetGenericTeamId(const FGenericTeamId& NewTeamID)
+{
+    TeamID = NewTeamID;
+}
+
+FGenericTeamId ACCharacter::GetGenericTeamId() const
+{
+    return TeamID;
+}
+
+#pragma endregion

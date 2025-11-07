@@ -6,6 +6,7 @@
 #include "GameFramework/Character.h"
 #include "AbilitySystemInterface.h"
 #include "GameplayTagContainer.h"
+#include "GenericTeamAgentInterface.h"
 
 #include "CCharacter.generated.h"
 
@@ -20,12 +21,15 @@ class UWidgetComponent;
  */
 
 UCLASS(Abstract)
-class CRUNCH_API ACCharacter : public ACharacter, public IAbilitySystemInterface
+class CRUNCH_API ACCharacter : public ACharacter, public IAbilitySystemInterface, public IGenericTeamAgentInterface
 {
     GENERATED_BODY()
 
 public:
     ACCharacter();
+
+    virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
     void ServerSideInit();
     void ClientSideInit();
     bool IsLocallyControlledByPlayer() const;
@@ -75,8 +79,18 @@ private:
 #pragma endregion
 #pragma region----- Death and Respawn ------------------------------------------
 private:
-    UPROPERTY(EditDefaultsOnly, Category = "Gameplay Effects")
+    UPROPERTY(EditDefaultsOnly, Category = "Gameplay Effects|Death")
     UAnimMontage* DeathMontage;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Gameplay Effects|Death")
+    float DeathMontageFinishedTimeShift{-0.8f};
+
+    FTimerHandle DeathMontageTimerHandle;
+
+    void DeathMontageFinished();
+    void SetRagdollEnable(bool bIsEnable);
+
+    FTransform MeshRelativeTransform;
 
     void StartDeathSequence();
     void Respawn();
@@ -86,4 +100,16 @@ private:
     virtual void OnDead();
     virtual void OnRespawn();
 #pragma endregion
+
+#pragma region----- Team  ------------------------------------------
+public:
+	virtual void SetGenericTeamId(const FGenericTeamId& NewTeamID) override;
+
+	virtual FGenericTeamId GetGenericTeamId() const override;
+
+private:
+    UPROPERTY(Replicated)
+    FGenericTeamId TeamID;
+#pragma endregion
+
 };

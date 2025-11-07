@@ -4,6 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
+
+#include "GenericTeamAgentInterface.h"
 #include "CPlayerController.generated.h"
 
 
@@ -15,16 +17,26 @@ class UGameplayWidget;
  * 
  */
 UCLASS(Abstract)
-class CRUNCH_API ACPlayerController : public APlayerController
+class CRUNCH_API ACPlayerController : public APlayerController, public IGenericTeamAgentInterface
 {
 	GENERATED_BODY()
 	
 public:
+virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
 	// Only called on the server
 	virtual void OnPossess(APawn* NewPawn) override;
 
 	// Only called on the client, also on the listening server.
 	virtual void AcknowledgePossession(APawn* NewPawn) override;
+
+	virtual void SetGenericTeamId(const FGenericTeamId& NewTeamID) override;
+
+	virtual FGenericTeamId GetGenericTeamId() const override;
+
+
+
+
 
 private:
 
@@ -39,5 +51,8 @@ private:
 
 	UPROPERTY()
 	UGameplayWidget* GameplayWidget;
+
+	UPROPERTY(Replicated)
+	FGenericTeamId TeamID;
 
 };

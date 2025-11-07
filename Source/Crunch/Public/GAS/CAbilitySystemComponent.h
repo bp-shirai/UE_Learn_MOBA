@@ -42,7 +42,7 @@ private:
     UPROPERTY(EditDefaultsOnly, Category = "Gameplay Abilities")
     TMap<ECAbilityInputID, TSubclassOf<UGameplayAbility>> BaseAbilities;
 
-    UPROPERTY(EditDefaultsOnly, Category = "Gameplay Effects")
+    UPROPERTY(EditDefaultsOnly, Category = "Gameplay Effects|Death")
     TSubclassOf<UGameplayEffect> DeathEffect;
 
     FORCEINLINE bool HasAuthority() const { return IsOwnerActorAuthoritative(); }
