@@ -24,4 +24,9 @@ namespace Tags
             }
         }
     }
+
+    namespace Stats
+    {
+        UE_DECLARE_GAMEPLAY_TAG_EXTERN(Dead);
+    }
 } // namespace Tags

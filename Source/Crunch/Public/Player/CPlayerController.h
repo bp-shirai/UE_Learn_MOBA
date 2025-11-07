@@ -34,7 +34,7 @@ private:
 	UPROPERTY()
 	ACPlayerCharacter* PlayerCharacter;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Crunch|UI")
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
 	TSubclassOf<UGameplayWidget> GameplayWidgetClass;
 
 	UPROPERTY()

@@ -30,27 +30,27 @@ public:
     virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 private:
-    UPROPERTY(VisibleDefaultsOnly, Category = "Crunch|View")
+    UPROPERTY(VisibleDefaultsOnly, Category = "View")
     USpringArmComponent* CameraBoom;
 
-    UPROPERTY(VisibleDefaultsOnly, Category = "Crunch|View")
+    UPROPERTY(VisibleDefaultsOnly, Category = "View")
     UCameraComponent* ViewCam;
 
-#pragma region Input --------------------------------------------------
+#pragma region----- Input --------------------------------------------------
 private:
-    UPROPERTY(EditDefaultsOnly, Category = "Crunch|Input")
+    UPROPERTY(EditDefaultsOnly, Category = "Input")
     UInputMappingContext* GameplayInputMappingContext;
 
-    UPROPERTY(EditDefaultsOnly, Category = "Crunch|Input")
+    UPROPERTY(EditDefaultsOnly, Category = "Input")
     UInputAction* Jump_InputAction;
 
-    UPROPERTY(EditDefaultsOnly, Category = "Crunch|Input")
+    UPROPERTY(EditDefaultsOnly, Category = "Input")
     UInputAction* Look_InputAction;
 
-    UPROPERTY(EditDefaultsOnly, Category = "Crunch|Input")
+    UPROPERTY(EditDefaultsOnly, Category = "Input")
     UInputAction* Move_InputAction;
 
-    UPROPERTY(EditDefaultsOnly, Category = "Crunch|Input")
+    UPROPERTY(EditDefaultsOnly, Category = "Input")
     TMap<ECAbilityInputID, UInputAction*> GameplayAbilityInputActions;
 
     void HandleLookInput(const FInputActionValue& Value);
@@ -60,6 +60,12 @@ private:
     FVector GetLookRightDir() const;
     FVector GetLookFwdDir() const;
     FVector GetMoveFwdDir() const;
+
+#pragma endregion
+#pragma region----- Death and Respawn ------------------------------------------
+private:
+    virtual void OnDead() override;
+    virtual void OnRespawn() override;
 
 #pragma endregion
 };

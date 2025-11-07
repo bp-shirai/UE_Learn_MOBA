@@ -18,7 +18,7 @@ class CRUNCH_API UCAnimNotify_SendGameplayEvent : public UAnimNotify
 public:
     virtual void Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, const FAnimNotifyEventReference& EventReference) override;
 
-    UPROPERTY(EditAnywhere, Category = "Gameplay Ability")
+    UPROPERTY(EditAnywhere, Category = "Gameplay Abilities")
     FGameplayTag EventTag;
 
     virtual FString GetNotifyName_Implementation() const override;

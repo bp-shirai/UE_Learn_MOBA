@@ -22,18 +22,28 @@ public:
     UCAbilitySystemComponent();
 
     void ApplyInitialEffects();
-
     void GiveInitialAbilities();
+    void ApplyFullStatEffect();
 
 private:
-    UPROPERTY(EditDefaultsOnly, Category = "Crunch|Gameplay Effects")
+    void AuthApplyGameplayEffect(TSubclassOf<UGameplayEffect> ApplyEffect, int32 Level = 1);
+    void HealthUpdated(const FOnAttributeChangeData& Data);
+
+private:
+    UPROPERTY(EditDefaultsOnly, Category = "Gameplay Effects")
     TArray<TSubclassOf<UGameplayEffect>> InitialEffects;
 
-    UPROPERTY(EditDefaultsOnly, Category = "Crunch|Gameplay Abilities")
+    UPROPERTY(EditDefaultsOnly, Category = "Gameplay Effects")
+    TSubclassOf<UGameplayEffect> FullStatEffect;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Gameplay Abilities")
     TMap<ECAbilityInputID, TSubclassOf<UGameplayAbility>> Abilities;
 
-    UPROPERTY(EditDefaultsOnly, Category = "Crunch|Gameplay Abilities")
+    UPROPERTY(EditDefaultsOnly, Category = "Gameplay Abilities")
     TMap<ECAbilityInputID, TSubclassOf<UGameplayAbility>> BaseAbilities;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Gameplay Effects")
+    TSubclassOf<UGameplayEffect> DeathEffect;
 
     FORCEINLINE bool HasAuthority() const { return IsOwnerActorAuthoritative(); }
 };

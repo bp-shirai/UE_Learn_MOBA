@@ -100,17 +100,35 @@ FVector ACPlayerCharacter::GetMoveFwdDir() const
 
 void ACPlayerCharacter::HandleAbilityInput(const FInputActionValue& Value, ECAbilityInputID InputID)
 {
-    UAbilitySystemComponent* GAS = GetAbilitySystemComponent();
-    if (!GAS) return;
+    UAbilitySystemComponent* ASC = GetAbilitySystemComponent();
+    if (!ASC) return;
     
     const int32 inputID = static_cast<int32>(InputID); 
     const bool bPressed = Value.Get<bool>();
     if (bPressed)
     {
-        GAS->AbilityLocalInputPressed(inputID);
+        ASC->AbilityLocalInputPressed(inputID);
     }
     else
     {
-        GAS->AbilityLocalInputReleased(inputID);
+        ASC->AbilityLocalInputReleased(inputID);
+    }
+}
+
+void ACPlayerCharacter::OnDead()
+{
+    APlayerController* PC = GetController<APlayerController>();
+    if (PC)
+    {
+        PC->DisableInput(PC);
+    }
+}
+
+void ACPlayerCharacter::OnRespawn()
+{
+    APlayerController* PC = GetController<APlayerController>();
+    if (PC)
+    {
+        PC->EnableInput(PC);
     }
 }

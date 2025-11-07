@@ -6,10 +6,11 @@
 #include "GameplayEffectTypes.h"
 
 #include "GAS/CGameplayAbility.h"
+#include "GAS/CAttributeSet.h"
 
 UCAbilitySystemComponent::UCAbilitySystemComponent()
 {
-
+    GetGameplayAttributeValueChangeDelegate(UCAttributeSet::GetHealthAttribute()).AddUObject(this, &ThisClass::HealthUpdated);
 }
 
 void UCAbilitySystemComponent::ApplyInitialEffects()
@@ -23,21 +24,39 @@ void UCAbilitySystemComponent::ApplyInitialEffects()
     }
 }
 
-
 void UCAbilitySystemComponent::GiveInitialAbilities()
 {
     if (!HasAuthority()) return;
 
-    for (const auto& Pair : Abilities)
-    {   
-        GiveAbility(FGameplayAbilitySpec(Pair.Value, 0, static_cast<int32>(Pair.Key), nullptr));
-        //UE_LOG(LogTemp, Log, TEXT("UCAbilitySystemComponent::GiveInitialAbilities: %s"), *AbilityClass->GetName());
+    for (const auto& [InputID, Ability] : Abilities)
+    {
+        GiveAbility(FGameplayAbilitySpec(Ability, 0, static_cast<int32>(InputID), nullptr));
     }
 
-    for (const auto& Pair : BaseAbilities)
-    {   
-        GiveAbility(FGameplayAbilitySpec(Pair.Value, 0, static_cast<int32>(Pair.Key), nullptr));
-        //UE_LOG(LogTemp, Log, TEXT("UCAbilitySystemComponent::GiveInitialAbilities: %s"), *AbilityClass->GetName());
+    for (const auto& [InputID, Ability] : BaseAbilities)
+    {
+        GiveAbility(FGameplayAbilitySpec(Ability, 0, static_cast<int32>(InputID), nullptr));
     }
+}
 
+void UCAbilitySystemComponent::HealthUpdated(const FOnAttributeChangeData& Data)
+{
+    if (Data.NewValue <= 0 )
+    {
+        AuthApplyGameplayEffect(DeathEffect);
+    }
+}
+
+void UCAbilitySystemComponent::ApplyFullStatEffect()
+{
+    AuthApplyGameplayEffect(FullStatEffect);
+}
+
+void UCAbilitySystemComponent::AuthApplyGameplayEffect(TSubclassOf<UGameplayEffect> ApplyEffect, int32 Level)
+{
+    if (HasAuthority() && ApplyEffect)
+    {
+        FGameplayEffectSpecHandle EffectSpecHandle = MakeOutgoingSpec(ApplyEffect, Level, MakeEffectContext());
+        BP_ApplyGameplayEffectSpecToSelf(EffectSpecHandle);
+    }
 }

@@ -22,4 +22,10 @@ namespace Tags
         }
 
     }
+
+    namespace Stats
+    {
+        UE_DEFINE_GAMEPLAY_TAG(Dead, "Stats.Dead");
+
+    }
 } // namespace Tags

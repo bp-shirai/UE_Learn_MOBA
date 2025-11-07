@@ -4,10 +4,15 @@
 
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/WidgetComponent.h"
+#include "Components/CapsuleComponent.h"
+#include "Engine/EngineTypes.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 
+#include "GAS/CGameplayTags.h"
 #include "GAS/CAbilitySystemComponent.h"
 #include "GAS/CAttributeSet.h"
+#include "GAS/CAbilitySystemStatics.h"
 #include "Widgets/OverHeadStatsGauge.h"
 
 ACCharacter::ACCharacter()
@@ -23,13 +28,15 @@ ACCharacter::ACCharacter()
     OverHeadWidgetComponent->SetupAttachment(RootComponent);
     OverHeadWidgetComponent->SetWidgetSpace(EWidgetSpace::Screen);
     OverHeadWidgetComponent->SetDrawAtDesiredSize(true);
+
+    BindGASChangeDelegates();
 }
 
 void ACCharacter::BeginPlay()
 {
     Super::BeginPlay();
 
-    ConfigureOverHeadStatsWidget();
+    ConfigureOverHeadWidget();
 }
 
 void ACCharacter::Tick(float DeltaTime)
@@ -59,7 +66,7 @@ void ACCharacter::ClientSideInit()
     AbilitySystemComponent->InitAbilityActorInfo(this, this);
 }
 
-void ACCharacter::ConfigureOverHeadStatsWidget()
+void ACCharacter::ConfigureOverHeadWidget()
 {
     if (IsLocallyControlledByPlayer())
     {
@@ -73,8 +80,8 @@ void ACCharacter::ConfigureOverHeadStatsWidget()
         OverHeadWidgetComponent->SetHiddenInGame(false);
 
         // Widget Visiblity Update Timer
-        GetWorldTimerManager().ClearTimer(OverHeadVisibilityUpdateTimerHandle);
-        GetWorldTimerManager().SetTimer(OverHeadVisibilityUpdateTimerHandle, this, &ThisClass::UpdateOverHeadVisibility, OverHeadVisibilityCheckUpdateGap, true);
+        GetWorldTimerManager().ClearTimer(StatsGaugeVisibilityUpdateTimerHandle);
+        GetWorldTimerManager().SetTimer(StatsGaugeVisibilityUpdateTimerHandle, this, &ThisClass::UpdateStatsGaugeVisibility, StatsGaugeVisibilityCheckUpdateGap, true);
     }
     else
     {
@@ -98,13 +105,84 @@ void ACCharacter::PossessedBy(AController* NewController)
     }
 }
 
-void ACCharacter::UpdateOverHeadVisibility()
+void ACCharacter::UpdateStatsGaugeVisibility()
 {
     APawn* LocalPlayerPawn = UGameplayStatics::GetPlayerPawn(this, 0);
     if (LocalPlayerPawn)
     {
         const float DistSquared = FVector::DistSquared(GetActorLocation(), LocalPlayerPawn->GetActorLocation());
-        const bool bNewHidden = DistSquared > OverHeadVisibilityRangeSquared;
-        OverHeadWidgetComponent->SetHiddenInGame(bNewHidden);
+        const bool bIsEnable    = DistSquared > StatsGaugeVisibilityRangeSquared;
+        OverHeadWidgetComponent->SetHiddenInGame(bIsEnable);
     }
 }
+
+void ACCharacter::SetStatsGaugeEnable(bool bIsEnable)
+{
+    GetWorldTimerManager().ClearTimer(StatsGaugeVisibilityUpdateTimerHandle);
+    if (bIsEnable)
+    {
+        ConfigureOverHeadWidget();
+    }
+    else
+    {
+        OverHeadWidgetComponent->SetHiddenInGame(bIsEnable);
+    }
+}
+
+void ACCharacter::BindGASChangeDelegates()
+{
+    if (AbilitySystemComponent)
+    {
+        AbilitySystemComponent->RegisterGameplayTagEvent(Tags::Stats::Dead).AddUObject(this, &ThisClass::DeathTagUpdated);
+    }
+}
+
+void ACCharacter::DeathTagUpdated(const FGameplayTag Tag, int32 NewCount)
+{
+    if (NewCount)
+    {
+        StartDeathSequence();
+    }
+    else
+    {
+        Respawn();
+    }
+}
+
+void ACCharacter::StartDeathSequence()
+{
+    OnDead();
+
+    SetStatsGaugeEnable(false);
+    PlayDeathAnimation();
+
+    GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_None);
+    GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+}
+
+void ACCharacter::Respawn()
+{
+    OnRespawn();
+
+    GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking);
+    GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+    GetMesh()->GetAnimInstance()->StopAllMontages(0.f);
+    SetStatsGaugeEnable(true);
+
+    if (AbilitySystemComponent)
+    {
+        AbilitySystemComponent->ApplyFullStatEffect();
+    }
+}
+
+void ACCharacter::PlayDeathAnimation()
+{
+    if (DeathMontage)
+    {
+        PlayAnimMontage(DeathMontage);
+    }
+}
+
+void ACCharacter::OnDead(){}
+
+void ACCharacter::OnRespawn(){}

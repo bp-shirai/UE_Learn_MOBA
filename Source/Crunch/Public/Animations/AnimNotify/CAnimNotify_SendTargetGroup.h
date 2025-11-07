@@ -19,10 +19,10 @@ public:
     virtual void Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, const FAnimNotifyEventReference& EventReference) override;
 
 private:
-    UPROPERTY(EditAnywhere, Category = "Gameplay Ability")
+    UPROPERTY(EditAnywhere, Category = "Gameplay Abilities")
     FGameplayTag EventTag;
 
-    UPROPERTY(EditAnywhere, Category = "Gameplay Ability")
+    UPROPERTY(EditAnywhere, Category = "Gameplay Abilities")
     TArray<FName> TargetSocketNames;
 
     virtual FString GetNotifyName_Implementation() const override;

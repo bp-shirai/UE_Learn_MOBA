@@ -39,8 +39,8 @@ private:
     UPROPERTY(VisibleAnywhere, meta = (BindWidget))
     UTextBlock* ValueText;
 
-    UPROPERTY(EditAnywhere, Category = "Crunch|Visual")
+    UPROPERTY(EditAnywhere, Category = "Visual")
     FLinearColor BarColor;
-    UPROPERTY(EditAnywhere, Category = "Crunch|Visual")
+    UPROPERTY(EditAnywhere, Category = "Visual")
     float FontSize{22.f};
 };
