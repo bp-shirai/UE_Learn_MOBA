@@ -106,12 +106,19 @@ void UCAbility_Combo::TryCommitCombo()
 
 void UCAbility_Combo::ComboDamageEventReceived(FGameplayEventData Data)
 {
-    TArray<FHitResult> HitResults = GetHitResultsFromSweepLocationTargetData(Data.TargetData, 30.f, true, true);
+    // Get sweep location from AnimNotify.
+    // Trace the sweep location to obtain the HitResult.
+    TArray<FHitResult> HitResults = GetHitResultsFromSweepLocationTargetData(Data.TargetData, TargetSweepSphereRadius, true, false);
 
     for (const FHitResult& HitResult : HitResults)
     {
         const TSubclassOf<UGameplayEffect> DamageEffect  = GetDamageEffectForCurrentCombo();
         const FGameplayEffectSpecHandle EffectSpecHandle = MakeOutgoingGameplayEffectSpec(DamageEffect, GetAbilityLevel()); // GetCurrentAbilitySpecHandle(), GetCurrentActorInfo()
+
+        FGameplayEffectContextHandle EffectContext = MakeEffectContext(GetCurrentAbilitySpecHandle(), GetCurrentActorInfo());
+        EffectContext.AddHitResult(HitResult);
+
+        EffectSpecHandle.Data->SetContext(EffectContext);
 
         const FGameplayAbilityTargetDataHandle TargetData = UAbilitySystemBlueprintLibrary::AbilityTargetDataFromActor(HitResult.GetActor());
         K2_ApplyGameplayEffectSpecToTarget(EffectSpecHandle, TargetData);

@@ -40,3 +40,18 @@ FString UCAnimNotify_SendTargetGroup::GetNotifyName_Implementation() const
 
     return TEXT("None");
 }
+
+void UCAnimNotify_SendTargetGroup::DrawDebug()
+{
+// #if WITH_EDITORONLY_DATA
+// 		UWorld* World = MeshComp->GetWorld();
+// 		if (bPreviewIgnoreAttenuation && World && World->WorldType == EWorldType::EditorPreview)
+// 		{
+// 			if (MeshComp->IsPlaying())
+// 			{
+// 				UGameplayStatics::PlaySound2D(World, Sound, VolumeMultiplier, PitchMultiplier);
+// 			}
+// 		}
+// 		else
+// #endif
+}

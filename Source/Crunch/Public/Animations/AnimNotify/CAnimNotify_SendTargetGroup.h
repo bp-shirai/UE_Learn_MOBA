@@ -26,4 +26,6 @@ private:
     TArray<FName> TargetSocketNames;
 
     virtual FString GetNotifyName_Implementation() const override;
+
+    void DrawDebug();
 };

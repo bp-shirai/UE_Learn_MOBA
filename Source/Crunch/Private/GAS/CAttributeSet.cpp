@@ -2,7 +2,9 @@
 
 #include "GAS/CAttributeSet.h"
 
+#include "AttributeSet.h"
 #include "Net/UnrealNetwork.h"
+#include "GameplayEffectExtension.h"
 
 UCAttributeSet::UCAttributeSet()
 {
@@ -42,26 +44,18 @@ void UCAttributeSet::OnRep_MaxMana(const FGameplayAttributeData& OldValue)
 
 void UCAttributeSet::PreAttributeChange(const FGameplayAttribute& Attribute, float& NewValue)
 {
-    Super::PreAttributeChange(Attribute, NewValue);
-
-    if (Attribute == GetMaxHealthAttribute())
-    {
-        //NewValue = FMath::Max(1.f, MaxHealth.GetCurrentValue());
-    }
     if (Attribute == GetHealthAttribute())
     {
-        NewValue = FMath::Clamp(NewValue, 0.f, MaxHealth.GetCurrentValue());
+        NewValue = FMath::Clamp(NewValue, 0.f, GetMaxHealth());
     }
-}
-
-void UCAttributeSet::PostAttributeChange(const FGameplayAttribute& Attribute, float OldValue, float NewValue)
-{
-    Super::PostAttributeChange(Attribute, OldValue, NewValue);
+    if (Attribute == GetManaAttribute())
+    {
+        NewValue = FMath::Clamp(NewValue, 0.f, GetMaxMana());
+    }
 }
 
 void UCAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallbackData& Data)
 {
-    Super::PostGameplayEffectExecute(Data);
 
     // // Get the Target actor, which should be our owner
     // AActor* TargetActor           = nullptr;
@@ -73,4 +67,14 @@ void UCAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallbackD
     //     TargetController = Data.Target.AbilityActorInfo->PlayerController.Get();
     //     TargetCharacter  = Cast<ACharacter>(TargetActor);
     // }
+
+    if (Data.EvaluatedData.Attribute == GetHealthAttribute())
+    {
+        SetHealth(FMath::Clamp(GetHealth(), 0, GetMaxHealth()));
+    }
+
+    if (Data.EvaluatedData.Attribute == GetManaAttribute())
+    {
+        SetMana(FMath::Clamp(GetMana(), 0, GetMaxMana()));
+    }
 }
