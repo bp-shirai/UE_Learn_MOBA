@@ -18,11 +18,11 @@ class CRUNCH_API ACGameMode : public AGameModeBase
 
 public:
     virtual APlayerController* SpawnPlayerController(ENetRole InRemoteRole, const FString& Options) override;
-
+   
 private:
     FGenericTeamId GetTeamIDForPlayer(const APlayerController* PlayerController) const;
 
-    AActor* FindNextStartSpotFromTeam(const FGenericTeamId& TeamID) const;
+    AActor* FindNextStartSpotForTeam(const FGenericTeamId& TeamID) const;
 
     UPROPERTY(EditDefaultsOnly, Category = "Team")
     TMap<FGenericTeamId, FName> TeamStartSpotTagMap;

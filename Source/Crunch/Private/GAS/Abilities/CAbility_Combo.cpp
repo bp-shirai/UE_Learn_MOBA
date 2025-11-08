@@ -108,7 +108,7 @@ void UCAbility_Combo::ComboDamageEventReceived(FGameplayEventData Data)
 {
     // Get sweep location from AnimNotify.
     // Trace the sweep location to obtain the HitResult.
-    TArray<FHitResult> HitResults = GetHitResultsFromSweepLocationTargetData(Data.TargetData, TargetSweepSphereRadius, true, false);
+    TArray<FHitResult> HitResults = GetHitResultsFromSweepLocationTargetData(Data.TargetData, TargetSweepSphereRadius);
 
     for (const FHitResult& HitResult : HitResults)
     {

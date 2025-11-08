@@ -6,17 +6,16 @@
 
 APlayerController* ACGameMode::SpawnPlayerController(ENetRole InRemoteRole, const FString& Options)
 {
-    APlayerController* NewPC                       = Super::SpawnPlayerController(InRemoteRole, Options);
-    FGenericTeamId TeamID                          = GetTeamIDForPlayer(NewPC);
-    IGenericTeamAgentInterface* TeamAgentInterface = Cast<IGenericTeamAgentInterface>(NewPC);
-    if (TeamAgentInterface)
+    APlayerController* NewPlayerController             = Super::SpawnPlayerController(InRemoteRole, Options);
+    IGenericTeamAgentInterface* NewPlayerTeamInterface = Cast<IGenericTeamAgentInterface>(NewPlayerController);
+    FGenericTeamId TeamId                              = GetTeamIDForPlayer(NewPlayerController);
+    if (NewPlayerTeamInterface)
     {
-        TeamAgentInterface->SetGenericTeamId(TeamID);
+        NewPlayerTeamInterface->SetGenericTeamId(TeamId);
     }
 
-    NewPC->StartSpot = FindNextStartSpotFromTeam(TeamID);
-
-    return NewPC;
+    NewPlayerController->StartSpot = FindNextStartSpotForTeam(TeamId);
+    return NewPlayerController;
 }
 
 FGenericTeamId ACGameMode::GetTeamIDForPlayer(const APlayerController* PlayerController) const
@@ -24,14 +23,16 @@ FGenericTeamId ACGameMode::GetTeamIDForPlayer(const APlayerController* PlayerCon
     static int32 PlayerCount = 0;
     ++PlayerCount;
 
-    return FGenericTeamId(PlayerCount % 2);
+    return FGenericTeamId((PlayerCount % 2) + 1); // 1 or 2
 }
 
-AActor* ACGameMode::FindNextStartSpotFromTeam(const FGenericTeamId& TeamID) const
+AActor* ACGameMode::FindNextStartSpotForTeam(const FGenericTeamId& TeamID) const
 {
     const FName* StartSpotTag = TeamStartSpotTagMap.Find(TeamID);
+
     if (!StartSpotTag)
     {
+        UE_LOG(LogTemp, Error, TEXT("FindNextStartSpotForTeam: %d not found in TeamStartSpotTagMap"), TeamID.GetId());
         return nullptr;
     }
 
@@ -41,7 +42,7 @@ AActor* ACGameMode::FindNextStartSpotFromTeam(const FGenericTeamId& TeamID) cons
     {
         if (It->PlayerStartTag == *StartSpotTag)
         {
-            It->PlayerStartTag = FName(TEXT("Taken"));
+            It->PlayerStartTag = FName("Taken");
             return *It;
         }
     }

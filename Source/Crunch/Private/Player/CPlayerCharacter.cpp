@@ -2,6 +2,7 @@
 
 #include "Player/CPlayerCharacter.h"
 
+#include "Engine/EngineTypes.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
@@ -34,6 +35,8 @@ ACPlayerCharacter::ACPlayerCharacter()
 void ACPlayerCharacter::BeginPlay()
 {
     Super::BeginPlay();
+    DefaultCameraRotation = ViewCam->GetComponentRotation();
+    DefaultPawnRotation = GetActorRotation();
 }
 
 void ACPlayerCharacter::PawnClientRestart()
@@ -62,9 +65,9 @@ void ACPlayerCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerI
     EnhancedInputComp->BindAction(Look_InputAction, ETriggerEvent::Triggered, this, &ThisClass::HandleLookInput);
     EnhancedInputComp->BindAction(Move_InputAction, ETriggerEvent::Triggered, this, &ThisClass::HandleMoveInput);
 
-    for(const auto& Pair : GameplayAbilityInputActions)
+    for (const auto& [InputID, InputAction] : GameplayAbilityInputActions)
     {
-        EnhancedInputComp->BindAction(Pair.Value, ETriggerEvent::Triggered, this, &ThisClass::HandleAbilityInput, Pair.Key);
+        EnhancedInputComp->BindAction(InputAction, ETriggerEvent::Triggered, this, &ThisClass::HandleAbilityInput, InputID);
     }
 }
 
@@ -102,8 +105,8 @@ void ACPlayerCharacter::HandleAbilityInput(const FInputActionValue& Value, ECAbi
 {
     UAbilitySystemComponent* ASC = GetAbilitySystemComponent();
     if (!ASC) return;
-    
-    const int32 inputID = static_cast<int32>(InputID); 
+
+    const int32 inputID = static_cast<int32>(InputID);
     const bool bPressed = Value.Get<bool>();
     if (bPressed)
     {
@@ -130,5 +133,7 @@ void ACPlayerCharacter::OnRespawn()
     if (PC)
     {
         PC->EnableInput(PC);
+        GetController()->SetControlRotation(DefaultCameraRotation);
+        SetActorRotation(DefaultPawnRotation);
     }
 }

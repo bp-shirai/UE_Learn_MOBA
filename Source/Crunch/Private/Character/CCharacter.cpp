@@ -14,6 +14,7 @@
 #include "GAS/CAbilitySystemComponent.h"
 #include "GAS/CAttributeSet.h"
 #include "GAS/CAbilitySystemStatics.h"
+#include "UObject/WeakObjectPtrTemplates.h"
 #include "Widgets/OverHeadStatsGauge.h"
 
 ACCharacter::ACCharacter()
@@ -100,7 +101,7 @@ void ACCharacter::BindGASChangeDelegates()
     }
 }
 
-#pragma region------ UI ---------------------------------------------
+#pragma region---------------- UI ---------------------------------------------
 
 void ACCharacter::ConfigureOverHeadWidget()
 {
@@ -113,7 +114,7 @@ void ACCharacter::ConfigureOverHeadWidget()
     if (UOverHeadStatsGauge* OverHeadStatsWidget = Cast<UOverHeadStatsGauge>(OverHeadWidgetComponent->GetUserWidgetObject()))
     {
         OverHeadStatsWidget->ConfigureWithASC(GetAbilitySystemComponent());
-        OverHeadWidgetComponent->SetHiddenInGame(false);
+        OverHeadWidgetComponent->SetHiddenInGame(true);
 
         // Widget Visiblity Update Timer
         GetWorldTimerManager().ClearTimer(StatsGaugeVisibilityUpdateTimerHandle);
@@ -145,13 +146,13 @@ void ACCharacter::SetStatsGaugeEnable(bool bIsEnable)
     }
     else
     {
-        OverHeadWidgetComponent->SetHiddenInGame(bIsEnable);
+        OverHeadWidgetComponent->SetHiddenInGame(!bIsEnable);
     }
 }
 
 #pragma endregion
 
-#pragma region------ Death ---------------------------------------------
+#pragma region---------------- Death ---------------------------------------------
 
 void ACCharacter::DeathTagUpdated(const FGameplayTag Tag, int32 NewCount)
 {
@@ -185,6 +186,15 @@ void ACCharacter::Respawn()
     GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
     GetMesh()->GetAnimInstance()->StopAllMontages(0.f);
     SetStatsGaugeEnable(true);
+
+    if (HasAuthority() && GetController())
+    {
+        if (const AActor* StartSpot = GetController()->StartSpot.Get())
+        {
+            SetActorTransform(StartSpot->GetActorTransform());
+            
+        }
+    }
 
     if (AbilitySystemComponent)
     {
@@ -229,7 +239,7 @@ void ACCharacter::SetRagdollEnable(bool bIsEnable)
 
 #pragma endregion
 
-#pragma region------ Team ---------------------------------------------
+#pragma region---------------- Team ---------------------------------------------
 
 void ACCharacter::SetGenericTeamId(const FGenericTeamId& NewTeamID)
 {

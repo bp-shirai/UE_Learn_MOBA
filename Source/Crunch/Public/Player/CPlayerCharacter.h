@@ -67,5 +67,9 @@ private:
     virtual void OnDead() override;
     virtual void OnRespawn() override;
 
+    FRotator DefaultCameraRotation;
+    FRotator DefaultPawnRotation;
+
+
 #pragma endregion
 };
