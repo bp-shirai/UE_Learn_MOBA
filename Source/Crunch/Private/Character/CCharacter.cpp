@@ -9,11 +9,15 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
+#include "Perception/AIPerceptionStimuliSourceComponent.h"
 
 #include "GAS/CGameplayTags.h"
 #include "GAS/CAbilitySystemComponent.h"
 #include "GAS/CAttributeSet.h"
 #include "GAS/CAbilitySystemStatics.h"
+#include "Perception/AISenseConfig_Sight.h"
+#include "Perception/AISense_Sight.h"
+#include "Templates/SubclassOf.h"
 #include "UObject/WeakObjectPtrTemplates.h"
 #include "Widgets/OverHeadStatsGauge.h"
 
@@ -30,6 +34,10 @@ ACCharacter::ACCharacter()
     OverHeadWidgetComponent->SetupAttachment(RootComponent);
     OverHeadWidgetComponent->SetWidgetSpace(EWidgetSpace::Screen);
     OverHeadWidgetComponent->SetDrawAtDesiredSize(true);
+
+    // PerceptionStimuliSource = CreateDefaultSubobject<UAIPerceptionStimuliSourceComponent>(TEXT("PerceptionStimuliSource"));
+    // PerceptionStimuliSource->RegisterForSense(UAISense_Sight::StaticClass());
+    // PerceptionStimuliSource->bAutoRegister = true;
 
     BindGASChangeDelegates();
 }
@@ -192,7 +200,6 @@ void ACCharacter::Respawn()
         if (const AActor* StartSpot = GetController()->StartSpot.Get())
         {
             SetActorTransform(StartSpot->GetActorTransform());
-            
         }
     }
 

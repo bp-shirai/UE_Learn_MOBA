@@ -15,7 +15,7 @@ class UCAbilitySystemComponent;
 class UAttributeSet;
 class UCAttributeSet;
 class UWidgetComponent;
-
+class UAIPerceptionStimuliSourceComponent;
 /**
  *
  */
@@ -79,10 +79,10 @@ private:
 #pragma endregion
 #pragma region----- Death and Respawn ------------------------------------------
 private:
-    UPROPERTY(EditDefaultsOnly, Category = "Gameplay Effects|Death")
+    UPROPERTY(EditDefaultsOnly, Category = "Gameplay Effects")
     UAnimMontage* DeathMontage;
 
-    UPROPERTY(EditDefaultsOnly, Category = "Gameplay Effects|Death")
+    UPROPERTY(EditDefaultsOnly, Category = "Gameplay Effects")
     float DeathMontageFinishedTimeShift{-0.8f};
 
     FTimerHandle DeathMontageTimerHandle;
@@ -111,5 +111,9 @@ private:
     UPROPERTY(Replicated)
     FGenericTeamId TeamID;
 #pragma endregion
+
+public:
+/*     UPROPERTY(VisibleAnywhere, Category = "AI Perception")
+    UAIPerceptionStimuliSourceComponent* PerceptionStimuliSource; */
 
 };
