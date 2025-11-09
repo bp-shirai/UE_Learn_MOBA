@@ -2,12 +2,16 @@
 
 #include "AI/CAIController.h"
 
+#include "AbilitySystemComponent.h"
+#include "AbilitySystemBlueprintLibrary.h"
+#include "Delegates/Delegate.h"
 #include "GenericTeamAgentInterface.h"
-#include "Logging/LogVerbosity.h"
 #include "Perception/AIPerceptionComponent.h"
 #include "Perception/AIPerceptionTypes.h"
 #include "Perception/AISenseConfig_Sight.h"
+#include "Perception/AISense_Sight.h"
 #include "BehaviorTree/BlackboardComponent.h"
+#include "BehaviorTree/BehaviorTree.h"
 
 #include "Character/CCharacter.h"
 #include "GAS/CAbilitySystemStatics.h"
@@ -17,6 +21,7 @@ ACAIController::ACAIController()
 {
     UAIPerceptionComponent* PerceptionComp = CreateDefaultSubobject<UAIPerceptionComponent>(TEXT("AIPerceptionComponent"));
     SetPerceptionComponent(*PerceptionComp);
+    ensureMsgf(PerceptionComponent, TEXT("AI: %s, AIPerceptionComponent is nullptr"), *GetName());
 
     SightConfig = CreateDefaultSubobject<UAISenseConfig_Sight>(TEXT("SightConfig"));
 
@@ -30,15 +35,13 @@ ACAIController::ACAIController()
     SightConfig->SetMaxAge(5.f);
 
     PerceptionComponent->ConfigureSense(*SightConfig);
-    // AIPerceptionComponent->OnTargetPerceptionUpdated.AddDynamic(this, &ThisClass::OnTargetPerceptionUpdated);
-    // AIPerceptionComponent->OnTargetPerceptionForgotten.AddDynamic(this, &ThisClass::OnTargetForgotten);
 }
 
 void ACAIController::OnPossess(APawn* NewPawn)
 {
     Super::OnPossess(NewPawn);
 
-    SetGenericTeamId(FGenericTeamId(1));
+    SetGenericTeamId(FGenericTeamId(1)); // Forces a team to be set to 1.
 
     IGenericTeamAgentInterface* PawnTeamInterface = Cast<IGenericTeamAgentInterface>(NewPawn);
     if (PawnTeamInterface)
@@ -46,10 +49,13 @@ void ACAIController::OnPossess(APawn* NewPawn)
         PawnTeamInterface->SetGenericTeamId(GetGenericTeamId());
     }
 
-    if (PerceptionComponent)
+    PerceptionComponent->OnTargetPerceptionUpdated.AddDynamic(this, &ThisClass::OnTargetPerceptionUpdated);
+    PerceptionComponent->OnTargetPerceptionForgotten.AddDynamic(this, &ThisClass::OnTargetForgotten);
+
+    UAbilitySystemComponent* PawnASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(NewPawn);
+    if (PawnASC)
     {
-        PerceptionComponent->OnTargetPerceptionUpdated.AddDynamic(this, &ThisClass::OnTargetPerceptionUpdated);
-        PerceptionComponent->OnTargetPerceptionForgotten.AddDynamic(this, &ThisClass::OnTargetForgotten);
+        PawnASC->RegisterGameplayTagEvent(Tags::Stats::Dead).AddUObject(this, &ThisClass::PawnDeadTagUpdated);
     }
 }
 
@@ -76,7 +82,6 @@ void ACAIController::OnTargetPerceptionUpdated(AActor* TargetActor, FAIStimulus 
         // Handle updates to the hearing sense
         // Example: calculate the distance between the stimulus receiver and the source
         // const float Distance = FVector::Dist(Stimulus.ReceiverLocation, Stimulus.StimulusLocation);
-        // UE_LOG(LogTemp, Warning, TEXT("OnTargetPerceptionUpdated: AI: %s, TargetActor: %s, Distance: %f"), *GetName(), *GetNameSafe(TargetActor), Distance);
 
         if (GetCurrentTarget() == nullptr)
         {
@@ -85,15 +90,6 @@ void ACAIController::OnTargetPerceptionUpdated(AActor* TargetActor, FAIStimulus 
     }
     else
     {
-        // UE_LOG(LogTemp, Warning, TEXT("OnTargetPerceptionUpdated: AI: %s, TargetActor: %s, Lost sight of the target !"), *GetName(), *GetNameSafe(TargetActor));
-
-        // if (TargetActor == GetCurrentTarget())
-        // {
-        //     if (Stimulus.GetAge()  >= SightConfig->GetMaxAge())
-        //     {
-        //         SetCurrentTarget(nullptr);
-        //     }
-        // }
         ForgetActorIfDead(TargetActor);
     }
 }
@@ -131,15 +127,12 @@ void ACAIController::SetCurrentTarget(AActor* NewTarget)
 
 AActor* ACAIController::GetNextPerceivedTarget() const
 {
-    if (PerceptionComponent)
-    {
-        TArray<AActor*> Actors;
-        PerceptionComponent->GetPerceivedHostileActors(Actors);
+    TArray<AActor*> Actors;
+    PerceptionComponent->GetPerceivedHostileActors(Actors);
 
-        if (Actors.Num() != 0)
-        {
-            return Actors[0];
-        }
+    if (Actors.Num() != 0)
+    {
+        return Actors[0];
     }
 
     return nullptr;
@@ -160,8 +153,52 @@ void ACAIController::ForgetActorIfDead(AActor* ActorToForget)
 
             for (FAIStimulus& Stimulus : It->Value.LastSensedStimuli)
             {
-                Stimulus.SetStimulusAge(SightConfig->GetMaxAge());
+                Stimulus.SetStimulusAge(TNumericLimits<float>::Max());
             }
         }
+    }
+}
+
+void ACAIController::ClearAndDisableAllSenses()
+{
+    // PerceptionComponent->ForgetAll();
+    PerceptionComponent->AgeStimuli(TNumericLimits<float>::Max());
+
+    for (auto SenseConfig = PerceptionComponent->GetSensesConfigIterator(); SenseConfig; ++SenseConfig)
+    {
+        PerceptionComponent->SetSenseEnabled((*SenseConfig)->GetSenseImplementation(), false);
+    }
+
+    if (GetBlackboardComponent())
+    {
+        GetBlackboardComponent()->ClearValue(Target_KeyName);
+    }
+}
+
+void ACAIController::EnableAllSenses()
+{
+    for (auto SenseConfig = PerceptionComponent->GetSensesConfigIterator(); SenseConfig; ++SenseConfig)
+    {
+        PerceptionComponent->SetSenseEnabled((*SenseConfig)->GetSenseImplementation(), true);
+    }
+}
+
+void ACAIController::PawnDeadTagUpdated(const FGameplayTag Tag, int32 Count)
+{
+    if (Count)
+    {
+        if (GetBrainComponent())
+        {
+            GetBrainComponent()->StopLogic(TEXT("Dead"));
+        }
+        ClearAndDisableAllSenses();
+    }
+    else
+    {
+        if (GetBrainComponent())
+        {
+            GetBrainComponent()->StartLogic();
+        }
+        EnableAllSenses();
     }
 }

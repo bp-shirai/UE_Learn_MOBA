@@ -26,20 +26,27 @@ void UCAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 
     if (OwnerCharacter)
     {
-        Speed                 = OwnerMovementComp->Velocity.Length();
-        FRotator BodyRot      = OwnerCharacter->GetActorRotation();
-        FRotator BodyRotDelta = UKismetMathLibrary::NormalizedDeltaRotator(BodyRot, PrevBodyRot);
-        PrevBodyRot           = BodyRot;
+        Speed = OwnerMovementComp->Velocity.Length();
 
-        YawSpeed         = BodyRotDelta.Yaw / DeltaSeconds;
-        SmoothedYawSpeed = UKismetMathLibrary::FInterpTo(SmoothedYawSpeed, YawSpeed, DeltaSeconds, YawSpeedSmoothLerpSpeed);
+        if (bUseYawSpeed)
+        {
+            const FRotator BodyRot      = OwnerCharacter->GetActorRotation();
+            const FRotator BodyRotDelta = UKismetMathLibrary::NormalizedDeltaRotator(BodyRot, PrevBodyRot);
+            PrevBodyRot           = BodyRot;
+
+            YawSpeed         = BodyRotDelta.Yaw / DeltaSeconds;
+            SmoothedYawSpeed = UKismetMathLibrary::FInterpTo(SmoothedYawSpeed, YawSpeed, DeltaSeconds, YawSpeedSmoothLerpSpeed);
+
+            if (bUseLookRotOffset)
+            {
+                const FRotator ControlRot = OwnerCharacter->GetBaseAimRotation();
+                LookRotOffset       = UKismetMathLibrary::NormalizedDeltaRotator(ControlRot, BodyRot);
+            }
+        }
 
         // const FRotator OwnerAimRot = OwnerCharacter->IsPawnControlled()
         //                               ? OwnerCharacter->GetControlRotation()
         //                               : OwnerCharacter->GetBaseAimRotation();
-
-        FRotator ControlRot = OwnerCharacter->GetBaseAimRotation();
-        LookRotOffset       = UKismetMathLibrary::NormalizedDeltaRotator(ControlRot, BodyRot);
     }
 
     if (OwnerMovementComp)

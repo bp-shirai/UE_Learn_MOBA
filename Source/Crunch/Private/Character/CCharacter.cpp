@@ -27,6 +27,7 @@ ACCharacter::ACCharacter()
     PrimaryActorTick.bCanEverTick = true;
 
     GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+    GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 
     AbilitySystemComponent = CreateDefaultSubobject<UCAbilitySystemComponent>(TEXT("AbilitySystemComponent"));
     AttributeSet           = CreateDefaultSubobject<UCAttributeSet>(TEXT("AttributeSet"));
@@ -180,6 +181,11 @@ void ACCharacter::DeathTagUpdated(const FGameplayTag Tag, int32 NewCount)
 void ACCharacter::StartDeathSequence()
 {
     OnDead();
+
+    if (AbilitySystemComponent)
+    {
+        AbilitySystemComponent->CancelAllAbilities();
+    }
 
     SetStatsGaugeEnable(false);
     PlayDeathAnimation();
