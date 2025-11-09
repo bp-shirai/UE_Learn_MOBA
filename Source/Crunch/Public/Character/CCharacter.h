@@ -103,17 +103,21 @@ private:
 
 #pragma region----- Team  ------------------------------------------
 public:
-	virtual void SetGenericTeamId(const FGenericTeamId& NewTeamID) override;
+    virtual void SetGenericTeamId(const FGenericTeamId& NewTeamID) override;
 
-	virtual FGenericTeamId GetGenericTeamId() const override;
+    virtual FGenericTeamId GetGenericTeamId() const override;
 
 private:
     UPROPERTY(Replicated)
     FGenericTeamId TeamID;
 #pragma endregion
 
+#pragma region----- AI  ------------------------------------------
 public:
-/*     UPROPERTY(VisibleAnywhere, Category = "AI Perception")
-    UAIPerceptionStimuliSourceComponent* PerceptionStimuliSource; */
+    UPROPERTY(VisibleAnywhere, Category = "AI Perception")
+    UAIPerceptionStimuliSourceComponent* PerceptionStimuliSource;
 
+    void AIPerceptionStimuliSourceEnable(bool bIsEnable);
+
+#pragma endregion
 };

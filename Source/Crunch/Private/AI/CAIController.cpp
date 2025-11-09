@@ -5,10 +5,13 @@
 #include "GenericTeamAgentInterface.h"
 #include "Logging/LogVerbosity.h"
 #include "Perception/AIPerceptionComponent.h"
+#include "Perception/AIPerceptionTypes.h"
 #include "Perception/AISenseConfig_Sight.h"
 #include "BehaviorTree/BlackboardComponent.h"
 
 #include "Character/CCharacter.h"
+#include "GAS/CAbilitySystemStatics.h"
+#include "GAS/CGameplayTags.h"
 
 ACAIController::ACAIController()
 {
@@ -69,10 +72,11 @@ void ACAIController::OnTargetPerceptionUpdated(AActor* TargetActor, FAIStimulus 
 {
     if (Stimulus.WasSuccessfullySensed())
     {
+        // if (Stimulus.Type == UAISense::GetSenseID<UAISense_Hearing>())
         // Handle updates to the hearing sense
         // Example: calculate the distance between the stimulus receiver and the source
         // const float Distance = FVector::Dist(Stimulus.ReceiverLocation, Stimulus.StimulusLocation);
-        //UE_LOG(LogTemp, Warning, TEXT("OnTargetPerceptionUpdated: AI: %s, TargetActor: %s, Distance: %f"), *GetName(), *GetNameSafe(TargetActor), Distance);
+        // UE_LOG(LogTemp, Warning, TEXT("OnTargetPerceptionUpdated: AI: %s, TargetActor: %s, Distance: %f"), *GetName(), *GetNameSafe(TargetActor), Distance);
 
         if (GetCurrentTarget() == nullptr)
         {
@@ -81,12 +85,16 @@ void ACAIController::OnTargetPerceptionUpdated(AActor* TargetActor, FAIStimulus 
     }
     else
     {
-        //UE_LOG(LogTemp, Warning, TEXT("OnTargetPerceptionUpdated: AI: %s, TargetActor: %s, Lost sight of the target !"), *GetName(), *GetNameSafe(TargetActor));
+        // UE_LOG(LogTemp, Warning, TEXT("OnTargetPerceptionUpdated: AI: %s, TargetActor: %s, Lost sight of the target !"), *GetName(), *GetNameSafe(TargetActor));
 
-        if (TargetActor == GetCurrentTarget())
-        {
-            SetCurrentTarget(nullptr);
-        }
+        // if (TargetActor == GetCurrentTarget())
+        // {
+        //     if (Stimulus.GetAge()  >= SightConfig->GetMaxAge())
+        //     {
+        //         SetCurrentTarget(nullptr);
+        //     }
+        // }
+        ForgetActorIfDead(TargetActor);
     }
 }
 
@@ -135,4 +143,25 @@ AActor* ACAIController::GetNextPerceivedTarget() const
     }
 
     return nullptr;
+}
+
+void ACAIController::ForgetActorIfDead(AActor* ActorToForget)
+{
+    if (UCAbilitySystemStatics::DoesActorHaveTag(ActorToForget, Tags::Stats::Dead))
+    {
+        // PerceptionComponent->ForgetActor(ActorToForget);
+
+        for (UAIPerceptionComponent::TActorPerceptionContainer::TIterator It = PerceptionComponent->GetPerceptualDataIterator(); It; ++It)
+        {
+            if (It->Key != ActorToForget)
+            {
+                continue;
+            }
+
+            for (FAIStimulus& Stimulus : It->Value.LastSensedStimuli)
+            {
+                Stimulus.SetStimulusAge(SightConfig->GetMaxAge());
+            }
+        }
+    }
 }

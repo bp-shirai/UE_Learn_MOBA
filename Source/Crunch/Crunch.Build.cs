@@ -26,7 +26,8 @@ public class Crunch : ModuleRules
 			"GameplayTags",
 			"GameplayTasks",
 			"GameplayAbilities",
-			"AIModule"
+			"AIModule",
+			"GameplayBehaviorsModule"
 		});
 
 		// Uncomment if you are using online features

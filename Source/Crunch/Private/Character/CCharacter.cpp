@@ -10,6 +10,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
 #include "Perception/AIPerceptionStimuliSourceComponent.h"
+#include "Perception/AISense_Sight.h"
 
 #include "GAS/CGameplayTags.h"
 #include "GAS/CAbilitySystemComponent.h"
@@ -35,9 +36,10 @@ ACCharacter::ACCharacter()
     OverHeadWidgetComponent->SetWidgetSpace(EWidgetSpace::Screen);
     OverHeadWidgetComponent->SetDrawAtDesiredSize(true);
 
-    // PerceptionStimuliSource = CreateDefaultSubobject<UAIPerceptionStimuliSourceComponent>(TEXT("PerceptionStimuliSource"));
-    // PerceptionStimuliSource->RegisterForSense(UAISense_Sight::StaticClass());
-    // PerceptionStimuliSource->bAutoRegister = true;
+    // Please add to DefaultGame.ini
+    // [/Script/AIModule.AISense_Sight]
+    // bAutoRegisterAllPawnsAsSources=False
+    PerceptionStimuliSource = CreateDefaultSubobject<UAIPerceptionStimuliSourceComponent>(TEXT("PerceptionStimuliSource"));
 
     BindGASChangeDelegates();
 }
@@ -56,6 +58,8 @@ void ACCharacter::BeginPlay()
     ConfigureOverHeadWidget();
 
     MeshRelativeTransform = GetMesh()->GetRelativeTransform();
+
+    PerceptionStimuliSource->RegisterForSense(UAISense_Sight::StaticClass());
 }
 
 void ACCharacter::Tick(float DeltaTime)
@@ -66,11 +70,6 @@ void ACCharacter::Tick(float DeltaTime)
 void ACCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
     Super::SetupPlayerInputComponent(PlayerInputComponent);
-}
-
-UAbilitySystemComponent* ACCharacter::GetAbilitySystemComponent() const
-{
-    return AbilitySystemComponent;
 }
 
 void ACCharacter::ServerSideInit()
@@ -107,6 +106,11 @@ void ACCharacter::BindGASChangeDelegates()
     {
         AbilitySystemComponent->RegisterGameplayTagEvent(Tags::Stats::Dead).AddUObject(this, &ThisClass::DeathTagUpdated);
     }
+}
+
+UAbilitySystemComponent* ACCharacter::GetAbilitySystemComponent() const
+{
+    return AbilitySystemComponent;
 }
 
 #pragma region---------------- UI ---------------------------------------------
@@ -159,7 +163,6 @@ void ACCharacter::SetStatsGaugeEnable(bool bIsEnable)
 }
 
 #pragma endregion
-
 #pragma region---------------- Death ---------------------------------------------
 
 void ACCharacter::DeathTagUpdated(const FGameplayTag Tag, int32 NewCount)
@@ -183,12 +186,15 @@ void ACCharacter::StartDeathSequence()
 
     GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_None);
     GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+    AIPerceptionStimuliSourceEnable(false);
 }
 
 void ACCharacter::Respawn()
 {
     OnRespawn();
 
+    AIPerceptionStimuliSourceEnable(true);
     SetRagdollEnable(false);
     GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking);
     GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
@@ -245,7 +251,6 @@ void ACCharacter::SetRagdollEnable(bool bIsEnable)
 }
 
 #pragma endregion
-
 #pragma region---------------- Team ---------------------------------------------
 
 void ACCharacter::SetGenericTeamId(const FGenericTeamId& NewTeamID)
@@ -259,3 +264,20 @@ FGenericTeamId ACCharacter::GetGenericTeamId() const
 }
 
 #pragma endregion
+#pragma region---------------- AI ---------------------------------------------
+
+void ACCharacter::AIPerceptionStimuliSourceEnable(bool bIsEnable)
+{
+    if (!PerceptionStimuliSource) return;
+
+    if (bIsEnable)
+    {
+        PerceptionStimuliSource->RegisterWithPerceptionSystem();
+    }
+    else
+    {
+        PerceptionStimuliSource->UnregisterFromPerceptionSystem();
+    }
+}
+
+#pragma
