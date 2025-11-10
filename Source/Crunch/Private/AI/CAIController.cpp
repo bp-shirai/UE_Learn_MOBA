@@ -41,12 +41,12 @@ void ACAIController::OnPossess(APawn* NewPawn)
 {
     Super::OnPossess(NewPawn);
 
-    SetGenericTeamId(FGenericTeamId(1)); // Forces a team to be set to 1.
-
     IGenericTeamAgentInterface* PawnTeamInterface = Cast<IGenericTeamAgentInterface>(NewPawn);
     if (PawnTeamInterface)
     {
-        PawnTeamInterface->SetGenericTeamId(GetGenericTeamId());
+        SetGenericTeamId(PawnTeamInterface->GetGenericTeamId());
+        ClearAndDisableAllSenses();
+        EnableAllSenses();
     }
 
     PerceptionComponent->OnTargetPerceptionUpdated.AddDynamic(this, &ThisClass::OnTargetPerceptionUpdated);

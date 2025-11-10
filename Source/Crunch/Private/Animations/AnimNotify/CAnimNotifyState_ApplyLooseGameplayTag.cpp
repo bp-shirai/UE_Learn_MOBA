@@ -18,6 +18,11 @@ void UCAnimNotifyState_ApplyLooseGameplayTag::BranchingPointNotifyBegin(FBranchi
     if (Actor)
     {
         UAbilitySystemBlueprintLibrary::AddLooseGameplayTags(Actor, GameplayTagsToApply, false);
+
+        if (BeginNotifyTag.IsValid())
+        {
+            UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(Actor, BeginNotifyTag, FGameplayEventData());
+        }
     }
 }
 
@@ -29,6 +34,11 @@ void UCAnimNotifyState_ApplyLooseGameplayTag::BranchingPointNotifyEnd(FBranching
     if (Actor)
     {
         UAbilitySystemBlueprintLibrary::RemoveLooseGameplayTags(Actor, GameplayTagsToApply, false);
+
+        if (EndNotifyTag.IsValid())
+        {
+            UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(Actor, EndNotifyTag, FGameplayEventData());
+        }
     }
 }
 

@@ -16,7 +16,10 @@ class CRUNCH_API UCBTTask_SendInputToAbilitySystem : public UBTTaskNode
 {
     GENERATED_BODY()
 
+    UCBTTask_SendInputToAbilitySystem();
+
     virtual EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
+    virtual FString GetStaticDescription() const override;
 
 private:
     UPROPERTY(EditAnywhere, Category = "Gameplay Abilities")

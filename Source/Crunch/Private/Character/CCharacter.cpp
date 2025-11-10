@@ -131,7 +131,7 @@ void ACCharacter::ConfigureOverHeadWidget()
 
         // Widget Visiblity Update Timer
         GetWorldTimerManager().ClearTimer(StatsGaugeVisibilityUpdateTimerHandle);
-        GetWorldTimerManager().SetTimer(StatsGaugeVisibilityUpdateTimerHandle, this, &ThisClass::UpdateStatsGaugeVisibility, StatsGaugeVisibilityCheckUpdateGap, true);
+        GetWorldTimerManager().SetTimer(StatsGaugeVisibilityUpdateTimerHandle, this, &ThisClass::UpdateStatsGaugeVisibility, StatsGaugeVisibilityCheckUpdateGap, true, 0.f);
     }
     else
     {
@@ -267,6 +267,10 @@ void ACCharacter::SetGenericTeamId(const FGenericTeamId& NewTeamID)
 FGenericTeamId ACCharacter::GetGenericTeamId() const
 {
     return TeamID;
+}
+
+void ACCharacter::OnRep_TeamID()
+{
 }
 
 #pragma endregion

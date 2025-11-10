@@ -28,4 +28,10 @@ public:
 protected:
     UPROPERTY(EditAnywhere, Category = GameplayTags)
     FGameplayTagContainer GameplayTagsToApply;
+
+    UPROPERTY(EditAnywhere, Category = GameplayTags)
+    FGameplayTag BeginNotifyTag;
+
+    UPROPERTY(EditAnywhere, Category = GameplayTags)
+    FGameplayTag EndNotifyTag;
 };
