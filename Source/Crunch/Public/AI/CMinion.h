@@ -19,6 +19,7 @@ public:
 
     bool IsActive() const;
     void Activate();
+    void SetGoal(AActor* Goal);
 
 private:
     void PickSkinBasedOnTeamID();
@@ -27,4 +28,7 @@ private:
 
     UPROPERTY(EditDefaultsOnly, Category = "Visual")
     TMap<FGenericTeamId, USkeletalMesh*> SkinMap;
+
+    UPROPERTY(EditDefaultsOnly, Category = "AI")
+    FName Goal_KeyName{TEXT("Goal")};
 };

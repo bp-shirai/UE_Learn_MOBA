@@ -41,6 +41,13 @@ private:
 
     UPROPERTY(EditAnywhere, Category = "Visual")
     FLinearColor BarColor;
+
     UPROPERTY(EditAnywhere, Category = "Visual")
-    float FontSize{22.f};
+    FSlateFontInfo ValueTextFont;
+
+    UPROPERTY(EditAnywhere, Category = "Visual")
+    bool bValueTextVisible{true};
+
+    UPROPERTY(EditAnywhere, Category = "Visual")
+    bool bProgressBarVisible{true};
 };

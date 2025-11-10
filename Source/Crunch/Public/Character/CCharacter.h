@@ -78,6 +78,10 @@ private:
 
 #pragma endregion
 #pragma region----- Death and Respawn ------------------------------------------
+public:
+    bool IsDead() const;
+    void Respawn_Immediately();
+
 private:
     UPROPERTY(EditDefaultsOnly, Category = "Gameplay Effects")
     UAnimMontage* DeathMontage;

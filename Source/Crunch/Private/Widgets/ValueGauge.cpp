@@ -20,9 +20,9 @@ void UValueGauge::NativePreConstruct()
     }
     if (ValueText)
     {
-        auto Font = ValueText->GetFont();
-        Font.Size = FontSize;
-        ValueText->SetFont(Font);
+        ValueText->SetFont(ValueTextFont);
+        ValueText->SetVisibility(bValueTextVisible ? ESlateVisibility::Visible : ESlateVisibility::Hidden);
+        ProgressBar->SetVisibility(bProgressBarVisible ? ESlateVisibility::Visible : ESlateVisibility::Hidden);
     }
 }
 

@@ -8,6 +8,7 @@
 #include "Engine/EngineTypes.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "Misc/AssertionMacros.h"
 #include "Net/UnrealNetwork.h"
 #include "Perception/AIPerceptionStimuliSourceComponent.h"
 #include "Perception/AISense_Sight.h"
@@ -166,6 +167,19 @@ void ACCharacter::SetStatsGaugeEnable(bool bIsEnable)
 #pragma endregion
 #pragma region---------------- Death ---------------------------------------------
 
+bool ACCharacter::IsDead() const
+{
+    return GetAbilitySystemComponent() ? GetAbilitySystemComponent()->HasMatchingGameplayTag(Tags::Stats::Dead) : false;
+}
+
+void ACCharacter::Respawn_Immediately()
+{
+    if (HasAuthority() && GetAbilitySystemComponent())
+    {
+        GetAbilitySystemComponent()->RemoveActiveEffectsWithGrantedTags(FGameplayTagContainer(Tags::Stats::Dead));
+    }
+}
+
 void ACCharacter::DeathTagUpdated(const FGameplayTag Tag, int32 NewCount)
 {
     if (NewCount)
@@ -236,7 +250,10 @@ void ACCharacter::OnRespawn() {}
 
 void ACCharacter::DeathMontageFinished()
 {
-    SetRagdollEnable(true);
+    if (IsDead())
+    {
+        SetRagdollEnable(true);
+    }
 }
 
 void ACCharacter::SetRagdollEnable(bool bIsEnable)

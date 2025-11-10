@@ -1,10 +1,12 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "AI/CMinion.h"
-#include "AbilitySystemComponent.h"
+#include "AIController.h"
+#include "BehaviorTree/BlackboardComponent.h"
 
-#include "GAS/CGameplayTags.h"
-#include "GameplayTagContainer.h"
+
+
+#include "AI/CAIController.h"
 
 void ACMinion::PickSkinBasedOnTeamID()
 {
@@ -28,15 +30,21 @@ void ACMinion::SetGenericTeamId(const FGenericTeamId& NewTeamID)
 
 bool ACMinion::IsActive() const
 {
-    UAbilitySystemComponent* ASC = GetAbilitySystemComponent();
-    return ASC ? !ASC->HasMatchingGameplayTag(Tags::Stats::Dead) : false;
+    return !IsDead();
 }
 
 void ACMinion::Activate()
 {
-    UAbilitySystemComponent* ASC = GetAbilitySystemComponent();
-    if (ASC)
+    Respawn_Immediately();
+}
+
+void ACMinion::SetGoal(AActor* Goal)
+{
+    if (AAIController* AIC = GetController<AAIController>())
     {
-        ASC->RemoveActiveEffectsWithGrantedTags(FGameplayTagContainer(Tags::Stats::Dead));
+        if (UBlackboardComponent* BBComp = AIC->GetBlackboardComponent())
+        {
+            BBComp->SetValueAsObject(Goal_KeyName, Goal);
+        }
     }
 }
