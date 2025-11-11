@@ -25,7 +25,14 @@ private:
     UPROPERTY(EditAnywhere, Category = "Gameplay Abilities")
     TArray<FName> TargetSocketNames;
 
+    UPROPERTY(EditAnywhere, Category = "Gameplay Abilities|Debug")
+    bool bDrawDebug;
+    UPROPERTY(EditAnywhere, Category = "Gameplay Abilities|Debug", meta = (EditCondition = "bDrawDebug"))
+    float DebugDrawRadius{30.f};
+    UPROPERTY(EditAnywhere, Category = "Gameplay Abilities|Debug", meta = (EditCondition = "bDrawDebug"))
+    float DebugDrawTime{1.f};
+
     virtual FString GetNotifyName_Implementation() const override;
 
-    void DrawDebug();
+    void DrawDebug(USkeletalMeshComponent* MeshComp);
 };

@@ -12,7 +12,7 @@
 class ACMinion;
 class APlayerStart;
 
-UCLASS()
+UCLASS(Abstract)
 class CRUNCH_API ACMinionBarrack : public AActor
 {
     GENERATED_BODY()
@@ -40,7 +40,7 @@ private:
     TArray<ACMinion*> MinionPool;
 
     UPROPERTY(EditAnywhere, Category = "Spawn")
-	AActor* Goal;
+    AActor* Goal;
 
     UPROPERTY(EditAnywhere, Category = "Spawn")
     TSubclassOf<ACMinion> MinionClass;

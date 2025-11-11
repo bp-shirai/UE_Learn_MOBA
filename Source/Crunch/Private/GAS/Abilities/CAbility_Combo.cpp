@@ -11,7 +11,6 @@
 #include "AbilitySystemComponent.h"
 #include "AbilitySystemBlueprintLibrary.h"
 
-#include "Engine/HitResult.h"
 #include "GameplayEffectTypes.h"
 #include "GameplayTagsManager.h"
 
@@ -19,7 +18,7 @@
 
 UCAbility_Combo::UCAbility_Combo()
 {
-    InstancingPolicy = EGameplayAbilityInstancingPolicy::InstancedPerExecution;
+    InstancingPolicy = EGameplayAbilityInstancingPolicy::InstancedPerActor;
 
     SetAssetTags(FGameplayTagContainer(Tags::Ability::BasicAttack));
     BlockAbilitiesWithTag.AddTag(Tags::Ability::BasicAttack);

@@ -9,7 +9,7 @@
 /**
  *
  */
-UCLASS()
+UCLASS(Abstract)
 class CRUNCH_API ACMinion : public ACCharacter
 {
     GENERATED_BODY()

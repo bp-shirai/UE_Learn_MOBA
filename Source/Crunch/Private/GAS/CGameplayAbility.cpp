@@ -2,12 +2,20 @@
 
 #include "GAS/CGameplayAbility.h"
 
+#include "Abilities/GameplayAbilityTargetTypes.h"
+#include "Abilities/GameplayAbilityTypes.h"
+#include "AbilitySystemBlueprintLibrary.h"
 #include "Components/SkeletalMeshComponent.h"
-#include "Engine/HitResult.h"
+#include "GameFramework/Character.h"
 #include "Kismet/KismetSystemLibrary.h"
+
+#include "GAS/CGameplayTags.h"
+
+
 
 UCGameplayAbility::UCGameplayAbility()
 {
+    InstancingPolicy = EGameplayAbilityInstancingPolicy::InstancedPerActor;
 }
 
 UAnimInstance* UCGameplayAbility::GetOwnerAnimInstance() const
@@ -28,7 +36,7 @@ TArray<FHitResult> UCGameplayAbility::GetHitResultsFromSweepLocationTargetData(c
     TArray<FHitResult> OutResults;
     TSet<AActor*> HitActors; // Prevent adding the same Actor
 
-    AActor* AvatarActor = GetAvatarActorFromActorInfo();
+    AActor* AvatarActor                                  = GetAvatarActorFromActorInfo();
     const IGenericTeamAgentInterface* OwnerTeamInterface = Cast<const IGenericTeamAgentInterface>(AvatarActor);
 
     for (const TSharedPtr<FGameplayAbilityTargetData>& TargetData : TargetDataHandle.Data)
@@ -54,7 +62,7 @@ TArray<FHitResult> UCGameplayAbility::GetHitResultsFromSweepLocationTargetData(c
         {
             if (HitActors.Contains(Result.GetActor())) continue;
 
-            // Confirm hostile relationship
+            // Confirm hostile relationship.
             if (OwnerTeamInterface)
             {
                 ETeamAttitude::Type OtherActorTeamAttitude = OwnerTeamInterface->GetTeamAttitudeTowards(*Result.GetActor());
@@ -64,11 +72,45 @@ TArray<FHitResult> UCGameplayAbility::GetHitResultsFromSweepLocationTargetData(c
                 }
             }
 
-
             HitActors.Add(Result.GetActor());
             OutResults.Add(Result);
         }
     }
 
     return OutResults;
+}
+
+ACharacter* UCGameplayAbility::GetOwningAvatarCharacter()
+{
+    if (!AvatarCharacter.IsValid())
+    {
+        AvatarCharacter = Cast<ACharacter>(GetAvatarActorFromActorInfo());
+    }
+
+    return AvatarCharacter.Get();
+}
+
+void UCGameplayAbility::PushSelf(const FVector& PushVelocity)
+{
+    ACharacter* AvatarActor = GetOwningAvatarCharacter();
+    if (AvatarActor)
+    {
+        AvatarActor->LaunchCharacter(PushVelocity, true, true);
+    }
+}
+
+void UCGameplayAbility::PushTarget(AActor* Target, const FVector& PushVelocity)
+{
+    if (!IsValid(Target)) return;
+
+    FGameplayEventData EventData;
+
+    FGameplayAbilityTargetData_SingleTargetHit* HitData = new FGameplayAbilityTargetData_SingleTargetHit();
+    FHitResult HitResult;
+    HitResult.ImpactNormal = PushVelocity;
+    HitData->HitResult     = HitResult;
+
+    EventData.TargetData.Add(HitData);
+
+    UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(Target, Tags::Ability::Passive::Launch::Activate, EventData);
 }
