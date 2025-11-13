@@ -10,14 +10,16 @@ UCAbility_Launched::UCAbility_Launched()
     NetExecutionPolicy = EGameplayAbilityNetExecutionPolicy::ServerOnly;
     FAbilityTriggerData TriggerData;
     TriggerData.TriggerSource = EGameplayAbilityTriggerSource::GameplayEvent;
-    TriggerData.TriggerTag    = Tags::Ability::Passive::Launch::Activate;
+    TriggerData.TriggerTag    = Tags::Ability::Passive::Launch_Activate;
 
     AbilityTriggers.Add(TriggerData);
+
+    ActivationBlockedTags.RemoveTag(Tags::Stats::Stun);
 }
 
 void UCAbility_Launched::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData)
 {
-    if (!K2_CommitAbility())
+    if (K2_CommitAbility() == false)
     {
         K2_EndAbility();
         return;

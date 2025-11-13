@@ -57,6 +57,8 @@ private:
     void HandleMoveInput(const FInputActionValue& Value);
     void HandleAbilityInput(const FInputActionValue& Value, ECAbilityInputID InputID);
 
+    void SetInputEnableFromPlayerController(bool bEnable);
+
     FVector GetLookRightDir() const;
     FVector GetLookFwdDir() const;
     FVector GetMoveFwdDir() const;
@@ -70,6 +72,11 @@ private:
     FRotator DefaultCameraRotation;
     FRotator DefaultPawnRotation;
 
+#pragma endregion
+#pragma region----- Stun ------------------------------------------
+private:
+    virtual void OnStun() override;
+    virtual void OnRecoverFromStun() override;
 
 #pragma endregion
 };

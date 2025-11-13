@@ -7,38 +7,29 @@ namespace Tags
     namespace Ability
     {
         UE_DECLARE_GAMEPLAY_TAG_EXTERN(BasicAttack);
+        UE_DECLARE_GAMEPLAY_TAG_EXTERN(BasicAttack_Pressed);
         UE_DECLARE_GAMEPLAY_TAG_EXTERN(AbilityOne);
 
-        namespace Combo
-        {
-            UE_DECLARE_GAMEPLAY_TAG_EXTERN(_Change);
-            UE_DECLARE_GAMEPLAY_TAG_EXTERN(Damage);
+        UE_DECLARE_GAMEPLAY_TAG_EXTERN(Combo_Change);
+        UE_DECLARE_GAMEPLAY_TAG_EXTERN(Combo_Change_Combo01);
+        UE_DECLARE_GAMEPLAY_TAG_EXTERN(Combo_Change_Combo02);
+        UE_DECLARE_GAMEPLAY_TAG_EXTERN(Combo_Change_Combo03);
+        UE_DECLARE_GAMEPLAY_TAG_EXTERN(Combo_Change_Combo04);
+        UE_DECLARE_GAMEPLAY_TAG_EXTERN(Combo_Change_End);
+        UE_DECLARE_GAMEPLAY_TAG_EXTERN(Combo_Damage);
 
-            namespace Change
-            {
-                UE_DECLARE_GAMEPLAY_TAG_EXTERN(Combo01);
-                UE_DECLARE_GAMEPLAY_TAG_EXTERN(Combo02);
-                UE_DECLARE_GAMEPLAY_TAG_EXTERN(Combo03);
-                UE_DECLARE_GAMEPLAY_TAG_EXTERN(Combo04);
-                UE_DECLARE_GAMEPLAY_TAG_EXTERN(End);
-            } // namespace Change
-        } // namespace Combo
-        namespace UpperCut
-        {
-            UE_DECLARE_GAMEPLAY_TAG_EXTERN(Launch);
-        }
+        UE_DECLARE_GAMEPLAY_TAG_EXTERN(UpperCut_Launch);
+        UE_DECLARE_GAMEPLAY_TAG_EXTERN(UpperCut_Cooldown);
 
         namespace Passive
         {
-            namespace Launch
-            {
-                UE_DECLARE_GAMEPLAY_TAG_EXTERN(Activate);
-            }
-        } // namespace Passive
+            UE_DECLARE_GAMEPLAY_TAG_EXTERN(Launch_Activate);
+        }
     } // namespace Ability
 
     namespace Stats
     {
         UE_DECLARE_GAMEPLAY_TAG_EXTERN(Dead);
-    }
+        UE_DECLARE_GAMEPLAY_TAG_EXTERN(Stun);
+    } // namespace Stats
 } // namespace Tags

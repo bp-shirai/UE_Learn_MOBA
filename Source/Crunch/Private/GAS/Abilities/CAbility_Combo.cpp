@@ -15,6 +15,7 @@
 #include "GameplayTagsManager.h"
 
 #include "GAS/CGameplayTags.h"
+#include "Logging/LogVerbosity.h"
 
 UCAbility_Combo::UCAbility_Combo()
 {
@@ -43,14 +44,14 @@ void UCAbility_Combo::ActivateAbility(const FGameplayAbilitySpecHandle Handle, c
         PlayMontage->OnCompleted.AddDynamic(this, &ThisClass::K2_EndAbility);
         PlayMontage->ReadyForActivation();
 
-        UAbilityTask_WaitGameplayEvent* WaitEvent = UAbilityTask_WaitGameplayEvent::WaitGameplayEvent(this, Tags::Ability::Combo::_Change, nullptr, false, false);
+        UAbilityTask_WaitGameplayEvent* WaitEvent = UAbilityTask_WaitGameplayEvent::WaitGameplayEvent(this, Tags::Ability::Combo_Change, nullptr, false, false);
         WaitEvent->EventReceived.AddDynamic(this, &ThisClass::ComboChangedEventReceived);
         WaitEvent->ReadyForActivation();
     }
 
     if (K2_HasAuthority())
     {
-        UAbilityTask_WaitGameplayEvent* WaitTargetingEventTask = UAbilityTask_WaitGameplayEvent::WaitGameplayEvent(this, Tags::Ability::Combo::Damage);
+        UAbilityTask_WaitGameplayEvent* WaitTargetingEventTask = UAbilityTask_WaitGameplayEvent::WaitGameplayEvent(this, Tags::Ability::Combo_Damage);
         WaitTargetingEventTask->EventReceived.AddDynamic(this, &ThisClass::ComboDamageEventReceived);
         WaitTargetingEventTask->ReadyForActivation();
     }
@@ -62,7 +63,7 @@ void UCAbility_Combo::ComboChangedEventReceived(FGameplayEventData Data)
 {
     FGameplayTag EventTag = Data.EventTag;
 
-    if (EventTag == Tags::Ability::Combo::Change::End)
+    if (EventTag == Tags::Ability::Combo_Change_End)
     {
         NextComboName = NAME_None;
     }
@@ -107,20 +108,15 @@ void UCAbility_Combo::ComboDamageEventReceived(FGameplayEventData Data)
 {
     // Get sweep location from AnimNotify.
     // Trace the sweep location to obtain the HitResult.
-    TArray<FHitResult> HitResults = GetHitResultsFromSweepLocationTargetData(Data.TargetData, TargetSweepSphereRadius);
+    
+    TArray<FHitResult> HitResults = GetHitResultsFromSweepLocationTargetData(Data.TargetData, TargetSweepSphereRadius, ETeamAttitude::Hostile, true, ShouldDrawDebug());
 
     for (const FHitResult& HitResult : HitResults)
     {
-        const TSubclassOf<UGameplayEffect> DamageEffect  = GetDamageEffectForCurrentCombo();
-        const FGameplayEffectSpecHandle EffectSpecHandle = MakeOutgoingGameplayEffectSpec(DamageEffect, GetAbilityLevel()); // GetCurrentAbilitySpecHandle(), GetCurrentActorInfo()
+        const TSubclassOf<UGameplayEffect> DamageEffect = GetDamageEffectForCurrentCombo();
 
-        FGameplayEffectContextHandle EffectContext = MakeEffectContext(GetCurrentAbilitySpecHandle(), GetCurrentActorInfo());
-        EffectContext.AddHitResult(HitResult);
-
-        EffectSpecHandle.Data->SetContext(EffectContext);
-
-        const FGameplayAbilityTargetDataHandle TargetData = UAbilitySystemBlueprintLibrary::AbilityTargetDataFromActor(HitResult.GetActor());
-        K2_ApplyGameplayEffectSpecToTarget(EffectSpecHandle, TargetData);
+        // Apply Damage Effect
+        ApplyGameplayEffectToHitResultActor(HitResult, DamageEffect, GetAbilityLevel(CurrentSpecHandle, CurrentActorInfo));
     }
 }
 

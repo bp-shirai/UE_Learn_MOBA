@@ -43,13 +43,18 @@ public:
     virtual void Tick(float DeltaTime) override;
     virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-#pragma region------ Ability System ---------------------------------------------
+#pragma region--------- Ability System ---------------------------------------------
 public:
     virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 
+    UFUNCTION(Server, Reliable, WithValidation)
+    void Server_SendGameplayEventToSelf(const FGameplayTag& EventTag, const FGameplayEventData& EventData);
+
 private:
     void BindGASChangeDelegates();
+
     void DeathTagUpdated(const FGameplayTag Tag, int32 NewCount);
+    void StunTagUpdated(const FGameplayTag Tag, int32 NewCount);
 
     UPROPERTY(VisibleDefaultsOnly, Category = "Gameplay Abilities")
     UCAbilitySystemComponent* AbilitySystemComponent;
@@ -58,7 +63,7 @@ private:
     UCAttributeSet* AttributeSet;
 
 #pragma endregion
-#pragma region----- UI ---------------------------------------------------------
+#pragma region-------- UI ---------------------------------------------------------
 
 private:
     UPROPERTY(VisibleDefaultsOnly, Category = "UI")
@@ -77,7 +82,18 @@ private:
     void SetStatsGaugeEnable(bool bIsEnable);
 
 #pragma endregion
-#pragma region----- Death and Respawn ------------------------------------------
+#pragma region-------- Stun -------------------------------------------------------
+
+private:
+    UPROPERTY(EditDefaultsOnly, Category = "Gameplay Effects")
+    UAnimMontage* StunMontage;
+
+    virtual void OnStun();
+    virtual void OnRecoverFromStun();
+
+#pragma endregion
+#pragma region-------- Death and Respawn ------------------------------------------
+
 public:
     bool IsDead() const;
     void Respawn_Immediately();
@@ -103,9 +119,9 @@ private:
 
     virtual void OnDead();
     virtual void OnRespawn();
-#pragma endregion
 
-#pragma region----- Team  ------------------------------------------
+#pragma endregion
+#pragma region-------- Team  ------------------------------------------
 public:
     virtual void SetGenericTeamId(const FGenericTeamId& NewTeamID) override;
 
@@ -119,8 +135,7 @@ private:
     virtual void OnRep_TeamID();
 
 #pragma endregion
-
-#pragma region----- AI  ------------------------------------------
+#pragma region-------- AI  ------------------------------------------
 public:
     UPROPERTY(VisibleAnywhere, Category = "AI Perception")
     UAIPerceptionStimuliSourceComponent* PerceptionStimuliSource;

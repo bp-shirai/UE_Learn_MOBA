@@ -11,11 +11,11 @@
 
 #include "GAS/CGameplayTags.h"
 
-
-
 UCGameplayAbility::UCGameplayAbility()
 {
     InstancingPolicy = EGameplayAbilityInstancingPolicy::InstancedPerActor;
+
+    ActivationBlockedTags.AddTag(Tags::Stats::Stun);
 }
 
 UAnimInstance* UCGameplayAbility::GetOwnerAnimInstance() const
@@ -54,6 +54,9 @@ TArray<FHitResult> UCGameplayAbility::GetHitResultsFromSweepLocationTargetData(c
         }
 
         EDrawDebugTrace::Type DrawDebugTraceType = bDrawDebug ? EDrawDebugTrace::ForDuration : EDrawDebugTrace::None;
+
+        //UE_LOG(LogTemp, Warning, TEXT("GetHitResultsFromSweepLocationTargetData: DEBUG %s"), bDrawDebug ? TEXT("TRUE") : TEXT("FALSE"));
+        // UE_LOG(LogTemp, Warning, TEXT("DrawDebugTraceType: %d"), DrawDebugTraceType);
 
         TArray<FHitResult> Results;
         UKismetSystemLibrary::SphereTraceMultiForObjects(this, StartLoc, EndLoc, SphereSweepRadius, ObjectTypes, false, ActorsToIgnore, DrawDebugTraceType, Results, false);
@@ -112,5 +115,18 @@ void UCGameplayAbility::PushTarget(AActor* Target, const FVector& PushVelocity)
 
     EventData.TargetData.Add(HitData);
 
-    UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(Target, Tags::Ability::Passive::Launch::Activate, EventData);
+    UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(Target, Tags::Ability::Passive::Launch_Activate, EventData);
+}
+
+void UCGameplayAbility::ApplyGameplayEffectToHitResultActor(const FHitResult& HitResult, TSubclassOf<UGameplayEffect> GameplayEffectClass, int32 Level)
+{
+    const FGameplayEffectSpecHandle EffectSpecHandle = MakeOutgoingGameplayEffectSpec(GameplayEffectClass, Level);
+
+    FGameplayEffectContextHandle EffectContext = MakeEffectContext(GetCurrentAbilitySpecHandle(), GetCurrentActorInfo());
+    EffectContext.AddHitResult(HitResult);
+
+    EffectSpecHandle.Data->SetContext(EffectContext);
+
+    const FGameplayAbilityTargetDataHandle TargetData = UAbilitySystemBlueprintLibrary::AbilityTargetDataFromActor(HitResult.GetActor());
+    K2_ApplyGameplayEffectSpecToTarget(EffectSpecHandle, TargetData);
 }

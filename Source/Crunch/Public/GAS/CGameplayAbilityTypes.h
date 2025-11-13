@@ -1,8 +1,11 @@
 #pragma once
 
 #include "CoreMinimal.h"
-
+#include "GameplayTagContainer.h"
 #include "CGameplayAbilityTypes.generated.h"
+
+class UGameplayEffect;
+
 
 UENUM(BlueprintType)
 enum class ECAbilityInputID : uint8
@@ -19,25 +22,37 @@ enum class ECAbilityInputID : uint8
     Cancel UMETA(DisplayName = "Cancel"),
 };
 
+USTRUCT(BlueprintType)
+struct FCGenericDamageEffectDef
+{
+    GENERATED_BODY()
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "DamageEffect")
+    TSubclassOf<UGameplayEffect> DamageEffect;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "DamageEffect")
+    FVector PushVelocity;
+};
+
 UENUM()
 enum class ECConfirmType : uint8
 {
-	Yes,
-	No,
+    Yes,
+    No,
 };
 
 UENUM()
 enum class ECValidType : uint8
 {
-	Valid,
-	Invalid,
+    Valid,
+    Invalid,
 };
 
 UENUM()
 enum class ECSuccessType : uint8
 {
-	Successful,
-	Failed,
+    Successful,
+    Failed,
 };
 
 // UENUM()
@@ -58,15 +73,15 @@ enum class ECSuccessType : uint8
 UENUM(BlueprintType)
 enum class ECGameDifficulty : uint8
 {
-	Easy,
-	Normal,
-	Hard,
-	VeryHard,
+    Easy,
+    Normal,
+    Hard,
+    VeryHard,
 };
 
 UENUM(BlueprintType)
 enum class ECInputMode : uint8
 {
-	GameOnly,
-	UIOnly,
+    GameOnly,
+    UIOnly,
 };

@@ -37,7 +37,7 @@ void UCAnimNotify_SendTargetGroup::Notify(USkeletalMeshComponent* MeshComp, UAni
 
     if (bDrawDebug)
     {
-        DrawDebug(MeshComp);
+        // DrawDebug(MeshComp);
     }
 }
 

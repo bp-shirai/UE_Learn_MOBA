@@ -2,6 +2,7 @@
 
 #include "Character/CCharacter.h"
 
+#include "Abilities/GameplayAbilityTypes.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/WidgetComponent.h"
 #include "Components/CapsuleComponent.h"
@@ -13,14 +14,14 @@
 #include "Perception/AIPerceptionStimuliSourceComponent.h"
 #include "Perception/AISense_Sight.h"
 
+#include "AbilitySystemBlueprintLibrary.h"
+
 #include "GAS/CGameplayTags.h"
 #include "GAS/CAbilitySystemComponent.h"
 #include "GAS/CAttributeSet.h"
 #include "GAS/CAbilitySystemStatics.h"
-#include "Perception/AISenseConfig_Sight.h"
-#include "Perception/AISense_Sight.h"
-#include "Templates/SubclassOf.h"
-#include "UObject/WeakObjectPtrTemplates.h"
+
+
 #include "Widgets/OverHeadStatsGauge.h"
 
 ACCharacter::ACCharacter()
@@ -44,6 +45,15 @@ ACCharacter::ACCharacter()
     PerceptionStimuliSource = CreateDefaultSubobject<UAIPerceptionStimuliSourceComponent>(TEXT("PerceptionStimuliSource"));
 
     BindGASChangeDelegates();
+}
+
+void ACCharacter::BindGASChangeDelegates()
+{
+    if (AbilitySystemComponent)
+    {
+        AbilitySystemComponent->RegisterGameplayTagEvent(Tags::Stats::Dead).AddUObject(this, &ThisClass::DeathTagUpdated);
+        AbilitySystemComponent->RegisterGameplayTagEvent(Tags::Stats::Stun).AddUObject(this, &ThisClass::StunTagUpdated);
+    }
 }
 
 void ACCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -102,17 +112,21 @@ void ACCharacter::PossessedBy(AController* NewController)
     }
 }
 
-void ACCharacter::BindGASChangeDelegates()
-{
-    if (AbilitySystemComponent)
-    {
-        AbilitySystemComponent->RegisterGameplayTagEvent(Tags::Stats::Dead).AddUObject(this, &ThisClass::DeathTagUpdated);
-    }
-}
-
 UAbilitySystemComponent* ACCharacter::GetAbilitySystemComponent() const
 {
     return AbilitySystemComponent;
+}
+
+
+
+void ACCharacter::Server_SendGameplayEventToSelf_Implementation(const FGameplayTag& EventTag, const FGameplayEventData& EventData)
+{
+    UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(this, EventTag, EventData);
+}
+
+bool ACCharacter::Server_SendGameplayEventToSelf_Validate(const FGameplayTag& EventTag, const FGameplayEventData& EventData)
+{
+    return true;
 }
 
 #pragma region---------------- UI ---------------------------------------------
@@ -308,3 +322,32 @@ void ACCharacter::AIPerceptionStimuliSourceEnable(bool bIsEnable)
 }
 
 #pragma
+
+#pragma region---------------- Stun ---------------------------------------------
+
+void ACCharacter::StunTagUpdated(const FGameplayTag Tag, int32 NewCount)
+{
+    if (IsDead()) return;
+    
+    if (NewCount)
+    {
+        OnStun();
+        PlayAnimMontage(StunMontage);
+    }
+    else
+    {
+        OnRecoverFromStun();
+        StopAnimMontage(StunMontage);
+    }
+}
+
+void ACCharacter::OnStun()
+{
+}
+
+void ACCharacter::OnRecoverFromStun()
+{
+}
+
+
+#pragma endregion

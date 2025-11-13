@@ -2,16 +2,19 @@
 
 #include "Player/CPlayerCharacter.h"
 
+#include "Abilities/GameplayAbilityTypes.h"
+#include "AbilitySystemBlueprintLibrary.h"
+#include "AbilitySystemComponent.h"
 #include "Engine/EngineTypes.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
-#include "Camera/CameraComponent.h"
-
 #include "GameFramework/PlayerController.h"
+#include "Camera/CameraComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "EnhancedInputComponent.h"
-#include "AbilitySystemComponent.h"
+
+#include "GAS/CGameplayTags.h"
 
 ACPlayerCharacter::ACPlayerCharacter()
 {
@@ -36,7 +39,7 @@ void ACPlayerCharacter::BeginPlay()
 {
     Super::BeginPlay();
     DefaultCameraRotation = ViewCam->GetComponentRotation();
-    DefaultPawnRotation = GetActorRotation();
+    DefaultPawnRotation   = GetActorRotation();
 }
 
 void ACPlayerCharacter::PawnClientRestart()
@@ -116,24 +119,48 @@ void ACPlayerCharacter::HandleAbilityInput(const FInputActionValue& Value, ECAbi
     {
         ASC->AbilityLocalInputReleased(inputID);
     }
+
+    if (InputID == ECAbilityInputID::BasicAttack)
+    {
+        Server_SendGameplayEventToSelf(Tags::Ability::BasicAttack_Pressed, FGameplayEventData());
+    }
 }
 
 void ACPlayerCharacter::OnDead()
 {
-    APlayerController* PC = GetController<APlayerController>();
-    if (PC)
-    {
-        PC->DisableInput(PC);
-    }
+    SetInputEnableFromPlayerController(false);
 }
 
 void ACPlayerCharacter::OnRespawn()
 {
-    APlayerController* PC = GetController<APlayerController>();
-    if (PC)
+    SetInputEnableFromPlayerController(true);
+
+    GetController()->SetControlRotation(DefaultCameraRotation);
+    SetActorRotation(DefaultPawnRotation);
+}
+
+void ACPlayerCharacter::OnStun()
+{
+    SetInputEnableFromPlayerController(false);
+}
+
+void ACPlayerCharacter::OnRecoverFromStun()
+{
+    if (IsDead()) return;
+    SetInputEnableFromPlayerController(true);
+}
+
+void ACPlayerCharacter::SetInputEnableFromPlayerController(bool bEnable)
+{
+    if (APlayerController* PC = GetController<APlayerController>())
     {
-        PC->EnableInput(PC);
-        GetController()->SetControlRotation(DefaultCameraRotation);
-        SetActorRotation(DefaultPawnRotation);
+        if (bEnable)
+        {
+            EnableInput(PC);
+        }
+        else
+        {
+            DisableInput(PC);
+        }
     }
 }
