@@ -50,7 +50,7 @@ public:
     UFUNCTION(Server, Reliable, WithValidation)
     void Server_SendGameplayEventToSelf(const FGameplayTag& EventTag, const FGameplayEventData& EventData);
 
-private:
+protected:
     void BindGASChangeDelegates();
 
     void DeathTagUpdated(const FGameplayTag Tag, int32 NewCount);

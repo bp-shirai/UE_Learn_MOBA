@@ -12,6 +12,7 @@ class UCameraComponent;
 class UInputMappingContext;
 class UInputAction;
 struct FInputActionValue;
+class UGameplayAbility;
 
 /**
  *
@@ -28,6 +29,8 @@ public:
 
     virtual void PawnClientRestart() override;
     virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+    const TMap<ECAbilityInputID, TSubclassOf<UGameplayAbility>>& GetAbilities() const;
 
 private:
     UPROPERTY(VisibleDefaultsOnly, Category = "View")

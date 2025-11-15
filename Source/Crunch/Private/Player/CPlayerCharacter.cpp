@@ -15,6 +15,7 @@
 #include "EnhancedInputComponent.h"
 
 #include "GAS/CGameplayTags.h"
+#include "GAS/CAbilitySystemComponent.h"
 
 ACPlayerCharacter::ACPlayerCharacter()
 {
@@ -163,4 +164,9 @@ void ACPlayerCharacter::SetInputEnableFromPlayerController(bool bEnable)
             DisableInput(PC);
         }
     }
+}
+
+const TMap<ECAbilityInputID, TSubclassOf<UGameplayAbility>>& ACPlayerCharacter::GetAbilities() const
+{
+    return AbilitySystemComponent->GetAbilities();
 }

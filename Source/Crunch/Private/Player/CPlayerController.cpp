@@ -56,6 +56,7 @@ void ACPlayerController::SpawnGameplayWidget()
         if (GameplayWidget)
         {
             GameplayWidget->AddToViewport();
+            GameplayWidget->ConfigureAbilities(PlayerCharacter->GetAbilities());
         }
     }
 }
