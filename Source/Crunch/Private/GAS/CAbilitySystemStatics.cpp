@@ -5,6 +5,7 @@
 #include "AbilitySystemComponent.h"
 #include "AbilitySystemBlueprintLibrary.h"
 #include "AbilitySystemGlobals.h"
+#include "Misc/AssertionMacros.h"
 
 
 int32 UCAbilitySystemStatics::GetGameplayTagID(const FGameplayTag& Tag)
@@ -39,7 +40,7 @@ void UCAbilitySystemStatics::RemoveGameplayTagFromActorIfFound(AActor* InActor, 
 bool UCAbilitySystemStatics::DoesActorHaveTag(const AActor* InActor, FGameplayTag TagToCheck)
 {
 	const UAbilitySystemComponent* ASC = UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(InActor);
-	ensure(ASC);
+	ensureMsgf(ASC, TEXT("Actor %s does not have an AbilitySystemComponent"), *GetNameSafe(InActor));
 
 	return ASC ? ASC->HasMatchingGameplayTag(TagToCheck) : false;
 }

@@ -20,13 +20,14 @@ class CRUNCH_API ACAIController : public AAIController
 
 public:
     ACAIController();
+    virtual void PostInitializeComponents() override;
     virtual void OnPossess(APawn* NewPawn) override;
     virtual void OnUnPossess() override;
     virtual void BeginPlay() override;
 
 private:
-    // UPROPERTY(VisibleAnywhere, Category = "AI Perception")
-    // UAIPerceptionComponent* AIPerceptionComponent;
+    //UPROPERTY(VisibleAnywhere, Category = "AI Perception")
+    //UAIPerceptionComponent* AIPerceptionComponent;
 
     UPROPERTY(EditDefaultsOnly, Category = "AI Behavior")
     UBehaviorTree* BehaviorTree;

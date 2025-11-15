@@ -35,7 +35,6 @@ private:
 
     TSubclassOf<UGameplayEffect> GetDamageEffectForCurrentCombo() const;
 
-
     UFUNCTION()
     void ComboChangedEventReceived(FGameplayEventData Data);
 
@@ -48,6 +47,9 @@ private:
     void HandleInputPress(float TimeWaited);
 
     void TryCommitCombo();
+
+    UFUNCTION()
+    void DoDamage(FGameplayEventData Data);
 
     FName NextComboName;
 

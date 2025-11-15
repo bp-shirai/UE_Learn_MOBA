@@ -6,9 +6,11 @@
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/WidgetComponent.h"
 #include "Components/CapsuleComponent.h"
+#include "CoreGlobals.h"
 #include "Engine/EngineTypes.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "Logging/LogVerbosity.h"
 #include "Misc/AssertionMacros.h"
 #include "Net/UnrealNetwork.h"
 #include "Perception/AIPerceptionStimuliSourceComponent.h"
@@ -20,7 +22,6 @@
 #include "GAS/CAbilitySystemComponent.h"
 #include "GAS/CAttributeSet.h"
 #include "GAS/CAbilitySystemStatics.h"
-
 
 #include "Widgets/OverHeadStatsGauge.h"
 
@@ -116,8 +117,6 @@ UAbilitySystemComponent* ACCharacter::GetAbilitySystemComponent() const
 {
     return AbilitySystemComponent;
 }
-
-
 
 void ACCharacter::Server_SendGameplayEventToSelf_Implementation(const FGameplayTag& EventTag, const FGameplayEventData& EventData)
 {
@@ -218,7 +217,7 @@ void ACCharacter::StartDeathSequence()
     SetStatsGaugeEnable(false);
     PlayDeathAnimation();
 
-    GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_None);
+    // GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_None);
     GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
     AIPerceptionStimuliSourceEnable(false);
@@ -230,7 +229,7 @@ void ACCharacter::Respawn()
 
     AIPerceptionStimuliSourceEnable(true);
     SetRagdollEnable(false);
-    GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking);
+    // GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking);
     GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
     GetMesh()->GetAnimInstance()->StopAllMontages(0.f);
     SetStatsGaugeEnable(true);
@@ -328,7 +327,7 @@ void ACCharacter::AIPerceptionStimuliSourceEnable(bool bIsEnable)
 void ACCharacter::StunTagUpdated(const FGameplayTag Tag, int32 NewCount)
 {
     if (IsDead()) return;
-    
+
     if (NewCount)
     {
         OnStun();
@@ -348,6 +347,5 @@ void ACCharacter::OnStun()
 void ACCharacter::OnRecoverFromStun()
 {
 }
-
 
 #pragma endregion

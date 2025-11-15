@@ -17,9 +17,9 @@
 
 UCAbility_UpperCut::UCAbility_UpperCut()
 {
-    InstancingPolicy = EGameplayAbilityInstancingPolicy::InstancedPerActor;
+    InstancingPolicy = EGameplayAbilityInstancingPolicy::InstancedPerExecution;
 
-    SetAssetTags(FGameplayTagContainer(Tags::Ability::AbilityOne));
+    // SetAssetTags(FGameplayTagContainer(Tags::Ability::AbilityOne));
 
     BlockAbilitiesWithTag.AddTag(Tags::Ability::BasicAttack);
 }
@@ -35,15 +35,15 @@ void UCAbility_UpperCut::ActivateAbility(const FGameplayAbilitySpecHandle Handle
     if (HasAuthorityOrPredictionKey(ActorInfo, &ActivationInfo))
     {
         UAbilityTask_PlayMontageAndWait* PlayMontage = UAbilityTask_PlayMontageAndWait::CreatePlayMontageAndWaitProxy(this, NAME_None, UpperCutMontage);
-        // PlayMontage->OnBlendOut.AddDynamic(this, &ThisClass::K2_EndAbility);
+        PlayMontage->OnBlendOut.AddDynamic(this, &ThisClass::K2_EndAbility);
         PlayMontage->OnInterrupted.AddDynamic(this, &ThisClass::K2_EndAbility);
         PlayMontage->OnCancelled.AddDynamic(this, &ThisClass::K2_EndAbility);
         PlayMontage->OnCompleted.AddDynamic(this, &ThisClass::K2_EndAbility);
         PlayMontage->ReadyForActivation();
 
-        UAbilityTask_WaitGameplayEvent* WaitEvent = UAbilityTask_WaitGameplayEvent::WaitGameplayEvent(this, Tags::Ability::UpperCut_Launch);
-        WaitEvent->EventReceived.AddDynamic(this, &ThisClass::StartLaunching);
-        WaitEvent->ReadyForActivation();
+        UAbilityTask_WaitGameplayEvent* WaitLaunchEvent = UAbilityTask_WaitGameplayEvent::WaitGameplayEvent(this, Tags::Ability::UpperCut_Launch);
+        WaitLaunchEvent->EventReceived.AddDynamic(this, &ThisClass::StartLaunching);
+        WaitLaunchEvent->ReadyForActivation();
     }
 
     NextComboName = NAME_None;
@@ -53,7 +53,6 @@ void UCAbility_UpperCut::StartLaunching(FGameplayEventData Data)
 {
     if (K2_HasAuthority())
     {
-
         TArray<FHitResult> HitResults = GetHitResultsFromSweepLocationTargetData(Data.TargetData, TargetSweepSphereRadius, ETeamAttitude::Hostile, true, ShouldDrawDebug());
         const FVector PushVelocity    = FVector::UpVector * UpperCutLaunchSpeed;
 
@@ -87,10 +86,12 @@ void UCAbility_UpperCut::HandleComboChangeEvent(FGameplayEventData Data)
     if (EventTag == Tags::Ability::Combo_Change_End)
     {
         NextComboName = NAME_None;
+        UE_LOG(LogTemp, Warning, TEXT("Next Combo is cleared"));
     }
     else
     {
         NextComboName = EventTag.GetTagLeafName();
+        UE_LOG(LogTemp, Warning, TEXT("Next Combo is: %s"), *NextComboName.ToString());
     }
 }
 
@@ -100,6 +101,7 @@ void UCAbility_UpperCut::HandleComboCommitEvent(FGameplayEventData Data)
 
     if (UAnimInstance* OwnerAnimInstance = GetOwnerAnimInstance())
     {
+        UE_LOG(LogTemp, Warning, TEXT("Next Combo Commit is: %s"), *NextComboName.ToString());
         OwnerAnimInstance->Montage_SetNextSection(OwnerAnimInstance->Montage_GetCurrentSection(UpperCutMontage), NextComboName, UpperCutMontage);
     }
 }

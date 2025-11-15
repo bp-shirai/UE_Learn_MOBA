@@ -11,11 +11,13 @@
 #include "AbilitySystemComponent.h"
 #include "AbilitySystemBlueprintLibrary.h"
 
+#include "Engine/HitResult.h"
 #include "GameplayEffectTypes.h"
 #include "GameplayTagsManager.h"
 
 #include "GAS/CGameplayTags.h"
 #include "Logging/LogVerbosity.h"
+#include "Templates/SubclassOf.h"
 
 UCAbility_Combo::UCAbility_Combo()
 {
@@ -56,6 +58,7 @@ void UCAbility_Combo::ActivateAbility(const FGameplayAbilitySpecHandle Handle, c
         WaitTargetingEventTask->ReadyForActivation();
     }
 
+    NextComboName = NAME_None;
     SetupWaitComboInputPress();
 }
 
@@ -108,7 +111,7 @@ void UCAbility_Combo::ComboDamageEventReceived(FGameplayEventData Data)
 {
     // Get sweep location from AnimNotify.
     // Trace the sweep location to obtain the HitResult.
-    
+
     TArray<FHitResult> HitResults = GetHitResultsFromSweepLocationTargetData(Data.TargetData, TargetSweepSphereRadius, ETeamAttitude::Hostile, true, ShouldDrawDebug());
 
     for (const FHitResult& HitResult : HitResults)
@@ -133,4 +136,16 @@ TSubclassOf<UGameplayEffect> UCAbility_Combo::GetDamageEffectForCurrentCombo() c
     }
 
     return DefaultDamageEffect;
+}
+
+void UCAbility_Combo::DoDamage(FGameplayEventData Data)
+{
+    int32 HitResultCount = UAbilitySystemBlueprintLibrary::GetDataCountFromTargetData(Data.TargetData);
+
+    for (int32 i = 0; i < HitResultCount; i++)
+    {
+        FHitResult HitResult                      = UAbilitySystemBlueprintLibrary::GetHitResultFromTargetData(Data.TargetData, i);
+        TSubclassOf<UGameplayEffect> DamageEffect = GetDamageEffectForCurrentCombo();
+        ApplyGameplayEffectToHitResultActor(HitResult, DamageEffect, GetAbilityLevel(CurrentSpecHandle, CurrentActorInfo));
+    }
 }

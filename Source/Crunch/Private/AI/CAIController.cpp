@@ -4,8 +4,10 @@
 
 #include "AbilitySystemComponent.h"
 #include "AbilitySystemBlueprintLibrary.h"
+#include "CoreGlobals.h"
 #include "Delegates/Delegate.h"
 #include "GenericTeamAgentInterface.h"
+#include "Logging/LogVerbosity.h"
 #include "Perception/AIPerceptionComponent.h"
 #include "Perception/AIPerceptionTypes.h"
 #include "Perception/AISenseConfig_Sight.h"
@@ -41,6 +43,12 @@ void ACAIController::OnPossess(APawn* NewPawn)
 {
     Super::OnPossess(NewPawn);
 
+    if (!IsValid(this))
+    {
+        UE_LOG(LogTemp, Error, TEXT("AIController: , this is nullptr"));
+        return;
+    }
+
     IGenericTeamAgentInterface* PawnTeamInterface = Cast<IGenericTeamAgentInterface>(NewPawn);
     if (PawnTeamInterface)
     {
@@ -49,14 +57,15 @@ void ACAIController::OnPossess(APawn* NewPawn)
         EnableAllSenses();
     }
 
-    PerceptionComponent->OnTargetPerceptionUpdated.AddDynamic(this, &ThisClass::OnTargetPerceptionUpdated);
-    PerceptionComponent->OnTargetPerceptionForgotten.AddDynamic(this, &ThisClass::OnTargetForgotten);
-
     UAbilitySystemComponent* PawnASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(NewPawn);
     if (PawnASC)
     {
         PawnASC->RegisterGameplayTagEvent(Tags::Stats::Dead).AddUObject(this, &ThisClass::PawnDeadTagUpdated);
         PawnASC->RegisterGameplayTagEvent(Tags::Stats::Stun).AddUObject(this, &ThisClass::PawnStunTagUpdated);
+    }
+    else
+    {
+        UE_LOG(LogTemp, Warning, TEXT("AIController: , PawnASC is nullptr"));
     }
 }
 
@@ -102,6 +111,7 @@ void ACAIController::OnTargetForgotten(AActor* ForgottenActor)
     if (ForgottenActor == GetCurrentTarget())
     {
         SetCurrentTarget(GetNextPerceivedTarget());
+        UE_LOG(LogTemp, Warning, TEXT("AIController: %s, Target %s is forgotten"), *GetName(), *GetNameSafe(ForgottenActor));
     }
 }
 
@@ -211,5 +221,20 @@ void ACAIController::PawnStunTagUpdated(const FGameplayTag Tag, int32 Count)
     else
     {
         GetBrainComponent()->StartLogic();
+    }
+}
+
+void ACAIController::PostInitializeComponents()
+{
+    Super::PostInitializeComponents();
+
+    if (PerceptionComponent)
+    {
+        PerceptionComponent->OnTargetPerceptionUpdated.AddUniqueDynamic(this, &ThisClass::OnTargetPerceptionUpdated);
+        PerceptionComponent->OnTargetPerceptionForgotten.AddUniqueDynamic(this, &ThisClass::OnTargetForgotten);
+    }
+    else
+    {
+        UE_LOG(LogTemp, Error, TEXT("AIController: %s, AIPerceptionComponent is nullptr"), *GetName());
     }
 }

@@ -135,7 +135,7 @@ void ACPlayerCharacter::OnRespawn()
 {
     SetInputEnableFromPlayerController(true);
 
-    GetController()->SetControlRotation(DefaultCameraRotation);
+    if (GetController()) GetController()->SetControlRotation(DefaultCameraRotation);
     SetActorRotation(DefaultPawnRotation);
 }
 
