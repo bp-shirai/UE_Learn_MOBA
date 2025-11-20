@@ -11,6 +11,7 @@ namespace Tags
         UE_DEFINE_GAMEPLAY_TAG(AbilityThree, "Ability.AbilityThree");
         UE_DEFINE_GAMEPLAY_TAG(AbilityFour, "Ability.AbilityFour");
 
+        UE_DEFINE_GAMEPLAY_TAG(Combo, "Ability.Combo");
         UE_DEFINE_GAMEPLAY_TAG(Combo_Change, "Ability.Combo.Change");
         UE_DEFINE_GAMEPLAY_TAG(Combo_Damage, "Ability.Combo.Damage");
 
@@ -18,7 +19,9 @@ namespace Tags
         UE_DEFINE_GAMEPLAY_TAG(Combo_Change_Combo02, "Ability.Combo.Change.Combo02");
         UE_DEFINE_GAMEPLAY_TAG(Combo_Change_Combo03, "Ability.Combo.Change.Combo03");
         UE_DEFINE_GAMEPLAY_TAG(Combo_Change_Combo04, "Ability.Combo.Change.Combo04");
+        UE_DEFINE_GAMEPLAY_TAG(Combo_Change_Begin, "Ability.Combo.Change.Begin");
         UE_DEFINE_GAMEPLAY_TAG(Combo_Change_End, "Ability.Combo.Change.End");
+
         UE_DEFINE_GAMEPLAY_TAG(Combo_InputAllowed, "Ability.Combo.InputAllowed");
 
         UE_DEFINE_GAMEPLAY_TAG(UpperCut_Launch, "Ability.UpperCut.Launch");
@@ -30,11 +33,11 @@ namespace Tags
         namespace Passive
         {
             UE_DEFINE_GAMEPLAY_TAG(Launch_Activate, "Ability.Passive.Launch.Activate");
-        } 
-    } 
+        }
+    } // namespace Ability
     namespace Stats
     {
         UE_DEFINE_GAMEPLAY_TAG(Dead, "Stats.Dead");
         UE_DEFINE_GAMEPLAY_TAG(Stun, "Stats.Stun");
-    }
-} 
+    } // namespace Stats
+} // namespace Tags

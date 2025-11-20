@@ -1,9 +1,11 @@
 #include "Animations/AnimNotify/CAnimNotifyState_ApplyLooseGameplayTag.h"
 
 #include "AbilitySystemBlueprintLibrary.h"
+#include "AbilitySystemInterface.h"
 #include "Animation/AnimMontage.h"
 #include "Animation/AnimNotifies/AnimNotify.h"
 #include "Components/SkeletalMeshComponent.h"
+#include "Logging/LogVerbosity.h"
 
 UCAnimNotifyState_ApplyLooseGameplayTag::UCAnimNotifyState_ApplyLooseGameplayTag()
 {
@@ -15,9 +17,12 @@ void UCAnimNotifyState_ApplyLooseGameplayTag::BranchingPointNotifyBegin(FBranchi
     Super::BranchingPointNotifyBegin(BranchingPointPayload);
     USkeletalMeshComponent* MeshComp = BranchingPointPayload.SkelMeshComponent;
     AActor* Actor                    = MeshComp ? MeshComp->GetOwner() : nullptr;
-    if (Actor)
+    if (Actor && Actor->Implements<UAbilitySystemInterface>())
     {
-        UAbilitySystemBlueprintLibrary::AddLooseGameplayTags(Actor, GameplayTagsToApply, false);
+        if (GameplayTagsToApply.IsValid())
+        {
+            UAbilitySystemBlueprintLibrary::AddLooseGameplayTags(Actor, GameplayTagsToApply, false);
+        }
 
         if (BeginNotifyTag.IsValid())
         {
@@ -31,9 +36,12 @@ void UCAnimNotifyState_ApplyLooseGameplayTag::BranchingPointNotifyEnd(FBranching
     Super::BranchingPointNotifyEnd(BranchingPointPayload);
     USkeletalMeshComponent* MeshComp = BranchingPointPayload.SkelMeshComponent;
     AActor* Actor                    = MeshComp ? MeshComp->GetOwner() : nullptr;
-    if (Actor)
+    if (Actor && Actor->Implements<UAbilitySystemInterface>())
     {
-        UAbilitySystemBlueprintLibrary::RemoveLooseGameplayTags(Actor, GameplayTagsToApply, false);
+        if (GameplayTagsToApply.IsValid())
+        {
+            UAbilitySystemBlueprintLibrary::RemoveLooseGameplayTags(Actor, GameplayTagsToApply, false);
+        }
 
         if (EndNotifyTag.IsValid())
         {
@@ -51,5 +59,10 @@ bool UCAnimNotifyState_ApplyLooseGameplayTag::CanBePlaced(UAnimSequenceBase* Ani
 
 FString UCAnimNotifyState_ApplyLooseGameplayTag::GetNotifyName_Implementation() const
 {
-    return GameplayTagsToApply.ToStringSimple();
+    if (GameplayTagsToApply.IsValid())
+    {
+        return GameplayTagsToApply.ToStringSimple();
+    }
+
+    return FString::Format(TEXT("{0} -> {1}"), {BeginNotifyTag.GetTagLeafName().ToString(), EndNotifyTag.GetTagLeafName().ToString()});
 }

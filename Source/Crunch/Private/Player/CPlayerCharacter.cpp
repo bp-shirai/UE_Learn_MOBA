@@ -123,7 +123,8 @@ void ACPlayerCharacter::HandleAbilityInput(const FInputActionValue& Value, ECAbi
 
     if (InputID == ECAbilityInputID::BasicAttack)
     {
-        Server_SendGameplayEventToSelf(Tags::Ability::BasicAttack_Pressed, FGameplayEventData());
+        // Server_SendGameplayEventToSelf(Tags::Ability::BasicAttack_Pressed, FGameplayEventData());
+        UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(this, Tags::Ability::BasicAttack_Pressed, FGameplayEventData());
     }
 }
 

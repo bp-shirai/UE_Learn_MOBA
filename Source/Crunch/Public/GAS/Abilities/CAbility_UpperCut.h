@@ -23,6 +23,11 @@ private:
     UPROPERTY(EditDefaultsOnly, Category = "Combo")
     TMap<FName, FCGenericDamageEffectDef> ComboDamageMap;
 
+    UPROPERTY(EditDefaultsOnly, Category = "Animation")
+    TArray<FName> ComboSectionNames;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Animation")
+    TArray<FName> ComboEndSectionNames;
 
     UPROPERTY(EditDefaultsOnly, Category = "Launch")
     TSubclassOf<UGameplayEffect> LaunchDamageEffect;
@@ -41,18 +46,30 @@ private:
 
     const FCGenericDamageEffectDef* GetDamageEffectDefForCurrentCombo() const;
 
+    UFUNCTION()
+    void StartLaunching(FGameplayTag EventTag, const FGameplayEventData& EventData);
 
     UFUNCTION()
-    void StartLaunching(FGameplayEventData Data);
+    void HandleComboChangeEvent(FGameplayTag EventTag, const FGameplayEventData& EventData);
 
     UFUNCTION()
-    void HandleComboChangeEvent(FGameplayEventData Data);
+    void HandleComboCommitEvent(FGameplayTag EventTag, const FGameplayEventData& EventData);
 
     UFUNCTION()
-    void HandleComboCommitEvent(FGameplayEventData Data);
-
-    UFUNCTION()
-    void HandleComboDamageEvent(FGameplayEventData Data);
+    void HandleComboDamageEvent(FGameplayTag EventTag, const FGameplayEventData& EventData);
 
     FName NextComboName;
+
+    bool bComboInputAllowed;
+
+    int32 ComboCount;
+
+    UFUNCTION()
+    void HandlePlayEnd(FGameplayTag EventTag, FGameplayEventData EventData);
+
+    UFUNCTION()
+    void HandlePlayBlendOut(FGameplayTag EventTag, FGameplayEventData EventData);
+
+    UFUNCTION()
+    void HandleComboEvent(FGameplayTag EventTag, FGameplayEventData EventData);
 };
