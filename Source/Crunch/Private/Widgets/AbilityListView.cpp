@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "Widgets/AbilityListView.h"
-
+#include "Logging/LogVerbosity.h"
 #include "Widgets/AbilityGauge.h"
 
 #include "Abilities/GameplayAbility.h"
@@ -15,7 +15,7 @@ void UAbilityListView::ConfigureAbilities(const TMap<ECAbilityInputID, TSubclass
 
     for (const auto& [InputID, AbilityClass] : Abilities)
     {
-        AddItem(AbilityClass.GetDefaultObject()); // ListViewItem = UGameplayAbility CDO
+        AddItem(AbilityClass.GetDefaultObject()); // ListViewItem = GameplayAbility Class Default Object(CDO).
     }
 }
 

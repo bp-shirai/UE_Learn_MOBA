@@ -116,30 +116,6 @@ void UCAbility_ComboNext::HandleInputPress(float TimeWaited)
 
 void UCAbility_ComboNext::TryCommitCombo()
 {
-    // if (UAbilitySystemComponent* ASC = GetAbilitySystemComponentFromActorInfo())
-    // {
-    //     if (bComboAllowed == false)
-    //     {
-    //         const FName NextSection = ComboEndSectionNames.IsValidIndex(ComboCount) ? ComboEndSectionNames[ComboCount] : NAME_None;
-    //         UE_LOG(LogTemp, Warning, TEXT("TryCommitCombo: %s"), *NextSection.ToString());
-    //         const FName CurrentComboName = ASC->GetCurrentMontageSectionName();
-    //         MontageSetNextSectionName(CurrentComboName, NextSection);
-    //     }
-    // }
-    // // if (HasAuthorityOrPredictionKey(ActorInfo, &ActivationInfo))
-    // const FGameplayTagContainer Tags(Tags::Ability::Combo_Change);
-
-    // const FName StartSection = ComboSectionNames.IsValidIndex(ComboCount) ? ComboSectionNames[ComboCount] : NAME_None;
-
-    // UE_LOG(LogTemp, Warning, TEXT("TryCommitCombo: %s"), *StartSection.ToString());
-
-    // UCAbilityTask_PlayMontageWaitEvent* PlayMontage = UCAbilityTask_PlayMontageWaitEvent::CreatePlayMontageAndWaitProxyTags(this, NAME_None, ComboMontage, Tags, 1.f, StartSection); //, 1.f, NAME_None, true, 1.f, 0.f, false, false);
-    // // PlayMontage->OnBlendOut.AddDynamic(this, &ThisClass::HandlePlayBlendOut);
-    // PlayMontage->OnCancelled.AddDynamic(this, &ThisClass::HandlePlayEnd);
-    // // PlayMontage->OnInterrupted.AddDynamic(this, &ThisClass::HandlePlayEnd);
-    // PlayMontage->OnCompleted.AddDynamic(this, &ThisClass::HandlePlayEnd);
-    // PlayMontage->OnEvent.AddDynamic(this, &ThisClass::HandleComboEvent);
-    // PlayMontage->ReadyForActivation();
 }
 
 void UCAbility_ComboNext::DoDamage(FGameplayEventData Data)
@@ -148,13 +124,11 @@ void UCAbility_ComboNext::DoDamage(FGameplayEventData Data)
 
 void UCAbility_ComboNext::HandleComboEvent(FGameplayTag EventTag, FGameplayEventData EventData)
 {
-    // UE_LOG(LogTemp, Warning, TEXT("HandleComboEvent: %s"), *EventTag.GetTagName().ToString());
-    if (EventTag.MatchesTag(Tags::Ability::Combo_Change_Begin))
+    if (EventTag == Tags::Ability::Combo_Change_Begin)
     {
         SetupWaitComboInputPress();
     }
-
-    else if (EventTag.MatchesTagExact(Tags::Ability::Combo_Change_End))
+    else if (EventTag == Tags::Ability::Combo_Change_End)
     {
         // Disable combo input
         bComboInputAllowed = false;
@@ -163,7 +137,6 @@ void UCAbility_ComboNext::HandleComboEvent(FGameplayTag EventTag, FGameplayEvent
 
 void UCAbility_ComboNext::HandlePlayBlendOut(FGameplayTag EventTag, FGameplayEventData EventData)
 {
-    // TryCommitCombo();
 }
 
 void UCAbility_ComboNext::HandlePlayEnd(FGameplayTag EventTag, FGameplayEventData EventData)

@@ -13,28 +13,25 @@ class UTextBlock;
 class UGameplayAbility;
 class UTexture2D;
 
-
-
 USTRUCT(BlueprintType)
 struct FAbilityWidgetData : public FTableRowBase
 {
     GENERATED_BODY()
 
-	TSoftClassPtr<UGameplayAbility> Ability;
+    // TSoftClassPtr<UGameplayAbility> Ability;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TSubclassOf<UGameplayAbility> AbilityClass;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    TSubclassOf<UGameplayAbility> AbilityClass;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FName AbilityName;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    FName AbilityName;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TSoftObjectPtr<UTexture2D> Icon;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    TSoftObjectPtr<UTexture2D> Icon;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FText Description;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    FText Description;
 };
-
 
 /**
  *
@@ -45,14 +42,20 @@ class CRUNCH_API UAbilityGauge : public UUserWidget, public IUserObjectListEntry
     GENERATED_BODY()
 
 public:
+    virtual void NativeConstruct() override;
     virtual void NativeOnListItemObjectSet(UObject* ListItemObject) override;
 
-	void ConfigureWithWidgetData(const FAbilityWidgetData* WidgetData);
-
+    void ConfigureWithWidgetData(const FAbilityWidgetData* WidgetData);
 
 private:
+    UPROPERTY(EditDefaultsOnly, Category = "Cooldown")
+    float CooldownUpdateInterval{0.1f};
+
+    UPROPERTY(EditDefaultsOnly, Category = "Visual")
+    FName IconParamName{"Icon"};
+	
 	UPROPERTY(EditDefaultsOnly, Category = "Visual")
-	FName IconMaterialParamName {"Icon"};
+    FName CooldownPercentParamName{"Percent"};
 
     UPROPERTY(meta = (BindWidget))
     UImage* Icon;
@@ -65,4 +68,23 @@ private:
 
     UPROPERTY(meta = (BindWidget))
     UTextBlock* CostText;
+
+    UPROPERTY()
+    UGameplayAbility* AbilityCDO;
+
+    void AbilityCommitted(UGameplayAbility* Ability);
+
+    void StartCooldown(float TimeRemaining, float CooldownDuration);
+
+    float CachedCooldownDuration;
+    float CachedTimeRemaining;
+
+    FTimerHandle CooldownTimerHandle;
+    FTimerHandle CooldownTimerUpdateHandle;
+
+    FNumberFormattingOptions WholeNumberFormattingOptions;
+    FNumberFormattingOptions TwoDigitNumberFormattingOptions;
+
+    void CooldownFinished();
+    void CooldownUpdate();
 };

@@ -10,6 +10,8 @@
 #include "GAS/CGameplayAbilityTypes.h"
 #include "CAbilitySystemStatics.generated.h"
 
+class UGameplayAbility;
+
 /**
  *
  */
@@ -23,14 +25,16 @@ public:
     int32 GetGameplayTagID(const FGameplayTag& Tag);
 
     UFUNCTION(BlueprintCallable, Category = "GAS|Utils")
-	static void AddGameplayTagToActorIfNone(AActor* InActor, FGameplayTag TagToAdd);
+    static void AddGameplayTagToActorIfNone(AActor* InActor, FGameplayTag TagToAdd);
 
-	UFUNCTION(BlueprintCallable, Category = "GAS|Utils")
-	static void RemoveGameplayTagFromActorIfFound(AActor* InActor, FGameplayTag TagToRemove);
+    UFUNCTION(BlueprintCallable, Category = "GAS|Utils")
+    static void RemoveGameplayTagFromActorIfFound(AActor* InActor, FGameplayTag TagToRemove);
 
-	static bool DoesActorHaveTag(const AActor* InActor, FGameplayTag TagToCheck);
+    static bool DoesActorHaveTag(const AActor* InActor, FGameplayTag TagToCheck);
 
-	UFUNCTION(BlueprintCallable, Category = "GAS|Utils", meta = (DisplayName = "Does Actor Have Tag", ExpandEnumAsExecs = "OutConfirmType"))
-	static void BP_DoesActorHaveTag(const AActor* InActor, FGameplayTag TagToCheck, ECConfirmType& OutConfirmType);
+    UFUNCTION(BlueprintCallable, Category = "GAS|Utils", meta = (DisplayName = "Does Actor Have Tag", ExpandEnumAsExecs = "OutConfirmType"))
+    static void BP_DoesActorHaveTag(const AActor* InActor, FGameplayTag TagToCheck, ECConfirmType& OutConfirmType);
 
+    static float GetStaticColldownDurationForAbility(const UGameplayAbility* Ability);
+    static float GetStaticCostForAbility(const UGameplayAbility* Ability);
 };
