@@ -16,6 +16,10 @@
 
 #include "GAS/CGameplayTags.h"
 #include "GAS/CAbilitySystemComponent.h"
+#include "Logging/LogVerbosity.h"
+#include "TimerManager.h"
+
+#include "Framework/CTickablesSubsystem.h"
 
 ACPlayerCharacter::ACPlayerCharacter()
 {
@@ -170,4 +174,35 @@ void ACPlayerCharacter::SetInputEnableFromPlayerController(bool bEnable)
 const TMap<ECAbilityInputID, TSubclassOf<UGameplayAbility>>& ACPlayerCharacter::GetAbilities() const
 {
     return AbilitySystemComponent->GetAbilities();
+}
+
+void ACPlayerCharacter::OnAimStateChanged(bool bIsAiming)
+{
+    if (GetController() && GetController()->IsLocalPlayerController())
+    {
+        LerpCameraToLocalOffsetLocation(bIsAiming ? CameraAimLocalOffset : FVector::ZeroVector);
+    }
+}
+
+void ACPlayerCharacter::LerpCameraToLocalOffsetLocation(const FVector& Goal)
+{
+   
+    GetWorldTimerManager().ClearTimer(CameraLerpTimerHandle);
+    GetWorldTimerManager().SetTimerForNextTick(FTimerDelegate::CreateUObject(this, &ThisClass::TickCameraLocalOffsetLerp, Goal));
+}
+
+void ACPlayerCharacter::TickCameraLocalOffsetLerp(FVector Goal)
+{
+    FVector CurrentLocalOffset = ViewCam->GetRelativeLocation();
+    if (FVector::Dist(CurrentLocalOffset, Goal) < 1.f)
+    {
+        ViewCam->SetRelativeLocation(Goal);
+        return;
+    }
+
+    float LerpAlpha        = FMath::Clamp(GetWorld()->GetDeltaSeconds() * CameraLerpSpeed, 0.f, 1.f);
+    FVector NewLocalOffset = FMath::Lerp(CurrentLocalOffset, Goal, LerpAlpha);
+    ViewCam->SetRelativeLocation(NewLocalOffset);
+
+    GetWorldTimerManager().SetTimerForNextTick(FTimerDelegate::CreateUObject(this, &ThisClass::TickCameraLocalOffsetLerp, Goal));
 }

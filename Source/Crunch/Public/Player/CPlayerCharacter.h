@@ -39,7 +39,13 @@ private:
     UPROPERTY(VisibleDefaultsOnly, Category = "View")
     UCameraComponent* ViewCam;
 
-#pragma region----- Input --------------------------------------------------
+#pragma region------- Gameplay Ability ---------------------------------------
+private:
+    virtual void OnAimStateChanged(bool bIsAiming) override;
+
+#pragma endregion
+
+#pragma region------- Input --------------------------------------------------
 private:
     UPROPERTY(EditDefaultsOnly, Category = "Input")
     UInputMappingContext* GameplayInputMappingContext;
@@ -67,7 +73,7 @@ private:
     FVector GetMoveFwdDir() const;
 
 #pragma endregion
-#pragma region----- Death and Respawn ------------------------------------------
+#pragma region------- Death and Respawn -----------------------------------
 private:
     virtual void OnDead() override;
     virtual void OnRespawn() override;
@@ -76,10 +82,23 @@ private:
     FRotator DefaultPawnRotation;
 
 #pragma endregion
-#pragma region----- Stun ------------------------------------------
+#pragma region------- Stun ------------------------------------------------
 private:
     virtual void OnStun() override;
     virtual void OnRecoverFromStun() override;
 
+#pragma endregion
+#pragma region------- Camera View ------------------------------------------
+private:
+    UPROPERTY(EditDefaultsOnly, Category = "View")
+    FVector CameraAimLocalOffset;
+
+    UPROPERTY(EditDefaultsOnly, Category = "View")
+    float CameraLerpSpeed{20.f};
+
+    FTimerHandle CameraLerpTimerHandle;
+
+    void LerpCameraToLocalOffsetLocation(const FVector& Goal);
+    void TickCameraLocalOffsetLerp(FVector Goal);
 #pragma endregion
 };

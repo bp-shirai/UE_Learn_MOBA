@@ -39,5 +39,7 @@ namespace Tags
     {
         UE_DEFINE_GAMEPLAY_TAG(Dead, "Stats.Dead");
         UE_DEFINE_GAMEPLAY_TAG(Stun, "Stats.Stun");
+        UE_DEFINE_GAMEPLAY_TAG(Aim, "Stats.Aim");
+
     } // namespace Stats
 } // namespace Tags

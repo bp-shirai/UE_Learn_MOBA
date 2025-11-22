@@ -41,5 +41,6 @@ namespace Tags
     {
         UE_DECLARE_GAMEPLAY_TAG_EXTERN(Dead);
         UE_DECLARE_GAMEPLAY_TAG_EXTERN(Stun);
+        UE_DECLARE_GAMEPLAY_TAG_EXTERN(Aim);
     } // namespace Stats
 } // namespace Tags

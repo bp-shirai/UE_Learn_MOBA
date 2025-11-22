@@ -27,7 +27,8 @@ public class Crunch : ModuleRules
 			"GameplayTasks",
 			"GameplayAbilities",
 			"AIModule",
-			"GameplayBehaviorsModule"
+			"GameplayBehaviorsModule",
+			"AnimGraphRuntime"
 		});
 
 		// Uncomment if you are using online features

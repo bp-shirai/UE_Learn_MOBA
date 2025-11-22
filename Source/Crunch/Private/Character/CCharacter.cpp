@@ -24,6 +24,7 @@
 #include "GAS/CAbilitySystemStatics.h"
 
 #include "Widgets/OverHeadStatsGauge.h"
+#include "Crunch.h"
 
 ACCharacter::ACCharacter()
 {
@@ -31,6 +32,8 @@ ACCharacter::ACCharacter()
 
     GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
     GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+    GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_SpringArm, ECR_Ignore);
+    GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Target, ECR_Ignore);
 
     AbilitySystemComponent = CreateDefaultSubobject<UCAbilitySystemComponent>(TEXT("AbilitySystemComponent"));
     AttributeSet           = CreateDefaultSubobject<UCAttributeSet>(TEXT("AttributeSet"));
@@ -54,6 +57,7 @@ void ACCharacter::BindGASChangeDelegates()
     {
         AbilitySystemComponent->RegisterGameplayTagEvent(Tags::Stats::Dead).AddUObject(this, &ThisClass::DeathTagUpdated);
         AbilitySystemComponent->RegisterGameplayTagEvent(Tags::Stats::Stun).AddUObject(this, &ThisClass::StunTagUpdated);
+        AbilitySystemComponent->RegisterGameplayTagEvent(Tags::Stats::Aim).AddUObject(this, &ThisClass::AimTagUpdated);
     }
 }
 
@@ -127,6 +131,8 @@ bool ACCharacter::Server_SendGameplayEventToSelf_Validate(const FGameplayTag& Ev
 {
     return true;
 }
+
+
 
 #pragma region---------------- UI ---------------------------------------------
 
@@ -281,7 +287,7 @@ void ACCharacter::SetRagdollEnable(bool bIsEnable)
     {
         GetMesh()->SetSimulatePhysics(false);
         GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-        GetMesh()->AttachToComponent(GetCapsuleComponent(), FAttachmentTransformRules::KeepWorldTransform);
+        GetMesh()->AttachToComponent(GetCapsuleComponent(), FAttachmentTransformRules::KeepRelativeTransform);
         GetMesh()->SetRelativeTransform(MeshRelativeTransform);
     }
 }
@@ -342,10 +348,34 @@ void ACCharacter::StunTagUpdated(const FGameplayTag Tag, int32 NewCount)
 
 void ACCharacter::OnStun()
 {
+    // Override in child class
 }
 
 void ACCharacter::OnRecoverFromStun()
 {
+    // Override in child class
 }
 
 #pragma endregion
+#pragma region---------------- Aim ---------------------------------------------
+
+void ACCharacter::AimTagUpdated(const FGameplayTag Tag, int32 NewCount)
+{
+    const bool IsEnable = NewCount > 0;
+    SetIsAiming(IsEnable);
+}
+
+void ACCharacter::SetIsAiming(bool bIsAiming)
+{
+    bUseControllerRotationYaw                         = bIsAiming;
+    GetCharacterMovement()->bOrientRotationToMovement = !bIsAiming;
+    OnAimStateChanged(bIsAiming);
+}
+
+void ACCharacter::OnAimStateChanged(bool bIsAiming)
+{ 
+    // Override in child class
+}
+
+#pragma endregion
+
