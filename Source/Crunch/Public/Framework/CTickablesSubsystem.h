@@ -81,13 +81,9 @@ struct FCActiveEasingFunc
         : EasingType(InEasingType), EasingExp(InEasingExp), PlayRate(InPlayRate), Callback(InCallback) {}
 
     ECEasingType EasingType = ECEasingType::Linear;
-
     float EasingExp = 2.0f;
-
     float PlayRate = 1.0f;
-
     float Time = 0.0f;
-
     TFunction<void(float)> Callback;
 
     void Tick(float DeltaTime)

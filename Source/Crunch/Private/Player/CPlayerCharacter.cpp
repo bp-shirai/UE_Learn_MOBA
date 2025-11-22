@@ -16,10 +16,9 @@
 
 #include "GAS/CGameplayTags.h"
 #include "GAS/CAbilitySystemComponent.h"
-#include "Logging/LogVerbosity.h"
-#include "TimerManager.h"
 
 #include "Framework/CTickablesSubsystem.h"
+#include "Crunch.h"
 
 ACPlayerCharacter::ACPlayerCharacter()
 {
@@ -27,6 +26,7 @@ ACPlayerCharacter::ACPlayerCharacter()
     CameraBoom->SetupAttachment(RootComponent);
     CameraBoom->TargetArmLength         = 800.f;
     CameraBoom->bUsePawnControlRotation = true;
+    CameraBoom->ProbeChannel            = ECC_SpringArm;
 
     ViewCam = CreateDefaultSubobject<UCameraComponent>(TEXT("ViewCam"));
     ViewCam->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
@@ -186,9 +186,9 @@ void ACPlayerCharacter::OnAimStateChanged(bool bIsAiming)
 
 void ACPlayerCharacter::LerpCameraToLocalOffsetLocation(const FVector& Goal)
 {
-   
+
     GetWorldTimerManager().ClearTimer(CameraLerpTimerHandle);
-    GetWorldTimerManager().SetTimerForNextTick(FTimerDelegate::CreateUObject(this, &ThisClass::TickCameraLocalOffsetLerp, Goal));
+    CameraLerpTimerHandle = GetWorldTimerManager().SetTimerForNextTick(FTimerDelegate::CreateUObject(this, &ThisClass::TickCameraLocalOffsetLerp, Goal));
 }
 
 void ACPlayerCharacter::TickCameraLocalOffsetLerp(FVector Goal)
@@ -204,5 +204,5 @@ void ACPlayerCharacter::TickCameraLocalOffsetLerp(FVector Goal)
     FVector NewLocalOffset = FMath::Lerp(CurrentLocalOffset, Goal, LerpAlpha);
     ViewCam->SetRelativeLocation(NewLocalOffset);
 
-    GetWorldTimerManager().SetTimerForNextTick(FTimerDelegate::CreateUObject(this, &ThisClass::TickCameraLocalOffsetLerp, Goal));
+    CameraLerpTimerHandle = GetWorldTimerManager().SetTimerForNextTick(FTimerDelegate::CreateUObject(this, &ThisClass::TickCameraLocalOffsetLerp, Goal));
 }

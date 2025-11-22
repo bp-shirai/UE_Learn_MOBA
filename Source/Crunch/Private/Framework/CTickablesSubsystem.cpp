@@ -24,7 +24,7 @@ void UCTickablesSubsystem::Tick(float DeltaTime)
         ActiveEasingFuncs[i].Tick(DeltaTime);
 
         if (ActiveEasingFuncs[i].IsFinished())
-        {
+        {         
             ActiveEasingFuncs.RemoveAtSwap(i);
         }
     }

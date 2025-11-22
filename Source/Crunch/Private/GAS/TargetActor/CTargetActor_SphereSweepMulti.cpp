@@ -1,6 +1,5 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
 #include "GAS/TargetActor/CTargetActor_SphereSweepMulti.h"
 #include "Abilities/GameplayAbilityTargetTypes.h"
 
@@ -9,7 +8,6 @@
 #include "GameFramework/PlayerController.h"
 #include "Engine/World.h"
 #include "DrawDebugHelpers.h"
-
 
 ACTargetActor_SphereSweepMulti::ACTargetActor_SphereSweepMulti()
 {
@@ -28,13 +26,10 @@ void ACTargetActor_SphereSweepMulti::ConfirmTargetingAndContinue()
     if (OwningAbility && OwningAbility->GetCurrentActorInfo()->IsNetAuthority())
     {
         FHitResult HitResult;
-        
-
-        
 
         // Create Target Data
         FGameplayAbilityTargetData_SingleTargetHit* HitData = new FGameplayAbilityTargetData_SingleTargetHit();
-        HitData->HitResult = HitResult;
+        HitData->HitResult                                  = HitResult;
 
         FGameplayAbilityTargetDataHandle Handle(HitData);
 
