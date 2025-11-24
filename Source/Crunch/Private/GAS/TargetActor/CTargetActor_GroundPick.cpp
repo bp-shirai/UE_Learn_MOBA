@@ -2,9 +2,14 @@
 
 #include "GAS/TargetActor/CTargetActor_GroundPick.h"
 #include "Abilities/GameplayAbility.h"
+#include "Abilities/GameplayAbilityTargetTypes.h"
+#include "Components/SceneComponent.h"
+#include "DrawDebugHelpers.h"
+#include "Engine/HitResult.h"
 #include "Engine/OverlapResult.h"
 #include "GenericTeamAgentInterface.h"
 #include "AbilitySystemBlueprintLibrary.h"
+#include "Components/DecalComponent.h"
 
 #include "Kismet/KismetSystemLibrary.h"
 #include "Math/MathFwd.h"
@@ -12,6 +17,13 @@
 ACTargetActor_GroundPick::ACTargetActor_GroundPick()
 {
     PrimaryActorTick.bCanEverTick = true;
+
+    SetRootComponent(CreateDefaultSubobject<USceneComponent>(TEXT("RootComponent")));
+
+    TargetAreaDecal = CreateDefaultSubobject<UDecalComponent>(TEXT("TargetAreaDecal"));
+    TargetAreaDecal->SetupAttachment(GetRootComponent());
+    TargetAreaDecal->DecalSize = FVector(TargetAreaRadius);
+    TargetAreaDecal->SetRelativeRotation(FRotator(90.f, 0.f, 0.f));
 }
 
 void ACTargetActor_GroundPick::Tick(float DeltaTime)
@@ -49,20 +61,32 @@ FVector ACTargetActor_GroundPick::GetTargetPoint() const
         return GetActorLocation();
     }
 
+    if (bDebug)
+    {
+        DrawDebugSphere(GetWorld(), TraceResult.ImpactPoint, TargetAreaRadius, 12, FColor::Red);
+    }
+
     return TraceResult.ImpactPoint;
 }
 
 void ACTargetActor_GroundPick::SetTargetAreaRadius(float NewRadius)
 {
-    TargetAreaRadius = NewRadius;
+    TargetAreaRadius           = NewRadius;
+    TargetAreaDecal->DecalSize = FVector(NewRadius);
+}
+
+void ACTargetActor_GroundPick::SetTargetTraceRange(float NewRange)
+{
+    TargetTraceRange = NewRange;
 }
 
 void ACTargetActor_GroundPick::ConfirmTargetingAndContinue()
 {
-    AActor* OwningActor = OwningAbility ? OwningAbility->GetAvatarActorFromActorInfo() : nullptr;
+    const AActor* OwningActor = OwningAbility ? OwningAbility->GetAvatarActorFromActorInfo() : nullptr;
     if (!OwningActor)
     {
         TargetDataReadyDelegate.Broadcast(FGameplayAbilityTargetDataHandle());
+        UE_LOG(LogTemp, Error, TEXT("ACTargetActor_GroundPick::ConfirmTargetingAndContinue - No Owning Actor"));
         return;
     }
 
@@ -84,10 +108,10 @@ void ACTargetActor_GroundPick::ConfirmTargetingAndContinue()
 
     if (bDebug)
     {
-        UKismetSystemLibrary::DrawDebugSphere(GetWorld(), Start, TargetAreaRadius, 12, FColor::Green, 2.0f);
+        DrawDebugSphere(GetWorld(), Start, TargetAreaRadius, 12, FColor::Green, false, 2.0f);
     }
 
-    IGenericTeamAgentInterface* OwnerTeamInterface = Cast<IGenericTeamAgentInterface>(OwningActor);
+    const IGenericTeamAgentInterface* OwnerTeamInterface = Cast<IGenericTeamAgentInterface>(OwningActor);
 
     TSet<AActor*> TargetActors;
     for (const FOverlapResult& OverlapResult : OverlapResults)
@@ -102,13 +126,17 @@ void ACTargetActor_GroundPick::ConfirmTargetingAndContinue()
         {
             FVector Origin, BoxExtent;
             OverlapResult.GetActor()->GetActorBounds(true, Origin, BoxExtent);
-            UKismetSystemLibrary::DrawDebugBox(GetWorld(), Origin, BoxExtent, FColor::Red, FRotator::ZeroRotator, 2.0f);
+            DrawDebugBox(GetWorld(), Origin, BoxExtent, FColor::Red, false, 2.0f);
         }
-
-        FGameplayAbilityTargetDataHandle TargetData = UAbilitySystemBlueprintLibrary::AbilityTargetDataFromActorArray(TargetActors.Array(), false);
-
-        TargetDataReadyDelegate.Broadcast(TargetData);
     }
+
+    FGameplayAbilityTargetDataHandle TargetData = UAbilitySystemBlueprintLibrary::AbilityTargetDataFromActorArray(TargetActors.Array(), false);
+
+    FHitResult HitLoc;
+    HitLoc.ImpactPoint = GetActorLocation();
+    TargetData.Add(new FGameplayAbilityTargetData_SingleTargetHit(HitLoc));
+
+    TargetDataReadyDelegate.Broadcast(TargetData);
 }
 
 void ACTargetActor_GroundPick::SetTargetOptions(bool bTargetEnemy, bool bTargetFriendly)

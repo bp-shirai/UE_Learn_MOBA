@@ -55,8 +55,8 @@ TArray<FHitResult> UCGameplayAbility::GetHitResultsFromSweepLocationTargetData(c
 
         EDrawDebugTrace::Type DrawDebugTraceType = bDrawDebug ? EDrawDebugTrace::ForDuration : EDrawDebugTrace::None;
 
-        //UE_LOG(LogTemp, Warning, TEXT("GetHitResultsFromSweepLocationTargetData: DEBUG %s"), bDrawDebug ? TEXT("TRUE") : TEXT("FALSE"));
-        // UE_LOG(LogTemp, Warning, TEXT("DrawDebugTraceType: %d"), DrawDebugTraceType);
+        // UE_LOG(LogTemp, Warning, TEXT("GetHitResultsFromSweepLocationTargetData: DEBUG %s"), bDrawDebug ? TEXT("TRUE") : TEXT("FALSE"));
+        //  UE_LOG(LogTemp, Warning, TEXT("DrawDebugTraceType: %d"), DrawDebugTraceType);
 
         TArray<FHitResult> Results;
         UKismetSystemLibrary::SphereTraceMultiForObjects(this, StartLoc, EndLoc, SphereSweepRadius, ObjectTypes, false, ActorsToIgnore, DrawDebugTraceType, Results, false);
@@ -129,4 +129,18 @@ void UCGameplayAbility::ApplyGameplayEffectToHitResultActor(const FHitResult& Hi
 
     const FGameplayAbilityTargetDataHandle TargetData = UAbilitySystemBlueprintLibrary::AbilityTargetDataFromActor(HitResult.GetActor());
     K2_ApplyGameplayEffectSpecToTarget(EffectSpecHandle, TargetData);
+}
+
+void UCGameplayAbility::PushTargets(const TArray<AActor*> Targets, const FVector& PushVelocity)
+{
+    for (AActor* Target : Targets)
+    {
+        PushTarget(Target, PushVelocity);
+    }
+}
+
+void UCGameplayAbility::PushTargets(const FGameplayAbilityTargetDataHandle& TargetData, const FVector& PushVelocity)
+{
+    const TArray<AActor*> TargetActors = UAbilitySystemBlueprintLibrary::GetAllActorsFromTargetData(TargetData);
+    PushTargets(TargetActors, PushVelocity);
 }

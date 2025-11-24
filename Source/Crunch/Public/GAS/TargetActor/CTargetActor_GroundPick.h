@@ -6,6 +6,8 @@
 #include "Abilities/GameplayAbilityTargetActor.h"
 #include "CTargetActor_GroundPick.generated.h"
 
+class UDecalComponent;
+
 /**
  *
  */
@@ -20,10 +22,14 @@ public:
     virtual void ConfirmTargetingAndContinue() override;
 
     void SetTargetAreaRadius(float NewRadius);
+    void SetTargetTraceRange(float NewRange);
 
     void SetTargetOptions(bool bTargetEnemy, bool bTargetFriendly);
 
 protected:
+    UPROPERTY(VisibleAnywhere, Category = "Visual")
+    UDecalComponent* TargetAreaDecal;
+
     bool bShouldTargetEnemy{true};
     bool bShouldTargetFriendly{false};
 

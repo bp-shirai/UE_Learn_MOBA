@@ -30,6 +30,8 @@ namespace Tags
         UE_DEFINE_GAMEPLAY_TAG(Data_Damage, "Ability.Data.Damage");
         UE_DEFINE_GAMEPLAY_TAG(Data_Duration, "Ability.Data.Duration");
 
+        UE_DEFINE_GAMEPLAY_TAG(Type_Melee, "Ability.Type.Melee");
+
         namespace Passive
         {
             UE_DEFINE_GAMEPLAY_TAG(Launch_Activate, "Ability.Passive.Launch.Activate");
@@ -40,6 +42,13 @@ namespace Tags
         UE_DEFINE_GAMEPLAY_TAG(Dead, "Stats.Dead");
         UE_DEFINE_GAMEPLAY_TAG(Stun, "Stats.Stun");
         UE_DEFINE_GAMEPLAY_TAG(Aim, "Stats.Aim");
-
+        UE_DEFINE_GAMEPLAY_TAG(CanBeCanceled, "Stats.CanBeCanceled");
+        UE_DEFINE_GAMEPLAY_TAG(Attacking, "Stats.Attacking");
+        UE_DEFINE_GAMEPLAY_TAG(Combat_ComboWindow, "Stats.Combat.ComboWindow");
     } // namespace Stats
+
+    namespace GameplayCue
+    {
+        UE_DEFINE_GAMEPLAY_TAG(CameraShake, "GameplayCue.CameraShake");
+    }
 } // namespace Tags

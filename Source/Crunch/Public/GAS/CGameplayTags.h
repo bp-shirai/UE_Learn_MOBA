@@ -30,6 +30,8 @@ namespace Tags
         UE_DECLARE_GAMEPLAY_TAG_EXTERN(Data_Damage);
         UE_DECLARE_GAMEPLAY_TAG_EXTERN(Data_Duration);
 
+        UE_DECLARE_GAMEPLAY_TAG_EXTERN(Type_Melee);
+
         namespace Passive
         {
             UE_DECLARE_GAMEPLAY_TAG_EXTERN(Launch_Activate);
@@ -42,5 +44,13 @@ namespace Tags
         UE_DECLARE_GAMEPLAY_TAG_EXTERN(Dead);
         UE_DECLARE_GAMEPLAY_TAG_EXTERN(Stun);
         UE_DECLARE_GAMEPLAY_TAG_EXTERN(Aim);
+        UE_DECLARE_GAMEPLAY_TAG_EXTERN(CanBeCanceled);
+        UE_DECLARE_GAMEPLAY_TAG_EXTERN(Attacking);
+        UE_DECLARE_GAMEPLAY_TAG_EXTERN(Combat_ComboWindow);
     } // namespace Stats
+
+    namespace GameplayCue
+    {
+        UE_DECLARE_GAMEPLAY_TAG_EXTERN(CameraShake);
+    }
 } // namespace Tags

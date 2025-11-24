@@ -86,6 +86,7 @@ void UCAbility_UpperCut::ActivateAbility(const FGameplayAbilitySpecHandle Handle
 void UCAbility_UpperCut::StartLaunching(FGameplayTag EventTag, const FGameplayEventData& EventData)
 {
     if (K2_HasAuthority())
+    // if (HasAuthorityOrPredictionKey(CurrentActorInfo, &CurrentActivationInfo))
     {
         TArray<FHitResult> HitResults = GetHitResultsFromSweepLocationTargetData(EventData.TargetData, TargetSweepSphereRadius, ETeamAttitude::Hostile, true, ShouldDrawDebug());
         const FVector PushVelocity    = FVector::UpVector * UpperCutLaunchSpeed;

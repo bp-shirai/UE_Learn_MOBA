@@ -7,7 +7,7 @@
 
 UCAbility_Launched::UCAbility_Launched()
 {
-    NetExecutionPolicy = EGameplayAbilityNetExecutionPolicy::ServerOnly;
+    NetExecutionPolicy = EGameplayAbilityNetExecutionPolicy::LocalPredicted;
     FAbilityTriggerData TriggerData;
     TriggerData.TriggerSource = EGameplayAbilityTriggerSource::GameplayEvent;
     TriggerData.TriggerTag    = Tags::Ability::Passive::Launch_Activate;
@@ -26,11 +26,13 @@ void UCAbility_Launched::ActivateAbility(const FGameplayAbilitySpecHandle Handle
     }
 
     if (K2_HasAuthority())
+    // if (HasAuthorityOrPredictionKey(ActorInfo, &ActivationInfo))
     {
         if (TriggerEventData && TriggerEventData->TargetData.IsValid(0))
         {
             const FVector PushVelocity = TriggerEventData->TargetData.Get(0)->GetHitResult()->ImpactNormal;
             PushSelf(PushVelocity);
+            UE_LOG(LogTemp, Warning, TEXT("UCAbility_Launched::ActivateAbility: Pushing self with velocity %s"), *PushVelocity.ToString());
         }
     }
 

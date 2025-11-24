@@ -30,6 +30,8 @@ protected:
 
     void PushSelf(const FVector& PushVelocity);
     void PushTarget(AActor* Target, const FVector& PushVelocity);
+    void PushTargets(const TArray<AActor*> Targets, const FVector& PushVelocity);
+    void PushTargets(const FGameplayAbilityTargetDataHandle& TargetData, const FVector& PushVelocity);
 
     ACharacter* GetOwningAvatarCharacter();
 
