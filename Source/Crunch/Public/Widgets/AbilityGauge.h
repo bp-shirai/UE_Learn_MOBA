@@ -18,8 +18,6 @@ struct FAbilityWidgetData : public FTableRowBase
 {
     GENERATED_BODY()
 
-    // TSoftClassPtr<UGameplayAbility> Ability;
-
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
     TSubclassOf<UGameplayAbility> AbilityClass;
 

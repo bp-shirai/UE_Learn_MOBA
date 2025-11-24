@@ -22,6 +22,9 @@ void UCAttributeSet::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLi
     DOREPLIFETIME_CONDITION_NOTIFY(ThisClass, MaxHealth, COND_None, REPNOTIFY_Always);
     DOREPLIFETIME_CONDITION_NOTIFY(ThisClass, Mana, COND_None, REPNOTIFY_Always);
     DOREPLIFETIME_CONDITION_NOTIFY(ThisClass, MaxMana, COND_None, REPNOTIFY_Always);
+    DOREPLIFETIME_CONDITION_NOTIFY(ThisClass, Attack, COND_None, REPNOTIFY_Always);
+    DOREPLIFETIME_CONDITION_NOTIFY(ThisClass, Armor, COND_None, REPNOTIFY_Always);
+    DOREPLIFETIME_CONDITION_NOTIFY(ThisClass, MoveSpeed, COND_None, REPNOTIFY_Always);
 }
 
 void UCAttributeSet::OnRep_Health(const FGameplayAttributeData& OldValue)
@@ -79,4 +82,19 @@ void UCAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallbackD
     {
         SetMana(FMath::Clamp(GetMana(), 0, GetMaxMana()));
     }
+}
+
+void UCAttributeSet::OnRep_Attack(const FGameplayAttributeData& OldValue)
+{
+    GAMEPLAYATTRIBUTE_REPNOTIFY(ThisClass, Attack, OldValue);
+}
+
+void UCAttributeSet::OnRep_Armor(const FGameplayAttributeData& OldValue)
+{
+    GAMEPLAYATTRIBUTE_REPNOTIFY(ThisClass, Armor, OldValue);
+}
+
+void UCAttributeSet::OnRep_MoveSpeed(const FGameplayAttributeData& OldValue)
+{
+    GAMEPLAYATTRIBUTE_REPNOTIFY(ThisClass, MoveSpeed, OldValue);
 }

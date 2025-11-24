@@ -63,7 +63,7 @@ void UCAbility_GroundBlast::ActivateAbility(const FGameplayAbilitySpecHandle Han
     }
 }
 
-void UCAbility_GroundBlast::HandlePlayEnd(FGameplayTag EventTag, FGameplayEventData EventData)
+void UCAbility_GroundBlast::HandlePlayEnd()
 {
     K2_EndAbility();
 }
@@ -74,10 +74,17 @@ void UCAbility_GroundBlast::HandleComboEvent(FGameplayTag EventTag, FGameplayEve
 
 void UCAbility_GroundBlast::TargetConfirmed(const FGameplayAbilityTargetDataHandle& TargetData)
 {
-    // TArray<AActor*> TargetActors = UAbilitySystemBlueprintLibrary::GetAllActorsFromTargetData(TargetData);
+    if (!K2_CommitAbility())
+    {
+        K2_EndAbility();
+        return;
+    }
 
-    BP_ApplyGameplayEffectToTarget(TargetData, DamageEffectDef.DamageEffect, GetAbilityLevel());
-    PushTargets(TargetData, DamageEffectDef.PushVelocity);
+    if (K2_HasAuthority())
+    {
+        BP_ApplyGameplayEffectToTarget(TargetData, DamageEffectDef.DamageEffect, GetAbilityLevel());
+        PushTargets(TargetData, DamageEffectDef.PushVelocity);
+    }
 
     FGameplayCueParameters CueParams;
     CueParams.Location     = UAbilitySystemBlueprintLibrary::GetHitResultFromTargetData(TargetData, 1).ImpactPoint;
@@ -90,8 +97,12 @@ void UCAbility_GroundBlast::TargetConfirmed(const FGameplayAbilityTargetDataHand
         {
             ASC->ExecuteGameplayCue(AdditionalCueTag, CueParams);
         }
+    }
 
-        ASC->PlayMontage(CastMontage);
+    UAnimInstance* OwnerAnimInst = GetOwnerAnimInstance();
+    if (OwnerAnimInst && CastMontage)
+    {
+        OwnerAnimInst->Montage_Play(CastMontage);
     }
 
     K2_EndAbility();

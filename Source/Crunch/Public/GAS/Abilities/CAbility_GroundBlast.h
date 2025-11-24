@@ -47,7 +47,7 @@ public:
     UAnimMontage* CastMontage;
 
     UFUNCTION()
-    void HandlePlayEnd(FGameplayTag EventTag, FGameplayEventData EventData);
+    void HandlePlayEnd();
 
     UFUNCTION()
     void HandleComboEvent(FGameplayTag EventTag, FGameplayEventData EventData);

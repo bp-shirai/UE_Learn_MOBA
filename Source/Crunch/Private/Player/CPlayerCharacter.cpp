@@ -16,6 +16,7 @@
 
 #include "GAS/CGameplayTags.h"
 #include "GAS/CAbilitySystemComponent.h"
+#include "GAS/CHeroAttributeSet.h"
 
 #include "Framework/CTickablesSubsystem.h"
 #include "Crunch.h"
@@ -38,6 +39,8 @@ ACPlayerCharacter::ACPlayerCharacter()
 
     GetCharacterMovement()->bOrientRotationToMovement = true;
     GetCharacterMovement()->RotationRate              = FRotator(0.f, 720.f, 0.f);
+
+    HeroAttributeSet = CreateDefaultSubobject<UCHeroAttributeSet>(TEXT("HeroAttributeSet"));
 }
 
 void ACPlayerCharacter::BeginPlay()

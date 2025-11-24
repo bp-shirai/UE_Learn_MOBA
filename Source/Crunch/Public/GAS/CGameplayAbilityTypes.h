@@ -6,7 +6,6 @@
 
 class UGameplayEffect;
 
-
 UENUM(BlueprintType)
 enum class ECAbilityInputID : uint8
 {
@@ -32,6 +31,43 @@ struct FCGenericDamageEffectDef
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "DamageEffect")
     FVector PushVelocity;
+};
+
+USTRUCT(BlueprintType)
+struct FCHeroBaseStats : public FTableRowBase
+{
+    GENERATED_BODY()
+
+    UPROPERTY(EditAnywhere)
+    TSubclassOf<AActor> Class;
+
+    UPROPERTY(EditAnywhere)
+    float Strength;
+
+    UPROPERTY(EditAnywhere)
+    float Intelligence;
+
+    UPROPERTY(EditAnywhere)
+    float StrengthGrowRate;
+
+    UPROPERTY(EditAnywhere)
+    float IntelligenceGrowRate;
+
+    UPROPERTY(EditAnywhere)
+    float BaseMaxHealth;
+
+    UPROPERTY(EditAnywhere)
+    float BaseMaxMana;
+
+    UPROPERTY(EditAnywhere)
+    float BaseAttack;
+
+    UPROPERTY(EditAnywhere)
+    float BaseArmor;
+
+    UPROPERTY(EditAnywhere)
+    float BaseMoveSpeed;
+    TSoftClassPtr<>
 };
 
 UENUM()

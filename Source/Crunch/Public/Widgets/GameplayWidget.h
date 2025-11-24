@@ -11,7 +11,7 @@ class UValueGauge;
 class UAbilitySystemComponent;
 class UGameplayAbility;
 class UAbilityListView;
-
+class UStatsGauge;
 
 /**
  *
@@ -33,7 +33,22 @@ private:
     UValueGauge* ManaBar;
 
     UPROPERTY(meta = (BindWidget))
-	UAbilityListView* AbilityListView;
+    UAbilityListView* AbilityListView;
+
+    UPROPERTY(meta = (BindWidget))
+    UStatsGauge* Attack;
+
+    UPROPERTY(meta = (BindWidget))
+    UStatsGauge* Armor;
+
+    UPROPERTY(meta = (BindWidget))
+    UStatsGauge* MoveSpeed;
+
+    UPROPERTY(meta = (BindWidget))
+    UStatsGauge* Intelligence;
+
+    UPROPERTY(meta = (BindWidget))
+    UStatsGauge* Strength;
 
     UPROPERTY(Transient)
     TWeakObjectPtr<UAbilitySystemComponent> OwnerASC;

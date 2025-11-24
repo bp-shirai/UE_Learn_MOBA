@@ -7,7 +7,7 @@
 
 UCAbility_Launched::UCAbility_Launched()
 {
-    NetExecutionPolicy = EGameplayAbilityNetExecutionPolicy::LocalPredicted;
+    NetExecutionPolicy = EGameplayAbilityNetExecutionPolicy::ServerOnly;
     FAbilityTriggerData TriggerData;
     TriggerData.TriggerSource = EGameplayAbilityTriggerSource::GameplayEvent;
     TriggerData.TriggerTag    = Tags::Ability::Passive::Launch_Activate;

@@ -13,6 +13,8 @@ class UInputMappingContext;
 class UInputAction;
 struct FInputActionValue;
 class UGameplayAbility;
+class UCHeroAttributeSet;
+
 
 /**
  *
@@ -42,6 +44,9 @@ private:
 #pragma region------- Gameplay Ability ---------------------------------------
 private:
     virtual void OnAimStateChanged(bool bIsAiming) override;
+
+    UPROPERTY()
+    UCHeroAttributeSet* HeroAttributeSet;
 
 #pragma endregion
 
