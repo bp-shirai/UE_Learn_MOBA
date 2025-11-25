@@ -67,7 +67,6 @@ struct FCHeroBaseStats : public FTableRowBase
 
     UPROPERTY(EditAnywhere)
     float BaseMoveSpeed;
-    TSoftClassPtr<>
 };
 
 UENUM()

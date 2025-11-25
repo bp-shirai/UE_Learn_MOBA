@@ -21,14 +21,15 @@ class CRUNCH_API UCAbilitySystemComponent : public UAbilitySystemComponent
 public:
     UCAbilitySystemComponent();
 
-    void ApplyInitialEffects();
-    void GiveInitialAbilities();
+    void InitializeBaseAttributes();
+    void ServerSideInit();
     void ApplyFullStatEffect();
     // Get the Abilities that is unique for the avatar actor, this do not include Generic/Basic ones.
     const TMap<ECAbilityInputID, TSubclassOf<UGameplayAbility>>& GetAbilities() const { return Abilities; }
 
-
 private:
+    void ApplyInitialEffects();
+    void GiveInitialAbilities();
     void AuthApplyGameplayEffect(TSubclassOf<UGameplayEffect> ApplyEffect, int32 Level = 1);
     void HealthUpdated(const FOnAttributeChangeData& Data);
 
@@ -47,6 +48,9 @@ private:
 
     UPROPERTY(EditDefaultsOnly, Category = "Gameplay Effects")
     TSubclassOf<UGameplayEffect> DeathEffect;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Base Stats")
+    UDataTable* BaseStatsDataTable;
 
     FORCEINLINE bool HasAuthority() const { return IsOwnerActorAuthoritative(); }
 };

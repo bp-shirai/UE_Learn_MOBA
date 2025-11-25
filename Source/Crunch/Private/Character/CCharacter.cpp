@@ -92,8 +92,7 @@ void ACCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 void ACCharacter::ServerSideInit()
 {
     AbilitySystemComponent->InitAbilityActorInfo(this, this);
-    AbilitySystemComponent->ApplyInitialEffects();
-    AbilitySystemComponent->GiveInitialAbilities();
+    AbilitySystemComponent->ServerSideInit();
 }
 
 void ACCharacter::ClientSideInit()
@@ -131,8 +130,6 @@ bool ACCharacter::Server_SendGameplayEventToSelf_Validate(const FGameplayTag& Ev
 {
     return true;
 }
-
-
 
 #pragma region---------------- UI ---------------------------------------------
 
@@ -373,9 +370,8 @@ void ACCharacter::SetIsAiming(bool bIsAiming)
 }
 
 void ACCharacter::OnAimStateChanged(bool bIsAiming)
-{ 
+{
     // Override in child class
 }
 
 #pragma endregion
-

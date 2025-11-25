@@ -7,6 +7,9 @@
 
 #include "GAS/CGameplayAbility.h"
 #include "GAS/CAttributeSet.h"
+#include "GAS/CGameplayAbilityTypes.h"
+#include "GAS/CHeroAttributeSet.h"
+#include "Misc/AssertionMacros.h"
 
 UCAbilitySystemComponent::UCAbilitySystemComponent()
 {
@@ -14,6 +17,43 @@ UCAbilitySystemComponent::UCAbilitySystemComponent()
 
     GenericConfirmInputID = static_cast<int32>(ECAbilityInputID::Confirm);
     GenericCancelInputID  = static_cast<int32>(ECAbilityInputID::Cancel);
+}
+
+void UCAbilitySystemComponent::InitializeBaseAttributes()
+{
+    if (!GetOwner()) return;
+    if (!ensureMsgf(BaseStatsDataTable, TEXT("CAbilitySystemComponent: %s, BaseStatsDataTable is null"), *GetName())) return;
+
+    const FCHeroBaseStats* BaseStats = nullptr;
+    for (const auto& [RowName, DataRow] : BaseStatsDataTable->GetRowMap())
+    {
+        BaseStats = BaseStatsDataTable->FindRow<FCHeroBaseStats>(RowName, "");
+        if (BaseStats && BaseStats->Class == GetOwner()->GetClass())
+        {
+            break;
+        }
+    }
+
+    if (BaseStats)
+    {
+        SetNumericAttributeBase(UCAttributeSet::GetMaxHealthAttribute(), BaseStats->BaseMaxHealth);
+        SetNumericAttributeBase(UCAttributeSet::GetMaxManaAttribute(), BaseStats->BaseMaxMana);
+        SetNumericAttributeBase(UCAttributeSet::GetAttackAttribute(), BaseStats->BaseAttack);
+        SetNumericAttributeBase(UCAttributeSet::GetArmorAttribute(), BaseStats->BaseArmor);
+        SetNumericAttributeBase(UCAttributeSet::GetMoveSpeedAttribute(), BaseStats->BaseMoveSpeed);
+
+        SetNumericAttributeBase(UCHeroAttributeSet::GetStrengthAttribute(), BaseStats->Strength);
+        SetNumericAttributeBase(UCHeroAttributeSet::GetStrengthGrowthRateAttribute(), BaseStats->StrengthGrowRate);
+        SetNumericAttributeBase(UCHeroAttributeSet::GetIntelligenceAttribute(), BaseStats->Intelligence);
+        SetNumericAttributeBase(UCHeroAttributeSet::GetIntelligenceGrowthRateAttribute(), BaseStats->IntelligenceGrowRate);
+    }
+}
+
+void UCAbilitySystemComponent::ServerSideInit()
+{
+    InitializeBaseAttributes();
+    ApplyInitialEffects();
+    GiveInitialAbilities();
 }
 
 void UCAbilitySystemComponent::ApplyInitialEffects()
@@ -44,7 +84,7 @@ void UCAbilitySystemComponent::GiveInitialAbilities()
 
 void UCAbilitySystemComponent::HealthUpdated(const FOnAttributeChangeData& Data)
 {
-    if (Data.NewValue <= 0 )
+    if (Data.NewValue <= 0)
     {
         AuthApplyGameplayEffect(DeathEffect);
     }
