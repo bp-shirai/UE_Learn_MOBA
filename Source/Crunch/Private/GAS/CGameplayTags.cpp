@@ -61,4 +61,13 @@ namespace Tags
     {
         UE_DEFINE_GAMEPLAY_TAG(Hero, "Role.Hero");
     }
+
+    namespace Attribute
+    {
+        UE_DEFINE_GAMEPLAY_TAG(Health, "Attribute.Health");
+        UE_DEFINE_GAMEPLAY_TAG(Mana, "Attribute.Mana");
+        UE_DEFINE_GAMEPLAY_TAG(Experience, "Attribute.Experience");
+        UE_DEFINE_GAMEPLAY_TAG(Gold, "Attribute.Gold");
+        UE_DEFINE_GAMEPLAY_TAG(Level, "Attribute.Level");
+    } // namespace Attribute
 } // namespace Tags

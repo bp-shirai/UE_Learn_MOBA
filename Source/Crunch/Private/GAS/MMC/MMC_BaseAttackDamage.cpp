@@ -4,6 +4,7 @@
 
 #include "GAS/CAttributeSet.h"
 #include "GameplayEffectAggregator.h"
+#include "Logging/LogVerbosity.h"
 
 UMMC_BaseAttackDamage::UMMC_BaseAttackDamage()
 {
@@ -29,7 +30,12 @@ float UMMC_BaseAttackDamage::CalculateBaseMagnitude_Implementation(const FGamepl
     float Armor = 0.f;
     GetCapturedAttributeMagnitude(ArmorCaptureDef, Spec, EvalParams, Armor);
 
-    float Damage = Attack * (1 - Armor) / (Armor * 100);
+    float DamageReduction = Armor / (Armor + 100);
+
+    // float Damage = Attack * (1 - Armor) / (Armor + 100);
+    float Damage = Attack * (1 - DamageReduction);
+
+    UE_LOG(LogTemp, Log, TEXT("Damage = %f"), Damage);
 
     return -Damage;
 }

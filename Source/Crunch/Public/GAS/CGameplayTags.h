@@ -64,4 +64,13 @@ namespace Tags
     {
         UE_DECLARE_GAMEPLAY_TAG_EXTERN(Hero);
     }
+
+    namespace Attribute
+    {
+        UE_DECLARE_GAMEPLAY_TAG_EXTERN(Health);
+        UE_DECLARE_GAMEPLAY_TAG_EXTERN(Mana);
+        UE_DECLARE_GAMEPLAY_TAG_EXTERN(Experience);
+        UE_DECLARE_GAMEPLAY_TAG_EXTERN(Gold);
+        UE_DECLARE_GAMEPLAY_TAG_EXTERN(Level);
+    } // namespace Attribute
 } // namespace Tags

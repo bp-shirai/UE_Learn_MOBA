@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "GameplayTagContainer.h"
+#include "AttributeSet.h"
 #include "CGameplayAbilityTypes.generated.h"
 
 class UGameplayEffect;
@@ -67,6 +68,28 @@ struct FCHeroBaseStats : public FTableRowBase
 
     UPROPERTY(EditAnywhere)
     float BaseMoveSpeed;
+};
+
+USTRUCT(BlueprintType)
+struct FCAttributeTagMetadata
+{
+    GENERATED_BODY()
+
+    // Specify which attribute set the attribute is from
+    UPROPERTY(EditAnywhere, Category = "Attribute")
+    FGameplayAttribute Attribute;
+
+    // Name for UI display
+    UPROPERTY(EditAnywhere, Category = "UI")
+    FText DisplayName;
+
+    // Description text for UI display
+    UPROPERTY(EditAnywhere, Category = "UI", meta = (MultiLine = true))
+    FText Description;
+
+    // Icon texture for UI display
+    UPROPERTY(EditAnywhere, Category = "UI")
+    TSoftObjectPtr<UTexture2D> Icon;
 };
 
 UENUM()

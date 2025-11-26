@@ -17,6 +17,7 @@
 #include "GAS/CGameplayTags.h"
 #include "GAS/CAbilitySystemComponent.h"
 #include "GAS/CHeroAttributeSet.h"
+#include "GAS/CAbilitySystemStatics.h"
 
 #include "Framework/CTickablesSubsystem.h"
 #include "Crunch.h"
