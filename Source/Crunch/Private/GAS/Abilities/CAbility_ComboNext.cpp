@@ -28,8 +28,6 @@ UCAbility_ComboNext::UCAbility_ComboNext()
 
 void UCAbility_ComboNext::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData)
 {
-    Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
-
     if (!K2_CommitAbility())
     {
         K2_EndAbility();

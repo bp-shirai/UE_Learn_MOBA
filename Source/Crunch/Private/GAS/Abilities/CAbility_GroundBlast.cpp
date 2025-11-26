@@ -29,8 +29,6 @@ UCAbility_GroundBlast::UCAbility_GroundBlast()
 
 void UCAbility_GroundBlast::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData)
 {
-    Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
-
     if (HasAuthorityOrPredictionKey(CurrentActorInfo, &CurrentActivationInfo))
     {
         FGameplayTagContainer Tags(Tags::Ability::Combo_Damage);

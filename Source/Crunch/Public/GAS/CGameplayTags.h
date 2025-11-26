@@ -47,10 +47,21 @@ namespace Tags
         UE_DECLARE_GAMEPLAY_TAG_EXTERN(CanBeCanceled);
         UE_DECLARE_GAMEPLAY_TAG_EXTERN(Attacking);
         UE_DECLARE_GAMEPLAY_TAG_EXTERN(Combat_ComboWindow);
+        UE_DECLARE_GAMEPLAY_TAG_EXTERN(Health_Full);
+        UE_DECLARE_GAMEPLAY_TAG_EXTERN(Health_Empty);
+
+        UE_DECLARE_GAMEPLAY_TAG_EXTERN(Mana_Full);
+        UE_DECLARE_GAMEPLAY_TAG_EXTERN(Mana_Empty);
+
     } // namespace Stats
 
     namespace GameplayCue
     {
         UE_DECLARE_GAMEPLAY_TAG_EXTERN(CameraShake);
+    }
+
+    namespace Role
+    {
+        UE_DECLARE_GAMEPLAY_TAG_EXTERN(Hero);
     }
 } // namespace Tags

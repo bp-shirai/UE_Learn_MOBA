@@ -16,6 +16,7 @@ class UAttributeSet;
 class UCAttributeSet;
 class UWidgetComponent;
 class UAIPerceptionStimuliSourceComponent;
+struct FOnAttributeChangeData;
 /**
  *
  */
@@ -53,11 +54,13 @@ public:
 protected:
     void BindGASChangeDelegates();
 
-    void DeathTagUpdated(const FGameplayTag Tag, int32 NewCount);
-    void StunTagUpdated(const FGameplayTag Tag, int32 NewCount);
-    void AimTagUpdated(const FGameplayTag Tag, int32 NewCount);
+    void Death_TagUpdated(const FGameplayTag Tag, int32 NewCount);
+    void Stun_TagUpdated(const FGameplayTag Tag, int32 NewCount);
+    void Aim_TagUpdated(const FGameplayTag Tag, int32 NewCount);
     void SetIsAiming(bool bIsAiming);
     virtual void OnAimStateChanged(bool bIsAiming);
+
+    void MoveSpeed_Updated(const FOnAttributeChangeData& Data);
 
     UPROPERTY(VisibleDefaultsOnly, Category = "Gameplay Abilities")
     UCAbilitySystemComponent* AbilitySystemComponent;

@@ -11,7 +11,7 @@
 #include "CAbilitySystemStatics.generated.h"
 
 class UGameplayAbility;
-
+struct FScalableFloat;
 /**
  *
  */
@@ -35,6 +35,13 @@ public:
     UFUNCTION(BlueprintCallable, Category = "GAS|Utils", meta = (DisplayName = "Does Actor Have Tag", ExpandEnumAsExecs = "OutConfirmType"))
     static void BP_DoesActorHaveTag(const AActor* InActor, FGameplayTag TagToCheck, ECConfirmType& OutConfirmType);
 
+    UFUNCTION(BlueprintPure, Category = "GAS|Utils")
+    static bool IsTargetPawnHostile(const APawn* QueryPawn, const APawn* TargetPawn);
+
+    UFUNCTION(BlueprintPure, Category = "GAS|Utils", meta = (CompactNodeTitle = "Get Value At Level"))
+    static float GetScalableFloatValueAtLevel(const FScalableFloat& InScalableFloat, float InLevel = 1.f);
+
     static float GetStaticColldownDurationForAbility(const UGameplayAbility* Ability);
     static float GetStaticCostForAbility(const UGameplayAbility* Ability);
+    static bool IsHero(const AActor* ActorToCheck);
 };

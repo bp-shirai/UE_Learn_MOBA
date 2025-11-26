@@ -55,9 +55,11 @@ void ACCharacter::BindGASChangeDelegates()
 {
     if (AbilitySystemComponent)
     {
-        AbilitySystemComponent->RegisterGameplayTagEvent(Tags::Stats::Dead).AddUObject(this, &ThisClass::DeathTagUpdated);
-        AbilitySystemComponent->RegisterGameplayTagEvent(Tags::Stats::Stun).AddUObject(this, &ThisClass::StunTagUpdated);
-        AbilitySystemComponent->RegisterGameplayTagEvent(Tags::Stats::Aim).AddUObject(this, &ThisClass::AimTagUpdated);
+        AbilitySystemComponent->RegisterGameplayTagEvent(Tags::Stats::Dead).AddUObject(this, &ThisClass::Death_TagUpdated);
+        AbilitySystemComponent->RegisterGameplayTagEvent(Tags::Stats::Stun).AddUObject(this, &ThisClass::Stun_TagUpdated);
+        AbilitySystemComponent->RegisterGameplayTagEvent(Tags::Stats::Aim).AddUObject(this, &ThisClass::Aim_TagUpdated);
+
+        AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(UCAttributeSet::GetMoveSpeedAttribute()).AddUObject(this, &ThisClass::MoveSpeed_Updated);
     }
 }
 
@@ -196,7 +198,7 @@ void ACCharacter::Respawn_Immediately()
     }
 }
 
-void ACCharacter::DeathTagUpdated(const FGameplayTag Tag, int32 NewCount)
+void ACCharacter::Death_TagUpdated(const FGameplayTag Tag, int32 NewCount)
 {
     if (NewCount)
     {
@@ -327,7 +329,7 @@ void ACCharacter::AIPerceptionStimuliSourceEnable(bool bIsEnable)
 
 #pragma region---------------- Stun ---------------------------------------------
 
-void ACCharacter::StunTagUpdated(const FGameplayTag Tag, int32 NewCount)
+void ACCharacter::Stun_TagUpdated(const FGameplayTag Tag, int32 NewCount)
 {
     if (IsDead()) return;
 
@@ -356,7 +358,7 @@ void ACCharacter::OnRecoverFromStun()
 #pragma endregion
 #pragma region---------------- Aim ---------------------------------------------
 
-void ACCharacter::AimTagUpdated(const FGameplayTag Tag, int32 NewCount)
+void ACCharacter::Aim_TagUpdated(const FGameplayTag Tag, int32 NewCount)
 {
     const bool IsEnable = NewCount > 0;
     SetIsAiming(IsEnable);
@@ -375,3 +377,8 @@ void ACCharacter::OnAimStateChanged(bool bIsAiming)
 }
 
 #pragma endregion
+
+void ACCharacter::MoveSpeed_Updated(const FOnAttributeChangeData& Data)
+{
+    GetCharacterMovement()->MaxWalkSpeed = Data.NewValue;
+}

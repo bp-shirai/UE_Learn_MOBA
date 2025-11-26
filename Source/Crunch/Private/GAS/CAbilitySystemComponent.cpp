@@ -1,19 +1,24 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "GAS/CAbilitySystemComponent.h"
+#include "Abilities/GameplayAbility.h"
+#include "Abilities/GameplayAbilityTypes.h"
 #include "GameplayAbilitySpec.h"
 #include "GameplayEffect.h"
 #include "GameplayEffectTypes.h"
+#include "GameplayEffectExtension.h"
+#include "AbilitySystemBlueprintLibrary.h"
 
 #include "GAS/CGameplayAbility.h"
 #include "GAS/CAttributeSet.h"
 #include "GAS/CGameplayAbilityTypes.h"
 #include "GAS/CHeroAttributeSet.h"
-#include "Misc/AssertionMacros.h"
+#include "GAS/CGameplayTags.h"
 
 UCAbilitySystemComponent::UCAbilitySystemComponent()
 {
     GetGameplayAttributeValueChangeDelegate(UCAttributeSet::GetHealthAttribute()).AddUObject(this, &ThisClass::HealthUpdated);
+    GetGameplayAttributeValueChangeDelegate(UCAttributeSet::GetManaAttribute()).AddUObject(this, &ThisClass::ManaUpdated);
 
     GenericConfirmInputID = static_cast<int32>(ECAbilityInputID::Confirm);
     GenericCancelInputID  = static_cast<int32>(ECAbilityInputID::Cancel);
@@ -78,15 +83,76 @@ void UCAbilitySystemComponent::GiveInitialAbilities()
 
     for (const auto& [InputID, Ability] : BaseAbilities)
     {
-        GiveAbility(FGameplayAbilitySpec(Ability, 0, static_cast<int32>(InputID), nullptr));
+        GiveAbility(FGameplayAbilitySpec(Ability, 1, static_cast<int32>(InputID), nullptr));
+    }
+
+    for (const TSubclassOf<UGameplayAbility>& PassiveAbility : PassiveAbilities)
+    {
+        GiveAbility(FGameplayAbilitySpec(PassiveAbility, 1, -1, nullptr));
     }
 }
 
-void UCAbilitySystemComponent::HealthUpdated(const FOnAttributeChangeData& Data)
+void UCAbilitySystemComponent::HealthUpdated(const FOnAttributeChangeData& ChangeData)
 {
+    if (!GetOwner() || !GetOwner()->HasAuthority()) return;
+
+    bool bFound           = false;
+    const float MaxHealth = GetGameplayAttributeValue(UCAttributeSet::GetMaxHealthAttribute(), bFound);
+    if (bFound && ChangeData.NewValue >= MaxHealth)
+    {
+        AddGameplayTagIfNone(Tags::Stats::Health_Full); // This is done local only
+    }
+    else
+    {
+        RemoveGameplayTagIfFound(Tags::Stats::Health_Full);
+    }
+
+    if (ChangeData.NewValue <= 0)
+    {
+        if (AddGameplayTagIfNone(Tags::Stats::Health_Empty))
+        {
+            if (DeathEffect)
+            {
+                AuthApplyGameplayEffect(DeathEffect);
+            }
+
+            // Send Dead Event Data
+            FGameplayEventData DeadEventData;
+            if (ChangeData.GEModData)
+            {
+                DeadEventData.ContextHandle = ChangeData.GEModData->EffectSpec.GetContext();
+            }
+            UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(GetOwner(), Tags::Stats::Dead, DeadEventData);
+        }
+    }
+    else
+    {
+        RemoveGameplayTagIfFound(Tags::Stats::Health_Empty);
+    }
+}
+
+void UCAbilitySystemComponent::ManaUpdated(const FOnAttributeChangeData& Data)
+{
+    if (!GetOwner() || !GetOwner()->HasAuthority()) return;
+
+    bool bFound         = false;
+    const float MaxMana = GetGameplayAttributeValue(UCAttributeSet::GetMaxManaAttribute(), bFound);
+    if (bFound && Data.NewValue >= MaxMana)
+    {
+        AddGameplayTagIfNone(Tags::Stats::Mana_Full); // This is done local only
+    }
+    else
+    {
+        RemoveGameplayTagIfFound(Tags::Stats::Mana_Full);
+    }
+
     if (Data.NewValue <= 0)
     {
-        AuthApplyGameplayEffect(DeathEffect);
+        AddGameplayTagIfNone(Tags::Stats::Mana_Empty);
+    }
+    else
+    {
+        RemoveGameplayTagIfFound(Tags::Stats::Mana_Empty);
     }
 }
 
@@ -101,5 +167,31 @@ void UCAbilitySystemComponent::AuthApplyGameplayEffect(TSubclassOf<UGameplayEffe
     {
         FGameplayEffectSpecHandle EffectSpecHandle = MakeOutgoingSpec(ApplyEffect, Level, MakeEffectContext());
         BP_ApplyGameplayEffectSpecToSelf(EffectSpecHandle);
+    }
+}
+
+bool UCAbilitySystemComponent::AddGameplayTagIfNone(const FGameplayTag& Tag)
+{
+    if (HasMatchingGameplayTag(Tag))
+    {
+        return false;
+    }
+    else
+    {
+        AddLooseGameplayTag(Tag);
+        return true;
+    }
+}
+
+bool UCAbilitySystemComponent::RemoveGameplayTagIfFound(const FGameplayTag& Tag)
+{
+    if (HasMatchingGameplayTag(Tag))
+    {
+        RemoveLooseGameplayTag(Tag);
+        return true;
+    }
+    else
+    {
+        return false;
     }
 }

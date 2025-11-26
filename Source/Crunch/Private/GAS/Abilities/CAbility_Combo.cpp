@@ -29,8 +29,6 @@ UCAbility_Combo::UCAbility_Combo()
 
 void UCAbility_Combo::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData)
 {
-    Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
-
     if (!K2_CommitAbility())
     {
         K2_EndAbility();

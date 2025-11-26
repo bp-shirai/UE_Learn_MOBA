@@ -31,7 +31,9 @@ private:
     void ApplyInitialEffects();
     void GiveInitialAbilities();
     void AuthApplyGameplayEffect(TSubclassOf<UGameplayEffect> ApplyEffect, int32 Level = 1);
+
     void HealthUpdated(const FOnAttributeChangeData& Data);
+    void ManaUpdated(const FOnAttributeChangeData& Data);
 
 private:
     UPROPERTY(EditDefaultsOnly, Category = "Gameplay Effects")
@@ -46,6 +48,9 @@ private:
     UPROPERTY(EditDefaultsOnly, Category = "Gameplay Abilities")
     TMap<ECAbilityInputID, TSubclassOf<UGameplayAbility>> BaseAbilities;
 
+    UPROPERTY(EditDefaultsOnly, Category = "Gameplay Abilities")
+    TArray<TSubclassOf<UGameplayAbility>> PassiveAbilities;
+
     UPROPERTY(EditDefaultsOnly, Category = "Gameplay Effects")
     TSubclassOf<UGameplayEffect> DeathEffect;
 
@@ -53,4 +58,7 @@ private:
     UDataTable* BaseStatsDataTable;
 
     FORCEINLINE bool HasAuthority() const { return IsOwnerActorAuthoritative(); }
+
+    bool AddGameplayTagIfNone(const FGameplayTag& Tag);
+    bool RemoveGameplayTagIfFound(const FGameplayTag& Tag);
 };

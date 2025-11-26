@@ -45,10 +45,20 @@ namespace Tags
         UE_DEFINE_GAMEPLAY_TAG(CanBeCanceled, "Stats.CanBeCanceled");
         UE_DEFINE_GAMEPLAY_TAG(Attacking, "Stats.Attacking");
         UE_DEFINE_GAMEPLAY_TAG(Combat_ComboWindow, "Stats.Combat.ComboWindow");
+        UE_DEFINE_GAMEPLAY_TAG(Health_Full, "Stats.Health.Full");
+        UE_DEFINE_GAMEPLAY_TAG(Health_Empty, "Stats.Health.Empty");
+        UE_DEFINE_GAMEPLAY_TAG(Mana_Full, "Stats.Mana.Full");
+        UE_DEFINE_GAMEPLAY_TAG(Mana_Empty, "Stats.Mana.Empty");
+
     } // namespace Stats
 
     namespace GameplayCue
     {
         UE_DEFINE_GAMEPLAY_TAG(CameraShake, "GameplayCue.CameraShake");
+    }
+
+    namespace Role
+    {
+        UE_DEFINE_GAMEPLAY_TAG(Hero, "Role.Hero");
     }
 } // namespace Tags
