@@ -3,6 +3,7 @@
 #include "GAS/CAbilitySystemComponent.h"
 #include "Abilities/GameplayAbility.h"
 #include "Abilities/GameplayAbilityTypes.h"
+#include "Curves/RealCurve.h"
 #include "Engine/DataTable.h"
 #include "GameplayAbilitySpec.h"
 #include "GameplayEffect.h"
@@ -21,6 +22,7 @@ UCAbilitySystemComponent::UCAbilitySystemComponent()
 {
     GetGameplayAttributeValueChangeDelegate(UCAttributeSet::GetHealthAttribute()).AddUObject(this, &ThisClass::HealthUpdated);
     GetGameplayAttributeValueChangeDelegate(UCAttributeSet::GetManaAttribute()).AddUObject(this, &ThisClass::ManaUpdated);
+    GetGameplayAttributeValueChangeDelegate(UCHeroAttributeSet::GetExperienceAttribute()).AddUObject(this, &ThisClass::ExperienceUpdated);
 
     GenericConfirmInputID = static_cast<int32>(ECAbilityInputID::Confirm);
     GenericCancelInputID  = static_cast<int32>(ECAbilityInputID::Cancel);
@@ -60,6 +62,19 @@ void UCAbilitySystemComponent::InitializeBaseAttributes()
         SetNumericAttributeBase(UCHeroAttributeSet::GetIntelligenceAttribute(), BaseStats->Intelligence);
         SetNumericAttributeBase(UCHeroAttributeSet::GetIntelligenceGrowthRateAttribute(), BaseStats->IntelligenceGrowRate);
     }
+
+    // Update Experience Data
+    const FRealCurve* ExperienceCurve = AbilitySystemGenerics ? AbilitySystemGenerics->GetExperienceCurve() : nullptr;
+    if (ExperienceCurve)
+    {
+        int MaxLevel = ExperienceCurve->GetNumKeys();
+        SetNumericAttributeBase(UCHeroAttributeSet::GetMaxLevelAttribute(), MaxLevel);
+
+        float MaxExp = ExperienceCurve->GetKeyValue(ExperienceCurve->GetLastKeyHandle());
+        SetNumericAttributeBase(UCHeroAttributeSet::GetMaxLevelExperienceAttribute(), MaxExp);
+    }
+
+    ExperienceUpdated(FOnAttributeChangeData());
 }
 
 void UCAbilitySystemComponent::ServerSideInit()
@@ -207,4 +222,56 @@ bool UCAbilitySystemComponent::RemoveGameplayTagIfFound(const FGameplayTag& Tag)
     {
         return false;
     }
+}
+
+void UCAbilitySystemComponent::ExperienceUpdated(const FOnAttributeChangeData& Data)
+{
+    if (!HasAuthority()) return;
+    if (IsAtMaxLevel()) return;
+    if (!AbilitySystemGenerics) return;
+
+    float CurrentExp = Data.NewValue;
+
+    const FRealCurve* ExperienceCurve = AbilitySystemGenerics->GetExperienceCurve();
+    if (!ExperienceCurve)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("Can't find Experience Data"));
+        return;
+    }
+
+    float PrevLevelExp = 0.f;
+    float NextLevelExp = 0.f;
+    float NewLevel     = 1;
+
+    for (auto It = ExperienceCurve->GetKeyHandleIterator(); It; ++It)
+    {
+        float ExpToReachLevel = ExperienceCurve->GetKeyValue(*It);
+        if (CurrentExp < ExpToReachLevel)
+        {
+            NextLevelExp = ExpToReachLevel;
+            break;
+        }
+
+        PrevLevelExp = ExpToReachLevel;
+        NewLevel     = It.GetIndex() + 1;
+    }
+
+    float CurrentLevel        = GetNumericAttributeBase(UCHeroAttributeSet::GetLevelAttribute());
+    float CurrentUpgradePoint = GetNumericAttribute(UCHeroAttributeSet::GetUpgradePointAttribute());
+
+    float LevelUpgraded   = NewLevel - CurrentLevel;
+    float NewUpgradePoint = CurrentUpgradePoint + LevelUpgraded;
+
+    SetNumericAttributeBase(UCHeroAttributeSet::GetLevelAttribute(), NewLevel);
+    SetNumericAttributeBase(UCHeroAttributeSet::GetPrevLevelExperienceAttribute(), PrevLevelExp);
+    SetNumericAttributeBase(UCHeroAttributeSet::GetNextLevelExperienceAttribute(), NextLevelExp);
+    SetNumericAttributeBase(UCHeroAttributeSet::GetUpgradePointAttribute(), NewUpgradePoint);
+
+}
+
+bool UCAbilitySystemComponent::IsAtMaxLevel() const
+{
+    float CurrentLevel = GetNumericAttribute(UCHeroAttributeSet::GetLevelAttribute());
+    float MaxLevel     = GetNumericAttribute(UCHeroAttributeSet::GetMaxLevelAttribute());
+    return CurrentLevel >= MaxLevel;
 }

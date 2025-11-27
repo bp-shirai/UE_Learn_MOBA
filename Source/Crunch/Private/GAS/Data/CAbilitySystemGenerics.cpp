@@ -3,3 +3,8 @@
 
 #include "GAS/Data/CAbilitySystemGenerics.h"
 
+
+FRealCurve* UCAbilitySystemGenerics::GetExperienceCurve() const
+{
+    return ExperienceCurveTable ? ExperienceCurveTable->FindCurve(ExperienceRowName, "") : nullptr;
+}

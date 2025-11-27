@@ -60,6 +60,8 @@ void ACCharacter::BindGASChangeDelegates()
         AbilitySystemComponent->RegisterGameplayTagEvent(Tags::Stats::Aim).AddUObject(this, &ThisClass::Aim_TagUpdated);
 
         AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(UCAttributeSet::GetMoveSpeedAttribute()).AddUObject(this, &ThisClass::MoveSpeed_Updated);
+        AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(UCAttributeSet::GetMaxHealthAttribute()).AddUObject(this, &ThisClass::MaxHealth_Updated);
+        AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(UCAttributeSet::GetMaxManaAttribute()).AddUObject(this, &ThisClass::MaxMana_Updated);
     }
 }
 
@@ -381,4 +383,20 @@ void ACCharacter::OnAimStateChanged(bool bIsAiming)
 void ACCharacter::MoveSpeed_Updated(const FOnAttributeChangeData& Data)
 {
     GetCharacterMovement()->MaxWalkSpeed = Data.NewValue;
+}
+
+void ACCharacter::MaxHealth_Updated(const FOnAttributeChangeData& Data)
+{
+    if (IsValid(AttributeSet))
+    {
+        AttributeSet->RescaleHealth();
+    }
+}
+
+void ACCharacter::MaxMana_Updated(const FOnAttributeChangeData& Data)
+{
+    if (IsValid(AttributeSet))
+    {
+        AttributeSet->RescaleMana();
+    }
 }

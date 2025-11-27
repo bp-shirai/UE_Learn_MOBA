@@ -26,6 +26,7 @@ public:
     void ApplyFullStatEffect();
     // Get the Abilities that is unique for the avatar actor, this do not include Generic/Basic ones.
     const TMap<ECAbilityInputID, TSubclassOf<UGameplayAbility>>& GetAbilities() const { return Abilities; }
+    bool IsAtMaxLevel() const;
 
 private:
     void ApplyInitialEffects();
@@ -34,6 +35,7 @@ private:
 
     void HealthUpdated(const FOnAttributeChangeData& Data);
     void ManaUpdated(const FOnAttributeChangeData& Data);
+    void ExperienceUpdated(const FOnAttributeChangeData& Data);
 
 private:
     UPROPERTY(EditDefaultsOnly, Category = "Gameplay Abilities")

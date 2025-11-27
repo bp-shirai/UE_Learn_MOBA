@@ -30,6 +30,9 @@ public:
 
     virtual void PostGameplayEffectExecute(const FGameplayEffectModCallbackData& Data) override;
 
+    void RescaleHealth();
+    void RescaleMana();
+
     ATTRIBUTE_ACCESSORS(UCAttributeSet, Health)
     ATTRIBUTE_ACCESSORS(UCAttributeSet, MaxHealth)
     ATTRIBUTE_ACCESSORS(UCAttributeSet, Mana)
@@ -37,6 +40,8 @@ public:
     ATTRIBUTE_ACCESSORS(UCAttributeSet, Attack)
     ATTRIBUTE_ACCESSORS(UCAttributeSet, Armor)
     ATTRIBUTE_ACCESSORS(UCAttributeSet, MoveSpeed)
+    ATTRIBUTE_ACCESSORS(UCAttributeSet, CachedHealthPercent)
+    ATTRIBUTE_ACCESSORS(UCAttributeSet, CachedManaPercent)
 
 private:
     UPROPERTY(ReplicatedUsing = OnRep_Health)
@@ -59,6 +64,12 @@ private:
 
     UPROPERTY(ReplicatedUsing = OnRep_MoveSpeed)
     FGameplayAttributeData MoveSpeed;
+
+    UPROPERTY()
+    FGameplayAttributeData CachedHealthPercent;
+
+    UPROPERTY()
+    FGameplayAttributeData CachedManaPercent;
 
     UFUNCTION()
     void OnRep_Health(const FGameplayAttributeData& OldValue);

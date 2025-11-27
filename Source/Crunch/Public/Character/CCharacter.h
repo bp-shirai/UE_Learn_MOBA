@@ -61,6 +61,8 @@ protected:
     virtual void OnAimStateChanged(bool bIsAiming);
 
     void MoveSpeed_Updated(const FOnAttributeChangeData& Data);
+    void MaxHealth_Updated(const FOnAttributeChangeData& Data);
+    void MaxMana_Updated(const FOnAttributeChangeData& Data);
 
     UPROPERTY(VisibleDefaultsOnly, Category = "Gameplay Abilities")
     UCAbilitySystemComponent* AbilitySystemComponent;
