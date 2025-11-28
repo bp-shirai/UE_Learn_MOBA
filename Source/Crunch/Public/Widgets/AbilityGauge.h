@@ -112,4 +112,6 @@ private:
     void UpdateCanCast();
 
     void UpgradePointUpdated(const FOnAttributeChangeData& Data);
+    void ManaUpdated(const FOnAttributeChangeData& Data);
+
 };
