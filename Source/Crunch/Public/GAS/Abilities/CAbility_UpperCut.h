@@ -41,9 +41,6 @@ private:
     UPROPERTY(EditDefaultsOnly, Category = "Animation")
     UAnimMontage* UpperCutMontage;
 
-    UPROPERTY(EditDefaultsOnly, Category = "Targeting")
-    float TargetSweepSphereRadius{80.f};
-
     const FCGenericDamageEffectDef* GetDamageEffectDefForCurrentCombo() const;
 
     UFUNCTION()

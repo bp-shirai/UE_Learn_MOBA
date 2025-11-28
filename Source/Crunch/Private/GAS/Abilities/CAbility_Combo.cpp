@@ -37,23 +37,23 @@ void UCAbility_Combo::ActivateAbility(const FGameplayAbilitySpecHandle Handle, c
 
     if (HasAuthorityOrPredictionKey(ActorInfo, &ActivationInfo))
     {
-        UAbilityTask_PlayMontageAndWait* PlayMontage = UAbilityTask_PlayMontageAndWait::CreatePlayMontageAndWaitProxy(this, NAME_None, ComboMontage);
-        PlayMontage->OnBlendOut.AddDynamic(this, &ThisClass::K2_EndAbility);
-        PlayMontage->OnInterrupted.AddDynamic(this, &ThisClass::K2_EndAbility);
-        PlayMontage->OnCancelled.AddDynamic(this, &ThisClass::K2_EndAbility);
-        PlayMontage->OnCompleted.AddDynamic(this, &ThisClass::K2_EndAbility);
-        PlayMontage->ReadyForActivation();
+        UAbilityTask_PlayMontageAndWait* PlayMontageTask = UAbilityTask_PlayMontageAndWait::CreatePlayMontageAndWaitProxy(this, NAME_None, ComboMontage);
+        PlayMontageTask->OnBlendOut.AddDynamic(this, &ThisClass::K2_EndAbility);
+        PlayMontageTask->OnInterrupted.AddDynamic(this, &ThisClass::K2_EndAbility);
+        PlayMontageTask->OnCancelled.AddDynamic(this, &ThisClass::K2_EndAbility);
+        PlayMontageTask->OnCompleted.AddDynamic(this, &ThisClass::K2_EndAbility);
+        PlayMontageTask->ReadyForActivation();
 
-        UAbilityTask_WaitGameplayEvent* WaitEvent = UAbilityTask_WaitGameplayEvent::WaitGameplayEvent(this, Tags::Ability::Combo_Change, nullptr, false, false);
-        WaitEvent->EventReceived.AddDynamic(this, &ThisClass::ComboChangedEventReceived);
-        WaitEvent->ReadyForActivation();
+        UAbilityTask_WaitGameplayEvent* ComboEventTask = UAbilityTask_WaitGameplayEvent::WaitGameplayEvent(this, Tags::Ability::Combo_Change, nullptr, false, false);
+        ComboEventTask->EventReceived.AddDynamic(this, &ThisClass::ComboChangedEventReceived);
+        ComboEventTask->ReadyForActivation();
     }
 
     if (K2_HasAuthority())
     {
-        UAbilityTask_WaitGameplayEvent* WaitTargetingEventTask = UAbilityTask_WaitGameplayEvent::WaitGameplayEvent(this, Tags::Ability::Combo_Damage);
-        WaitTargetingEventTask->EventReceived.AddDynamic(this, &ThisClass::ComboDamageEventReceived);
-        WaitTargetingEventTask->ReadyForActivation();
+        UAbilityTask_WaitGameplayEvent* TargetingEventTask = UAbilityTask_WaitGameplayEvent::WaitGameplayEvent(this, Tags::Ability::Combo_Damage);
+        TargetingEventTask->EventReceived.AddDynamic(this, &ThisClass::DoDamage);
+        TargetingEventTask->ReadyForActivation();
     }
 
     NextComboName = NAME_None;
@@ -107,9 +107,6 @@ void UCAbility_Combo::TryCommitCombo()
 
 void UCAbility_Combo::ComboDamageEventReceived(FGameplayEventData Data)
 {
-    // Get sweep location from AnimNotify.
-    // Trace the sweep location to obtain the HitResult.
-
     TArray<FHitResult> HitResults = GetHitResultsFromSweepLocationTargetData(Data.TargetData, TargetSweepSphereRadius, ETeamAttitude::Hostile, true, ShouldDrawDebug());
 
     for (const FHitResult& HitResult : HitResults)
@@ -123,6 +120,8 @@ void UCAbility_Combo::ComboDamageEventReceived(FGameplayEventData Data)
 
 TSubclassOf<UGameplayEffect> UCAbility_Combo::GetDamageEffectForCurrentCombo() const
 {
+    if (DamageEffectMap.Num() == 0) return DefaultDamageEffect;
+
     if (UAbilitySystemComponent* ASC = GetAbilitySystemComponentFromActorInfo())
     {
         const FName CurrentComboName                       = ASC->GetCurrentMontageSectionName();

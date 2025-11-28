@@ -9,6 +9,7 @@
 #include "AbilitySystemComponent.h"
 #include "AbilitySystemBlueprintLibrary.h"
 #include "Animation/AnimInstance.h"
+#include "Engine/HitResult.h"
 #include "GenericTeamAgentInterface.h"
 
 #include "GAS/CGameplayAbilityTypes.h"
@@ -88,16 +89,16 @@ void UCAbility_UpperCut::StartLaunching(FGameplayTag EventTag, const FGameplayEv
     if (K2_HasAuthority())
     // if (HasAuthorityOrPredictionKey(CurrentActorInfo, &CurrentActivationInfo))
     {
-        TArray<FHitResult> HitResults = GetHitResultsFromSweepLocationTargetData(EventData.TargetData, TargetSweepSphereRadius, ETeamAttitude::Hostile, true, ShouldDrawDebug());
-        const FVector PushVelocity    = FVector::UpVector * UpperCutLaunchSpeed;
-
+        const FVector PushVelocity = FVector::UpVector * UpperCutLaunchSpeed;
         PushTarget(GetAvatarActorFromActorInfo(), PushVelocity);
 
-        for (const FHitResult& HitResult : HitResults)
+        int32 HitResultCount = UAbilitySystemBlueprintLibrary::GetDataCountFromTargetData(EventData.TargetData);
+        for (int32 i = 0; i < HitResultCount; i++)
         {
+            const FHitResult HitResult = UAbilitySystemBlueprintLibrary::GetHitResultFromTargetData(EventData.TargetData, i);
             PushTarget(HitResult.GetActor(), PushVelocity);
 
-            ApplyGameplayEffectToHitResultActor(HitResult, LaunchDamageEffect, GetAbilityLevel(CurrentSpecHandle, CurrentActorInfo));
+            ApplyGameplayEffectToHitResultActor(HitResult, LaunchDamageEffect, GetAbilityLevel());
         }
     }
 
@@ -160,21 +161,19 @@ void UCAbility_UpperCut::HandleComboDamageEvent(FGameplayTag EventTag, const FGa
 {
     if (K2_HasAuthority())
     {
-        TArray<FHitResult> HitResults = GetHitResultsFromSweepLocationTargetData(EventData.TargetData, TargetSweepSphereRadius, ETeamAttitude::Hostile, true, ShouldDrawDebug());
-
-        const FCGenericDamageEffectDef* DamageDef = GetDamageEffectDefForCurrentCombo();
-        if (!DamageDef)
-        {
-            return;
-        }
-
         PushTarget(GetAvatarActorFromActorInfo(), FVector::UpVector * UpperComboHoldSpeed);
 
-        for (const FHitResult& HitResult : HitResults)
+        const FCGenericDamageEffectDef* DamageDef = GetDamageEffectDefForCurrentCombo();
+        if (!DamageDef) return;
+        
+        const int32 HitResultCount = UAbilitySystemBlueprintLibrary::GetDataCountFromTargetData(EventData.TargetData);
+        for (int32 i = 0; i < HitResultCount; i++)
         {
-            FVector PushVelocity = GetAvatarActorFromActorInfo()->GetActorTransform().TransformVector(DamageDef->PushVelocity);
+            const FHitResult HitResult = UAbilitySystemBlueprintLibrary::GetHitResultFromTargetData(EventData.TargetData, i);
+            const FVector PushVelocity = GetAvatarActorFromActorInfo()->GetActorTransform().TransformVector(DamageDef->PushVelocity);
             PushTarget(HitResult.GetActor(), PushVelocity);
-            ApplyGameplayEffectToHitResultActor(HitResult, DamageDef->DamageEffect, GetAbilityLevel(CurrentSpecHandle, CurrentActorInfo));
+
+            ApplyGameplayEffectToHitResultActor(HitResult, DamageDef->DamageEffect, GetAbilityLevel());
         }
     }
 }

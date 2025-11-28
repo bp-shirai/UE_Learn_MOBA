@@ -43,13 +43,13 @@ void UCAbility_ComboNext::ActivateAbility(const FGameplayAbilitySpecHandle Handl
         const FName ComboEndSection = ComboEndSectionNames.IsValidIndex(ComboCount) ? ComboEndSectionNames[ComboCount] : NAME_None;
 
         const FGameplayTagContainer Tags(Tags::Ability::Combo_Change);
-        UCAbilityTask_PlayMontageWaitEvent* PlayMontage = UCAbilityTask_PlayMontageWaitEvent::CreatePlayMontageAndWaitProxyTags(this, NAME_None, ComboMontage, Tags, 1.f, ComboSection);
+        UCAbilityTask_PlayMontageWaitEvent* PlayMontageTask = UCAbilityTask_PlayMontageWaitEvent::CreatePlayMontageAndWaitProxyTags(this, NAME_None, ComboMontage, Tags, 1.f, ComboSection);
         // PlayMontage->OnBlendOut.AddDynamic(this, &ThisClass::HandlePlayBlendOut);
-        PlayMontage->OnCancelled.AddDynamic(this, &ThisClass::HandlePlayEnd);
-        PlayMontage->OnInterrupted.AddDynamic(this, &ThisClass::HandlePlayEnd);
-        PlayMontage->OnCompleted.AddDynamic(this, &ThisClass::HandlePlayEnd);
-        PlayMontage->OnEvent.AddDynamic(this, &ThisClass::HandleComboEvent);
-        PlayMontage->ReadyForActivation();
+        PlayMontageTask->OnCancelled.AddDynamic(this, &ThisClass::HandlePlayEnd);
+        PlayMontageTask->OnInterrupted.AddDynamic(this, &ThisClass::HandlePlayEnd);
+        PlayMontageTask->OnCompleted.AddDynamic(this, &ThisClass::HandlePlayEnd);
+        PlayMontageTask->OnEvent.AddDynamic(this, &ThisClass::HandleComboEvent);
+        PlayMontageTask->ReadyForActivation();
 
         if (ComboEndSection != NAME_None)
         {
@@ -59,9 +59,9 @@ void UCAbility_ComboNext::ActivateAbility(const FGameplayAbilitySpecHandle Handl
 
     if (K2_HasAuthority())
     {
-        UAbilityTask_WaitGameplayEvent* WaitTargetingEventTask = UAbilityTask_WaitGameplayEvent::WaitGameplayEvent(this, Tags::Ability::Combo_Damage);
-        WaitTargetingEventTask->EventReceived.AddDynamic(this, &ThisClass::ComboDamageEventReceived);
-        WaitTargetingEventTask->ReadyForActivation();
+        UAbilityTask_WaitGameplayEvent* TargetingEventTask = UAbilityTask_WaitGameplayEvent::WaitGameplayEvent(this, Tags::Ability::Combo_Damage);
+        TargetingEventTask->EventReceived.AddDynamic(this, &ThisClass::ComboDamageEventReceived);
+        TargetingEventTask->ReadyForActivation();
     }
 }
 

@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Animation/AnimNotifies/AnimNotify.h"
 #include "GameplayTagContainer.h"
+#include "GenericTeamAgentInterface.h"
 #include "CAnimNotify_SendTargetGroup.generated.h"
 
 /**
@@ -20,19 +21,32 @@ public:
 
 private:
     UPROPERTY(EditAnywhere, Category = "Gameplay Abilities")
+    FGameplayTagContainer GameplayCueTags;
+
+    UPROPERTY(EditAnywhere, Category = "Gameplay Abilities")
+    TEnumAsByte<ETeamAttitude::Type> TargetTeam{ETeamAttitude::Hostile};
+
+    UPROPERTY(EditAnywhere, Category = "Gameplay Abilities")
     FGameplayTag EventTag;
 
     UPROPERTY(EditAnywhere, Category = "Gameplay Abilities")
     TArray<FName> TargetSocketNames;
 
+    UPROPERTY(EditAnywhere, Category = "Gameplay Abilities")
+    float ShapeSweepRadius{60.f};
+
+    UPROPERTY(EditAnywhere, Category = "Gameplay Abilities")
+    bool bIgnoreOwner{true};
+
     UPROPERTY(EditAnywhere, Category = "Gameplay Abilities|Debug")
-    bool bDrawDebug;
-    UPROPERTY(EditAnywhere, Category = "Gameplay Abilities|Debug", meta = (EditCondition = "bDrawDebug"))
-    float DebugDrawRadius{30.f};
+    bool bDrawDebug{true};
+
     UPROPERTY(EditAnywhere, Category = "Gameplay Abilities|Debug", meta = (EditCondition = "bDrawDebug"))
     float DebugDrawTime{1.f};
 
     virtual FString GetNotifyName_Implementation() const override;
 
     void DrawDebug(USkeletalMeshComponent* MeshComp);
+
+    void SendLocalGameplayCue(const FHitResult& HitResult) const;
 };

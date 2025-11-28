@@ -27,6 +27,8 @@ struct FCGenericDamageEffectDef
 {
     GENERATED_BODY()
 
+    FCGenericDamageEffectDef() : DamageEffect(nullptr), PushVelocity(FVector::ZeroVector) {}
+
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "DamageEffect")
     TSubclassOf<UGameplayEffect> DamageEffect;
 
@@ -38,6 +40,8 @@ USTRUCT(BlueprintType)
 struct FCHeroBaseStats : public FTableRowBase
 {
     GENERATED_BODY()
+
+    FCHeroBaseStats() : Class{nullptr}, Strength(0.f), Intelligence(0.f), StrengthGrowRate(0.f), IntelligenceGrowRate(0.f), BaseMaxHealth(0.f), BaseMaxMana(0.f), BaseAttack(0.f), BaseArmor(0.f), BaseMoveSpeed(0.f) {}
 
     UPROPERTY(EditAnywhere)
     TSubclassOf<AActor> Class;

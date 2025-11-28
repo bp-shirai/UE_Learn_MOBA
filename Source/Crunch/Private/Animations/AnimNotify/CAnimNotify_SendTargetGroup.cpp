@@ -2,10 +2,18 @@
 
 #include "Animations/AnimNotify/CAnimNotify_SendTargetGroup.h"
 #include "AbilitySystemBlueprintLibrary.h"
+#include "AbilitySystemGlobals.h"
 #include "AbilitySystemInterface.h"
+#include "Containers/EnumAsByte.h"
+#include "Engine/EngineTypes.h"
+#include "GameFramework/Actor.h"
+#include "GameplayCueManager.h"
+#include "GameplayEffectTypes.h"
+#include "Abilities/GameplayAbilityTargetTypes.h"
 
 #include "DrawDebugHelpers.h"
 #include "Engine/HitResult.h"
+#include "GenericTeamAgentInterface.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "KismetTraceUtils.h"
 
@@ -13,32 +21,69 @@ void UCAnimNotify_SendTargetGroup::Notify(USkeletalMeshComponent* MeshComp, UAni
 {
     Super::Notify(MeshComp, Animation, EventReference);
 
-    if (TargetSocketNames.Num() == 0) return;
+    if (TargetSocketNames.Num() <= 1) return;
 
-    AActor* Actor = MeshComp ? MeshComp->GetOwner() : nullptr;
-    if (Actor && Actor->Implements<UAbilitySystemInterface>())
+    AActor* OwnerActor = MeshComp ? MeshComp->GetOwner() : nullptr;
+    if (OwnerActor && OwnerActor->Implements<UAbilitySystemInterface>())
     {
+
         FGameplayEventData Data;
+        TSet<AActor*> HitActors;
+        const IGenericTeamAgentInterface* OwnerTeam = Cast<IGenericTeamAgentInterface>(OwnerActor);
+
         for (int i = 1; i < TargetSocketNames.Num(); i++)
         {
-            FGameplayAbilityTargetData_LocationInfo* LocationInfo = new FGameplayAbilityTargetData_LocationInfo();
+            const FVector StartLoc = MeshComp->GetSocketLocation(TargetSocketNames[i - 1]);
+            const FVector EndLoc   = MeshComp->GetSocketLocation(TargetSocketNames[i]);
 
-            FVector StartLoc = MeshComp->GetSocketLocation(TargetSocketNames[i - 1]);
-            FVector EndLoc   = MeshComp->GetSocketLocation(TargetSocketNames[i]);
+            TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes;
+            ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_Pawn));
+            TArray<AActor*> ActorsToIgnore;
+            if (bIgnoreOwner)
+            {
+                ActorsToIgnore.Add(OwnerActor);
+            }
+            EDrawDebugTrace::Type DrawDebugTrace = bDrawDebug ? EDrawDebugTrace::ForDuration : EDrawDebugTrace::None;
+            TArray<FHitResult> HitResults;
 
-            LocationInfo->SourceLocation.LiteralTransform.SetLocation(StartLoc);
-            LocationInfo->TargetLocation.LiteralTransform.SetLocation(EndLoc);
+            UKismetSystemLibrary::SphereTraceMultiForObjects(MeshComp, StartLoc, EndLoc, ShapeSweepRadius, ObjectTypes, false, ActorsToIgnore, DrawDebugTrace, HitResults, false);
 
-            Data.TargetData.Add(LocationInfo);
+            for (const FHitResult& HitResult : HitResults)
+            {
+                AActor* HitActor = HitResult.GetActor();
+
+                if (HitActors.Contains(HitActor))
+                {
+                    continue;
+                }
+
+                if (OwnerTeam)
+                {
+                    if (OwnerTeam->GetTeamAttitudeTowards(*HitActor) != TargetTeam)
+                    {
+                        continue;
+                    }
+                }
+
+                FGameplayAbilityTargetData_SingleTargetHit* TargetHit = new FGameplayAbilityTargetData_SingleTargetHit(HitResult);
+                Data.TargetData.Add(TargetHit);
+                HitActors.Add(HitActor);
+
+                SendLocalGameplayCue(HitResult);
+            }
         }
 
-        UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(Actor, EventTag, Data);
+        UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(OwnerActor, EventTag, Data);
     }
+
+#if WITH_EDITORONLY_DATA
 
     if (bDrawDebug)
     {
-        // DrawDebug(MeshComp);
+        DrawDebug(MeshComp);
     }
+
+#endif
 }
 
 FString UCAnimNotify_SendTargetGroup::GetNotifyName_Implementation() const
@@ -70,7 +115,7 @@ void UCAnimNotify_SendTargetGroup::DrawDebug(USkeletalMeshComponent* MeshComp)
                 FVector StartLoc = MeshComp->GetSocketLocation(TargetSocketNames[i - 1]);
                 FVector EndLoc   = MeshComp->GetSocketLocation(TargetSocketNames[i]);
 
-                DrawDebugSphereTraceMulti(World, StartLoc, EndLoc, DebugDrawRadius, DrawDebugType, bHit, OutHits, TraceColor, TraceHitColor, DebugDrawTime);
+                DrawDebugSphereTraceMulti(World, StartLoc, EndLoc, ShapeSweepRadius, DrawDebugType, bHit, OutHits, TraceColor, TraceHitColor, DebugDrawTime);
             }
         }
     }
@@ -88,3 +133,15 @@ void UCAnimNotify_SendTargetGroup::DrawDebug(USkeletalMeshComponent* MeshComp)
 // 		}
 // 		else
 // #endif
+
+void UCAnimNotify_SendTargetGroup::SendLocalGameplayCue(const FHitResult& HitResult) const
+{
+    FGameplayCueParameters CueParams;
+    CueParams.Location = HitResult.ImpactPoint;
+    CueParams.Normal   = HitResult.ImpactNormal;
+
+    for (const FGameplayTag& GameplayCueTag : GameplayCueTags)
+    {
+        UAbilitySystemGlobals::Get().GetGameplayCueManager()->HandleGameplayCue(HitResult.GetActor(), GameplayCueTag, EGameplayCueEvent::Executed, CueParams);
+    }
+}

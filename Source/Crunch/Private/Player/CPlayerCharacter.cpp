@@ -124,7 +124,7 @@ void ACPlayerCharacter::HandleAbilityInput(const FInputActionValue& Value, ECAbi
     const bool bPressed = Value.Get<bool>();
 
     // Ability Upgrade
-   if (bPressed && bIsLearnAbilityLeaderDown)
+    if (bPressed && bIsLearnAbilityLeaderDown)
     {
         UpgradeAbilityWithInputID(InputID);
         return;
@@ -138,8 +138,6 @@ void ACPlayerCharacter::HandleAbilityInput(const FInputActionValue& Value, ECAbi
     {
         ASC->AbilityLocalInputReleased(inputID);
     }
-
- 
 
     if (InputID == ECAbilityInputID::BasicAttack)
     {
@@ -194,7 +192,7 @@ const TMap<ECAbilityInputID, TSubclassOf<UGameplayAbility>>& ACPlayerCharacter::
 
 void ACPlayerCharacter::OnAimStateChanged(bool bIsAiming)
 {
-    if (GetController() && GetController()->IsLocalPlayerController())
+    if (IsLocallyControlledByPlayer())
     {
         LerpCameraToLocalOffsetLocation(bIsAiming ? CameraAimLocalOffset : FVector::ZeroVector);
     }
@@ -231,5 +229,4 @@ void ACPlayerCharacter::HandleLearnAbilityLeaderDown(const FInputActionValue& Va
 void ACPlayerCharacter::HandleLearnAbilityLeaderUp(const FInputActionValue& Value)
 {
     bIsLearnAbilityLeaderDown = false;
-
 }
