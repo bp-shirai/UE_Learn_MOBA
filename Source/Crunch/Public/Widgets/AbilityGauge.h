@@ -12,6 +12,9 @@ class UImage;
 class UTextBlock;
 class UGameplayAbility;
 class UTexture2D;
+class UAbilitySystemComponent;
+struct FGameplayAbilitySpec;
+struct FOnAttributeChangeData;
 
 USTRUCT(BlueprintType)
 struct FAbilityWidgetData : public FTableRowBase
@@ -51,12 +54,24 @@ private:
 
     UPROPERTY(EditDefaultsOnly, Category = "Visual")
     FName IconParamName{"Icon"};
-	
-	UPROPERTY(EditDefaultsOnly, Category = "Visual")
+
+    UPROPERTY(EditDefaultsOnly, Category = "Visual")
     FName CooldownPercentParamName{"Percent"};
+
+    UPROPERTY(EditDefaultsOnly, Category = "Visual")
+    FName AbilityLevelParamName{"Level"};
+
+    UPROPERTY(EditDefaultsOnly, Category = "Visual")
+    FName CanCanstParamName{"CanCast"};
+
+    UPROPERTY(EditDefaultsOnly, Category = "Visual")
+    FName UpgradePointAvailableParamName{"UpgradeAvailable"};
 
     UPROPERTY(meta = (BindWidget))
     UImage* Icon;
+
+    UPROPERTY(meta = (BindWidget))
+    UImage* LevelGauge;
 
     UPROPERTY(meta = (BindWidget))
     UTextBlock* CooldownCounterText;
@@ -85,4 +100,16 @@ private:
 
     void CooldownFinished();
     void CooldownUpdate();
+
+    const UAbilitySystemComponent* OwnerAbilitySystemComponent;
+    const FGameplayAbilitySpec* CachedAbilitySpec;
+
+    const FGameplayAbilitySpec* GetAbilitySpec();
+
+    bool bIsAbilityLearned{false};
+
+    void AbilitySpecUpdated(const FGameplayAbilitySpec& AbilitySpec);
+    void UpdateCanCast();
+
+    void UpgradePointUpdated(const FOnAttributeChangeData& Data);
 };

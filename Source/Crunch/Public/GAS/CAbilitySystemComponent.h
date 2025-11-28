@@ -6,6 +6,7 @@
 #include "AbilitySystemComponent.h"
 
 #include "GAS/CGameplayAbilityTypes.h"
+
 #include "CAbilitySystemComponent.generated.h"
 
 class UGameplayAbility;
@@ -27,6 +28,13 @@ public:
     // Get the Abilities that is unique for the avatar actor, this do not include Generic/Basic ones.
     const TMap<ECAbilityInputID, TSubclassOf<UGameplayAbility>>& GetAbilities() const { return Abilities; }
     bool IsAtMaxLevel() const;
+
+    UFUNCTION(Server, Reliable)
+    void Server_UpgradeAbilityWithInputID(ECAbilityInputID InputID);
+
+    UFUNCTION(Client, Reliable)
+    void Clinet_AbilitySpecLevelUpdated(FGameplayAbilitySpecHandle Handle, int32 NewLevel);
+
 
 private:
     void ApplyInitialEffects();

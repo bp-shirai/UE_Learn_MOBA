@@ -8,6 +8,8 @@
 #include "GameplayTagContainer.h"
 #include "GenericTeamAgentInterface.h"
 
+#include "GAS/CGameplayAbilityTypes.h"
+
 #include "CCharacter.generated.h"
 
 class UAbilitySystemComponent;
@@ -52,6 +54,15 @@ public:
     void Server_SendGameplayEventToSelf(const FGameplayTag& EventTag, const FGameplayEventData& EventData);
 
 protected:
+    void UpgradeAbilityWithInputID(ECAbilityInputID InputID);
+
+    UPROPERTY(VisibleDefaultsOnly, Category = "Gameplay Abilities")
+    UCAbilitySystemComponent* AbilitySystemComponent;
+
+    UPROPERTY()
+    UCAttributeSet* AttributeSet;
+    
+private:
     void BindGASChangeDelegates();
 
     void Death_TagUpdated(const FGameplayTag Tag, int32 NewCount);
@@ -63,12 +74,6 @@ protected:
     void MoveSpeed_Updated(const FOnAttributeChangeData& Data);
     void MaxHealth_Updated(const FOnAttributeChangeData& Data);
     void MaxMana_Updated(const FOnAttributeChangeData& Data);
-
-    UPROPERTY(VisibleDefaultsOnly, Category = "Gameplay Abilities")
-    UCAbilitySystemComponent* AbilitySystemComponent;
-
-    UPROPERTY()
-    UCAttributeSet* AttributeSet;
 
 #pragma endregion
 #pragma region-------- UI ---------------------------------------------------------

@@ -5,6 +5,7 @@
 #include "Abilities/GameplayAbilityTypes.h"
 #include "Curves/RealCurve.h"
 #include "Engine/DataTable.h"
+#include "GAS/CAbilitySystemStatics.h"
 #include "GameplayAbilitySpec.h"
 #include "GameplayEffect.h"
 #include "GameplayEffectTypes.h"
@@ -266,7 +267,6 @@ void UCAbilitySystemComponent::ExperienceUpdated(const FOnAttributeChangeData& D
     SetNumericAttributeBase(UCHeroAttributeSet::GetPrevLevelExperienceAttribute(), PrevLevelExp);
     SetNumericAttributeBase(UCHeroAttributeSet::GetNextLevelExperienceAttribute(), NextLevelExp);
     SetNumericAttributeBase(UCHeroAttributeSet::GetUpgradePointAttribute(), NewUpgradePoint);
-
 }
 
 bool UCAbilitySystemComponent::IsAtMaxLevel() const
@@ -274,4 +274,31 @@ bool UCAbilitySystemComponent::IsAtMaxLevel() const
     float CurrentLevel = GetNumericAttribute(UCHeroAttributeSet::GetLevelAttribute());
     float MaxLevel     = GetNumericAttribute(UCHeroAttributeSet::GetMaxLevelAttribute());
     return CurrentLevel >= MaxLevel;
+}
+
+void UCAbilitySystemComponent::Server_UpgradeAbilityWithInputID_Implementation(ECAbilityInputID InputID)
+{
+    float UpgradePoint = GetNumericAttribute(UCHeroAttributeSet::GetUpgradePointAttribute());
+    if (UpgradePoint <= 0) return;
+
+    FGameplayAbilitySpec* AbilitySpec = FindAbilitySpecFromInputID(static_cast<int32>(InputID));
+    if (AbilitySpec && !UCAbilitySystemStatics::IsAbilityAtMaxLevel(*AbilitySpec))
+    {
+        SetNumericAttributeBase(UCHeroAttributeSet::GetUpgradePointAttribute(), UpgradePoint - 1);
+        AbilitySpec->Level += 1;
+        MarkAbilitySpecDirty(*AbilitySpec);
+
+        Clinet_AbilitySpecLevelUpdated(AbilitySpec->Handle, AbilitySpec->Level);
+    }
+}
+
+void UCAbilitySystemComponent::Clinet_AbilitySpecLevelUpdated_Implementation(FGameplayAbilitySpecHandle Handle, int32 NewLevel)
+{
+    FGameplayAbilitySpec* AbilitySpec = FindAbilitySpecFromHandle(Handle);
+    if (AbilitySpec)
+    {
+        AbilitySpec->Level = NewLevel;
+
+        AbilitySpecDirtiedCallbacks.Broadcast(*AbilitySpec);
+    }
 }

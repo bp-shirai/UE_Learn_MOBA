@@ -76,6 +76,8 @@ void ACPlayerCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerI
     EnhancedInputComp->BindAction(Jump_InputAction, ETriggerEvent::Triggered, this, &ACharacter::Jump);
     EnhancedInputComp->BindAction(Look_InputAction, ETriggerEvent::Triggered, this, &ThisClass::HandleLookInput);
     EnhancedInputComp->BindAction(Move_InputAction, ETriggerEvent::Triggered, this, &ThisClass::HandleMoveInput);
+    EnhancedInputComp->BindAction(LearnAbilityLeader_InputAction, ETriggerEvent::Started, this, &ThisClass::HandleLearnAbilityLeaderDown);
+    EnhancedInputComp->BindAction(LearnAbilityLeader_InputAction, ETriggerEvent::Completed, this, &ThisClass::HandleLearnAbilityLeaderUp);
 
     for (const auto& [InputID, InputAction] : GameplayAbilityInputActions)
     {
@@ -120,6 +122,14 @@ void ACPlayerCharacter::HandleAbilityInput(const FInputActionValue& Value, ECAbi
 
     const int32 inputID = static_cast<int32>(InputID);
     const bool bPressed = Value.Get<bool>();
+
+    // Ability Upgrade
+   if (bPressed && bIsLearnAbilityLeaderDown)
+    {
+        UpgradeAbilityWithInputID(InputID);
+        return;
+    }
+
     if (bPressed)
     {
         ASC->AbilityLocalInputPressed(inputID);
@@ -128,6 +138,8 @@ void ACPlayerCharacter::HandleAbilityInput(const FInputActionValue& Value, ECAbi
     {
         ASC->AbilityLocalInputReleased(inputID);
     }
+
+ 
 
     if (InputID == ECAbilityInputID::BasicAttack)
     {
@@ -209,4 +221,15 @@ void ACPlayerCharacter::TickCameraLocalOffsetLerp(FVector Goal)
     ViewCam->SetRelativeLocation(NewLocalOffset);
 
     CameraLerpTimerHandle = GetWorldTimerManager().SetTimerForNextTick(FTimerDelegate::CreateUObject(this, &ThisClass::TickCameraLocalOffsetLerp, Goal));
+}
+
+void ACPlayerCharacter::HandleLearnAbilityLeaderDown(const FInputActionValue& Value)
+{
+    bIsLearnAbilityLeaderDown = true;
+}
+
+void ACPlayerCharacter::HandleLearnAbilityLeaderUp(const FInputActionValue& Value)
+{
+    bIsLearnAbilityLeaderDown = false;
+
 }

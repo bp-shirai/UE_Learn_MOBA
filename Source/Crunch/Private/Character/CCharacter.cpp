@@ -51,6 +51,8 @@ ACCharacter::ACCharacter()
     BindGASChangeDelegates();
 }
 
+#pragma region---------------- Ability System ---------------------------------------------
+
 void ACCharacter::BindGASChangeDelegates()
 {
     if (AbilitySystemComponent)
@@ -135,6 +137,15 @@ bool ACCharacter::Server_SendGameplayEventToSelf_Validate(const FGameplayTag& Ev
     return true;
 }
 
+void ACCharacter::UpgradeAbilityWithInputID(ECAbilityInputID InputID)
+{
+    if (AbilitySystemComponent)
+    {
+        AbilitySystemComponent->Server_UpgradeAbilityWithInputID(InputID);
+    }
+}
+
+#pragma endregion
 #pragma region---------------- UI ---------------------------------------------
 
 void ACCharacter::ConfigureOverHeadWidget()

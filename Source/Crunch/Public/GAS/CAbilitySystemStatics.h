@@ -12,6 +12,8 @@
 
 class UGameplayAbility;
 struct FScalableFloat;
+struct FGameplayAbilitySpec;
+
 /**
  *
  */
@@ -44,4 +46,5 @@ public:
     static float GetStaticColldownDurationForAbility(const UGameplayAbility* Ability);
     static float GetStaticCostForAbility(const UGameplayAbility* Ability);
     static bool IsHero(const AActor* ActorToCheck);
+    static bool IsAbilityAtMaxLevel(const FGameplayAbilitySpec& Spec);
 };

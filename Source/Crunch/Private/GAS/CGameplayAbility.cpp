@@ -2,11 +2,13 @@
 
 #include "GAS/CGameplayAbility.h"
 
+#include "AbilitySystemComponent.h"
 #include "Abilities/GameplayAbilityTargetTypes.h"
 #include "Abilities/GameplayAbilityTypes.h"
 #include "AbilitySystemBlueprintLibrary.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "GameFramework/Character.h"
+#include "GameplayAbilitySpec.h"
 #include "Kismet/KismetSystemLibrary.h"
 
 #include "GAS/CGameplayTags.h"
@@ -16,6 +18,17 @@ UCGameplayAbility::UCGameplayAbility()
     InstancingPolicy = EGameplayAbilityInstancingPolicy::InstancedPerActor;
 
     ActivationBlockedTags.AddTag(Tags::Stats::Stun);
+}
+
+bool UCGameplayAbility::CanActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayTagContainer* SourceTags, const FGameplayTagContainer* TargetTags, FGameplayTagContainer* OptionalRelevantTags) const
+{
+    FGameplayAbilitySpec* AbilitySpec = ActorInfo->AbilitySystemComponent->FindAbilitySpecFromHandle(Handle);
+    if (AbilitySpec && AbilitySpec->Level <= 0)
+    {
+        return false;
+    }
+
+    return Super::CanActivateAbility(Handle, ActorInfo, SourceTags, TargetTags, OptionalRelevantTags);
 }
 
 UAnimInstance* UCGameplayAbility::GetOwnerAnimInstance() const
@@ -124,7 +137,6 @@ void UCGameplayAbility::ApplyGameplayEffectToHitResultActor(const FHitResult& Hi
 
     FGameplayEffectContextHandle EffectContext = MakeEffectContext(GetCurrentAbilitySpecHandle(), GetCurrentActorInfo());
     EffectContext.AddHitResult(HitResult);
-
 
     EffectSpecHandle.Data->SetContext(EffectContext);
 

@@ -105,3 +105,8 @@ bool UCAbilitySystemStatics::IsHero(const AActor* ActorToCheck)
 
     return ActorASC ? ActorASC->HasMatchingGameplayTag(Tags::Role::Hero) : false;
 }
+
+bool UCAbilitySystemStatics::IsAbilityAtMaxLevel(const FGameplayAbilitySpec& Spec)
+{
+    return Spec.Level >= 4;
+}
