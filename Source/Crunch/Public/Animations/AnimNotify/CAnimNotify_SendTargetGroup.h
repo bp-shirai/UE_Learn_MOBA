@@ -26,7 +26,7 @@ private:
     UPROPERTY(EditAnywhere, Category = "Gameplay Abilities")
     TEnumAsByte<ETeamAttitude::Type> TargetTeam{ETeamAttitude::Hostile};
 
-    UPROPERTY(EditAnywhere, Category = "Gameplay Abilities")
+    UPROPERTY(EditAnywhere, Category = "Gameplay Abilities", meta=(Categories = "GameplayCue"))
     FGameplayTag EventTag;
 
     UPROPERTY(EditAnywhere, Category = "Gameplay Abilities")

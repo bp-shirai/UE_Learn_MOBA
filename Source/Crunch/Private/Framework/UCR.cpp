@@ -5,6 +5,8 @@
 #include "Engine/World.h"
 #include "TimerManager.h"
 
+#include UE_INLINE_GENERATED_CPP_BY_NAME(UCR)
+
 FCRHandle UCR::Run(UObject* Owner, TFunction<bool(float)> Task)
 {
     if (!Task) return InvalidCRHandle;
