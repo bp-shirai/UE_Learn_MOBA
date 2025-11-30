@@ -14,6 +14,7 @@ class UInputAction;
 struct FInputActionValue;
 class UGameplayAbility;
 class UCHeroAttributeSet;
+class UInventoryComponent;
 
 /**
  *
@@ -113,5 +114,14 @@ private:
 
     void LerpCameraToLocalOffsetLocation(const FVector& Goal);
     void TickCameraLocalOffsetLerp(FVector Goal);
+#pragma endregion
+
+
+#pragma region------- Inventory ------------------------------------------
+private:
+
+    UPROPERTY()
+    UInventoryComponent* InventoryComponent;
+
 #pragma endregion
 };

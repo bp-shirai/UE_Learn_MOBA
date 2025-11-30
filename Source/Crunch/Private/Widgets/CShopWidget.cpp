@@ -3,6 +3,7 @@
 #include "Widgets/CShopWidget.h"
 
 #include "Framework/CAssetManager.h"
+#include "Inventory/InventoryComponent.h"
 #include "Inventory/PA_ShopItem.h"
 #include "Widgets/CShopItemWidget.h"
 
@@ -16,6 +17,11 @@ void UCShopWidget::NativeConstruct()
     LoadShopItems();
 
     ShopItemList->OnEntryWidgetGenerated().AddUObject(this, &ThisClass::ShopItemWidgetGenerated);
+
+    if (APawn* OwnerPawn = GetOwningPlayerPawn())
+    {
+        OwnerInventoryComponent = OwnerPawn->GetComponentByClass<UInventoryComponent>();
+    }
 }
 
 void UCShopWidget::LoadShopItems()
@@ -39,6 +45,11 @@ void UCShopWidget::ShopItemWidgetGenerated(UUserWidget& NewWidget)
     UCShopItemWidget* ItemWidget = Cast<UCShopItemWidget>(&NewWidget);
     if (ItemWidget)
     {
+        if (OwnerInventoryComponent)
+        {
+            ItemWidget->OnItemPurchaseIssued.AddUObject(OwnerInventoryComponent, &UInventoryComponent::TryPurchase);
+            //ItemWidget->OnShopItemClicked.AddUObject(this, &ThisClass::ShopItemClicked);
+        }
         ItemMap.Add(ItemWidget->GetShopItem(), ItemWidget);
     }
 }

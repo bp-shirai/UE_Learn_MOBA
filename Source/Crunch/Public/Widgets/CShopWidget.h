@@ -10,6 +10,7 @@
 class UTileView;
 class UCShopItemWidget;
 class UPA_ShopItem;
+class UInventoryComponent;
 
 /**
  * 
@@ -32,4 +33,7 @@ private:
 
 	UPROPERTY()
 	TMap<const UPA_ShopItem*, const UCShopItemWidget*> ItemMap;
+
+	UPROPERTY()
+	UInventoryComponent* OwnerInventoryComponent;
 };

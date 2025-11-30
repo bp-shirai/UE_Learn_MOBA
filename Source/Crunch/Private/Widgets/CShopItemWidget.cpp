@@ -17,3 +17,13 @@ void UCShopItemWidget::NativeOnListItemObjectSet(UObject* ListItemObject)
         SetToolTipWidget(ShopItem);
     }
 }
+
+void UCShopItemWidget::RightButtonClicked()
+{
+    OnItemPurchaseIssued.Broadcast(ShopItem);
+}
+
+void UCShopItemWidget::LeftButtonClicked()
+{
+    OnShopItemClicked.Broadcast(this);
+}

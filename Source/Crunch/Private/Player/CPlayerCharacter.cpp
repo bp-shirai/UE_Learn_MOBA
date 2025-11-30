@@ -22,6 +22,7 @@
 #include "Framework/CTickablesSubsystem.h"
 #include "Crunch.h"
 #include "Player/CPlayerController.h"
+#include "Inventory/InventoryComponent.h"
 
 ACPlayerCharacter::ACPlayerCharacter()
 {
@@ -43,6 +44,8 @@ ACPlayerCharacter::ACPlayerCharacter()
     GetCharacterMovement()->RotationRate              = FRotator(0.f, 720.f, 0.f);
 
     HeroAttributeSet = CreateDefaultSubobject<UCHeroAttributeSet>(TEXT("HeroAttributeSet"));
+
+    InventoryComponent = CreateDefaultSubobject<UInventoryComponent>(TEXT("InventoryComponent"));
 }
 
 void ACPlayerCharacter::BeginPlay()
