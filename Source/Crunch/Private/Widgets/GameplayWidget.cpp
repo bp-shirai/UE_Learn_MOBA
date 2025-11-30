@@ -3,15 +3,15 @@
 #include "Widgets/GameplayWidget.h"
 #include "Components/SlateWrapperTypes.h"
 #include "GameFramework/PlayerController.h"
+#include "AbilitySystemComponent.h"
+#include "AbilitySystemBlueprintLibrary.h"
+
 #include "Widgets/ValueGauge.h"
 #include "Widgets/AbilityListView.h"
 #include "Widgets/CShopWidget.h"
-
 #include "GAS/CAttributeSet.h"
 #include "GAS/CAbilitySystemComponent.h"
 
-#include "AbilitySystemBlueprintLibrary.h"
-#include "AbilitySystemComponent.h"
 
 void UGameplayWidget::NativeConstruct()
 {

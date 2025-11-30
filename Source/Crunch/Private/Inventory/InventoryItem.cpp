@@ -2,39 +2,43 @@
 
 #include "Inventory/InventoryItem.h"
 
-uint32 FInventoryItemHandle::InvalidId                   = 0;
-FInventoryItemHandle FInventoryItemHandle::InvalidHandle = FInventoryItemHandle();
+#include "AbilitySystemComponent.h"
+#include "AbilitySystemBlueprintLibrary.h"
+#include "GameplayEffect.h"
 
-FInventoryItemHandle::FInventoryItemHandle() : HandleId(InvalidId)
+#include "Inventory/PA_ShopItem.h"
+#include "GAS/CAbilitySystemStatics.h"
+#include "Templates/SubclassOf.h"
+
+void UInventoryItem::InitItem(const FInventoryItemHandle& NewHandle, const UPA_ShopItem* NewShopItem)
 {
+    Handle   = NewHandle;
+    ShopItem = NewShopItem;
 }
 
-FInventoryItemHandle::FInventoryItemHandle(uint32 Id) : HandleId(Id)
+void UInventoryItem::ApplyGASModifications(UAbilitySystemComponent* AbilitySystemComponent)
 {
-}
+    if (!GetShopItem() || !AbilitySystemComponent) return;
+    if (!AbilitySystemComponent->GetOwner() || !AbilitySystemComponent->GetOwner()->HasAuthority()) return;
 
-uint32 FInventoryItemHandle::GenerateNextId()
-{
-    static uint32 StaticId = 1;
-    return StaticId++;
-}
+    TSubclassOf<UGameplayEffect> EquipEffect = GetShopItem()->GetEquippedEffect();
+    if (EquipEffect)
+    {
+        AppliedEquippedEffectHandle = AbilitySystemComponent->BP_ApplyGameplayEffectToSelf(EquipEffect, 1, AbilitySystemComponent->MakeEffectContext());
+    }
 
-FInventoryItemHandle FInventoryItemHandle::CreateHandle()
-{
-    return FInventoryItemHandle(GenerateNextId());
-}
+    TSubclassOf<UGameplayAbility> GrantedAbility = GetShopItem()->GetGrantedAbility();
+    if (GrantedAbility)
+    {
+        const FGameplayAbilitySpec* FoundSpec = AbilitySystemComponent->FindAbilitySpecFromClass(GrantedAbility);
+        if (FoundSpec)
+        {
+            GrantedAbilitySpecHandle = FoundSpec->Handle;
+        }
+        else
+        {
+            GrantedAbilitySpecHandle = AbilitySystemComponent->GiveAbility(GrantedAbility);
+        }
+    }
 
-bool FInventoryItemHandle::IsValid() const
-{
-    return HandleId != InvalidId;
-}
-
-uint32 GetTypeHash(const FInventoryItemHandle& Key)
-{
-    return Key.GetHandleId();
-}
-
-bool operator==(const FInventoryItemHandle& A, const FInventoryItemHandle& B)
-{
-    return A.GetHandleId() == B.GetHandleId();
 }

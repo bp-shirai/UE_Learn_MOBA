@@ -4,8 +4,8 @@
 
 #include "Components/Image.h"
 #include "Components/TextBlock.h"
-#include "AbilitySystemBlueprintLibrary.h"
 #include "AbilitySystemComponent.h"
+#include "AbilitySystemBlueprintLibrary.h"
 
 void UStatsGauge::NativePreConstruct()
 {

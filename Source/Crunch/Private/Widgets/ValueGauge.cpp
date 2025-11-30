@@ -4,8 +4,8 @@
 
 #include "Components/ProgressBar.h"
 #include "Components/TextBlock.h"
-
 #include "GameplayEffectTypes.h"
+
 
 #include "GAS/CAbilitySystemComponent.h"
 #include "GAS/CAttributeSet.h"

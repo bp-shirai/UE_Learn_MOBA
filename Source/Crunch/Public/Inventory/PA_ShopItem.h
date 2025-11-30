@@ -7,6 +7,7 @@
 #include "PA_ShopItem.generated.h"
 
 class UGameplayEffect;
+class UGameplayAbility;
 
 USTRUCT(BlueprintType)
 struct FCItemCollection
@@ -43,7 +44,7 @@ public:
     float GetSellPrice() const { return Price * 0.5f; }
     TSubclassOf<UGameplayEffect> GetEquippedEffect() const { return EquippedEffect; }
     TSubclassOf<UGameplayEffect> GetConsumeEffect() const { return ConsumeEffect; }
-    TSubclassOf<UGameplayEffect> GetGrantedEffect() const { return GrantedEffect; }
+    TSubclassOf<UGameplayAbility> GetGrantedAbility() const { return GrantedAbility; }
     bool IsConsumable() const { return bIsConsumable; }
     bool IsStackable() const { return bIsStackable; }
     int32 GetMaxStackCount() const { return MaxStackCount; }
@@ -72,7 +73,7 @@ private:
     TSubclassOf<UGameplayEffect> ConsumeEffect;
 
     UPROPERTY(EditDefaultsOnly, Category = "ShopItem")
-    TSubclassOf<UGameplayEffect> GrantedEffect;
+    TSubclassOf<UGameplayAbility> GrantedAbility;
 
     UPROPERTY(EditDefaultsOnly, Category = "ShopItem")
     bool bIsStackable{false};

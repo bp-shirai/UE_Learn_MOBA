@@ -4,33 +4,14 @@
 
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
+#include "GameplayEffectTypes.h"
+#include "GameplayAbilitySpecHandle.h"
+#include "Inventory/InventoryTypes.h"
 #include "InventoryItem.generated.h"
 
-USTRUCT()
-struct FInventoryItemHandle
-{
-    GENERATED_BODY()
-public:
-    FInventoryItemHandle();
-    static FInventoryItemHandle CreateHandle();
-    static FInventoryItemHandle InvalidHandle;
-
-    bool IsValid() const;
-    uint32 GetHandleId() const { return HandleId; }
-
-private:
-    explicit FInventoryItemHandle(uint32 Id);
-
-    UPROPERTY()
-    uint32 HandleId;
-
-    static uint32 GenerateNextId();
-    static uint32 InvalidId;
-};
-
-bool operator==(const FInventoryItemHandle& A, const FInventoryItemHandle& B);
-
-uint32 GetTypeHash(const FInventoryItemHandle& Key);
+class UPA_ShopItem;
+class UInventoryComponent;
+class UAbilitySystemComponent;
 
 /**
  *
@@ -39,4 +20,19 @@ UCLASS()
 class CRUNCH_API UInventoryItem : public UObject
 {
     GENERATED_BODY()
+public:
+    void InitItem(const FInventoryItemHandle& NewHandle, const UPA_ShopItem* NewShopItem);
+    const UPA_ShopItem* GetShopItem() const { return ShopItem; }
+    FInventoryItemHandle GetHandle() const { return Handle; }
+
+    void ApplyGASModifications(UAbilitySystemComponent* AbilitySystemComponent);
+
+private:
+    UPROPERTY()
+    const UPA_ShopItem* ShopItem;
+
+    FInventoryItemHandle Handle;
+
+    FActiveGameplayEffectHandle AppliedEquippedEffectHandle;
+    FGameplayAbilitySpecHandle GrantedAbilitySpecHandle;
 };

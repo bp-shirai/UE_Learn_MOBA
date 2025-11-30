@@ -5,16 +5,14 @@
 #include "Components/Image.h"
 #include "Components/SlateWrapperTypes.h"
 #include "Components/TextBlock.h"
-#include "Abilities/GameplayAbility.h"
-#include "AbilitySystemBlueprintLibrary.h"
 #include "AbilitySystemComponent.h"
+#include "AbilitySystemBlueprintLibrary.h"
+#include "Abilities/GameplayAbility.h"
 
 #include "GAS/CAbilitySystemStatics.h"
 #include "GAS/CAttributeSet.h"
 #include "GAS/CHeroAttributeSet.h"
-#include "GameplayAbilitySpec.h"
-#include "GameplayAbilitySpecHandle.h"
-#include "Templates/SubclassOf.h"
+
 
 void UAbilityGauge::NativeConstruct()
 {

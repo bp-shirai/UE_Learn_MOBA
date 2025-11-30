@@ -5,13 +5,15 @@
 
 #include "Components/Image.h"
 #include "Components/TextBlock.h"
+
 #include "Inventory/PA_ShopItem.h"
 
 void UItemToolTip::SetItem(const UPA_ShopItem* Item)
 {
     ItemTitle->SetText(Item->GetItemName());
-    ItemDescription->SetText(Item->GetItemDescription());
+    ItemDescription->SetText(Item->GetItemDescription());   
     Icon->SetBrushFromTexture(Item->GetIcon());
+    SetPrice(Item->GetPrice());
 }
 
 void UItemToolTip::SetPrice(float NewPrice)

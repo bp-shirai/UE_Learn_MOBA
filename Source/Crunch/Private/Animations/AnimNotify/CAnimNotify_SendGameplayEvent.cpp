@@ -9,10 +9,10 @@ void UCAnimNotify_SendGameplayEvent::Notify(USkeletalMeshComponent* MeshComp, UA
 {
     Super::Notify(MeshComp, Animation, EventReference);
 
-    AActor* Actor = MeshComp ? MeshComp->GetOwner() : nullptr;
-    if (Actor && Actor->Implements<UAbilitySystemInterface>())
+    AActor* Owner = MeshComp ? MeshComp->GetOwner() : nullptr;
+    if (Owner && Owner->Implements<UAbilitySystemInterface>())
     {
-        UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(Actor, EventTag, FGameplayEventData());
+        UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(Owner, EventTag, FGameplayEventData());
     }
 }
 

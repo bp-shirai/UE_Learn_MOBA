@@ -16,17 +16,17 @@ void UCAnimNotifyState_ApplyLooseGameplayTag::BranchingPointNotifyBegin(FBranchi
 {
     Super::BranchingPointNotifyBegin(BranchingPointPayload);
     USkeletalMeshComponent* MeshComp = BranchingPointPayload.SkelMeshComponent;
-    AActor* Actor                    = MeshComp ? MeshComp->GetOwner() : nullptr;
-    if (Actor && Actor->Implements<UAbilitySystemInterface>())
+    AActor* Owner                    = MeshComp ? MeshComp->GetOwner() : nullptr;
+    if (Owner && Owner->Implements<UAbilitySystemInterface>())
     {
         if (GameplayTagsToApply.IsValid())
         {
-            UAbilitySystemBlueprintLibrary::AddLooseGameplayTags(Actor, GameplayTagsToApply, false);
+            UAbilitySystemBlueprintLibrary::AddLooseGameplayTags(Owner, GameplayTagsToApply, false);
         }
 
         if (BeginNotifyTag.IsValid())
         {
-            UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(Actor, BeginNotifyTag, FGameplayEventData());
+            UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(Owner, BeginNotifyTag, FGameplayEventData());
         }
     }
 }
@@ -35,17 +35,17 @@ void UCAnimNotifyState_ApplyLooseGameplayTag::BranchingPointNotifyEnd(FBranching
 {
     Super::BranchingPointNotifyEnd(BranchingPointPayload);
     USkeletalMeshComponent* MeshComp = BranchingPointPayload.SkelMeshComponent;
-    AActor* Actor                    = MeshComp ? MeshComp->GetOwner() : nullptr;
-    if (Actor && Actor->Implements<UAbilitySystemInterface>())
+    AActor* Owner                    = MeshComp ? MeshComp->GetOwner() : nullptr;
+    if (Owner && Owner->Implements<UAbilitySystemInterface>())
     {
         if (GameplayTagsToApply.IsValid())
         {
-            UAbilitySystemBlueprintLibrary::RemoveLooseGameplayTags(Actor, GameplayTagsToApply, false);
+            UAbilitySystemBlueprintLibrary::RemoveLooseGameplayTags(Owner, GameplayTagsToApply, false);
         }
 
         if (EndNotifyTag.IsValid())
         {
-            UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(Actor, EndNotifyTag, FGameplayEventData());
+            UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(Owner, EndNotifyTag, FGameplayEventData());
         }
     }
 }
@@ -64,5 +64,5 @@ FString UCAnimNotifyState_ApplyLooseGameplayTag::GetNotifyName_Implementation() 
         return GameplayTagsToApply.ToStringSimple();
     }
 
-    return FString::Format(TEXT("{0} -> {1}"), {BeginNotifyTag.GetTagLeafName().ToString(), EndNotifyTag.GetTagLeafName().ToString()});
+    return FString::Format(TEXT("{0} ~ {1}"), {BeginNotifyTag.GetTagLeafName().ToString(), EndNotifyTag.GetTagLeafName().ToString()});
 }
