@@ -15,7 +15,6 @@ struct FInputActionValue;
 class UGameplayAbility;
 class UCHeroAttributeSet;
 
-
 /**
  *
  */
@@ -78,12 +77,13 @@ private:
     void HandleLearnAbilityLeaderUp(const FInputActionValue& Value);
     bool bIsLearnAbilityLeaderDown{false};
 
-
     void SetInputEnableFromPlayerController(bool bEnable);
 
     FVector GetLookRightDir() const;
     FVector GetLookFwdDir() const;
     FVector GetMoveFwdDir() const;
+  
+
 
 #pragma endregion
 #pragma region------- Death and Respawn -----------------------------------

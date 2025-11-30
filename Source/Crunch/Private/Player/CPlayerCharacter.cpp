@@ -21,6 +21,7 @@
 
 #include "Framework/CTickablesSubsystem.h"
 #include "Crunch.h"
+#include "Player/CPlayerController.h"
 
 ACPlayerCharacter::ACPlayerCharacter()
 {
@@ -61,7 +62,7 @@ void ACPlayerCharacter::PawnClientRestart()
         UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(OwningPlayerController->GetLocalPlayer());
         if (Subsystem)
         {
-            Subsystem->ClearAllMappings();
+            Subsystem->RemoveMappingContext(GameplayInputMappingContext);
             Subsystem->AddMappingContext(GameplayInputMappingContext, 0);
         }
     }
@@ -78,6 +79,7 @@ void ACPlayerCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerI
     EnhancedInputComp->BindAction(Move_InputAction, ETriggerEvent::Triggered, this, &ThisClass::HandleMoveInput);
     EnhancedInputComp->BindAction(LearnAbilityLeader_InputAction, ETriggerEvent::Started, this, &ThisClass::HandleLearnAbilityLeaderDown);
     EnhancedInputComp->BindAction(LearnAbilityLeader_InputAction, ETriggerEvent::Completed, this, &ThisClass::HandleLearnAbilityLeaderUp);
+  
 
     for (const auto& [InputID, InputAction] : GameplayAbilityInputActions)
     {
@@ -230,3 +232,4 @@ void ACPlayerCharacter::HandleLearnAbilityLeaderUp(const FInputActionValue& Valu
 {
     bIsLearnAbilityLeaderDown = false;
 }
+

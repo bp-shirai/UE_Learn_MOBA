@@ -1,11 +1,13 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "Player/CPlayerController.h"
-#include "Player/CPlayerCharacter.h"
-
-#include "Widgets/GameplayWidget.h"
-
+#include "EnhancedInputComponent.h"
+#include "EnhancedInputSubsystems.h"
+#include "InputAction.h"
 #include "Net/UnrealNetwork.h"
+
+#include "Player/CPlayerCharacter.h"
+#include "Widgets/GameplayWidget.h"
 
 void ACPlayerController::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
@@ -69,4 +71,39 @@ void ACPlayerController::SetGenericTeamId(const FGenericTeamId& NewTeamID)
 FGenericTeamId ACPlayerController::GetGenericTeamId() const
 {
     return TeamID;
+}
+
+void ACPlayerController::ToggleShop()
+{
+    if (HasLocalNetOwner())
+    {
+        
+        if (GameplayWidget)
+        {
+            GameplayWidget->ToggleShop();
+        }
+    }
+}
+
+void ACPlayerController::SetupInputComponent()
+{
+    Super::SetupInputComponent();
+
+    UEnhancedInputLocalPlayerSubsystem* Subsystem = GetLocalPlayer()->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>();
+    if (Subsystem)
+    {
+        Subsystem->RemoveMappingContext(UIInputMapping);
+        Subsystem->AddMappingContext(UIInputMapping, 1);
+    }
+
+    if (UEnhancedInputComponent* EnhancedInputComp = CastChecked<UEnhancedInputComponent>(InputComponent))
+    {
+        EnhancedInputComp->BindAction(ShopToggle_InputAction, ETriggerEvent::Triggered, this, &ThisClass::ToggleShop);
+        EnhancedInputComp->BindAction(IA_Test, ETriggerEvent::Triggered, this, &ThisClass::Test);
+    }
+}
+
+void ACPlayerController::Test(const FInputActionValue& Value)
+{
+    UE_LOG(LogTemp, Warning, TEXT("Test"));
 }

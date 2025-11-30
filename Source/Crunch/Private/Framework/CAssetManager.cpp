@@ -11,7 +11,7 @@
 UCAssetManager& UCAssetManager::Get()
 {
     UCAssetManager* Singleton = Cast<UCAssetManager>(GEngine->AssetManager.Get());
-    if (!Singleton)
+    if (Singleton)
     {
         return *Singleton;
     }

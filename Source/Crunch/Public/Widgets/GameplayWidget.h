@@ -12,7 +12,8 @@ class UAbilitySystemComponent;
 class UGameplayAbility;
 class UAbilityListView;
 class UStatsGauge;
-
+class UCShopWidget;
+class UWidgetAnimation;
 /**
  *
  */
@@ -24,6 +25,8 @@ class CRUNCH_API UGameplayWidget : public UUserWidget
 public:
     virtual void NativeConstruct() override;
     void ConfigureAbilities(const TMap<ECAbilityInputID, TSubclassOf<UGameplayAbility>>& Abilities);
+
+    void ToggleShop();
 
 private:
     UPROPERTY(meta = (BindWidget))
@@ -49,6 +52,20 @@ private:
 
     UPROPERTY(meta = (BindWidget))
     UStatsGauge* Strength;
+
+    UPROPERTY(meta = (BindWidget))
+    UCShopWidget* ShopWidget;
+
+    UPROPERTY(Transient, meta = (BindWidgetAnim))
+    UWidgetAnimation* ShopPopup_Anim;
+
+    void PlayShopPopupAnim(bool bPlayForward);
+    void SetOwningPawnInputEnabled(bool bPawnInputEnabled);
+    void SetShowMouseCursor(bool bShowCursor);
+    void SetFocusToGameAndUI();
+    void SetFocusToGameOnly();
+
+
 
     UPROPERTY(Transient)
     TWeakObjectPtr<UAbilitySystemComponent> OwnerASC;

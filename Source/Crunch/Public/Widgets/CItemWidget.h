@@ -9,6 +9,8 @@
 
 class UImage;
 class UTextBlock;
+class UItemToolTip;
+class UPA_ShopItem;
 
 /**
  *
@@ -20,8 +22,10 @@ class CRUNCH_API UCItemWidget : public UUserWidget
 
 public:
     virtual void NativeConstruct() override;
-
     virtual void SetIcon(UTexture2D* IconTexture);
+
+protected:
+    UItemToolTip* SetToolTipWidget(const UPA_ShopItem* Item);
 
 private:
     virtual FReply NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
@@ -32,4 +36,7 @@ private:
 
     UPROPERTY(meta = (BindWidget))
     UImage* Icon;
+
+    UPROPERTY(EditDefaultsOnly, Category = "ToolTip")
+    TSubclassOf<UItemToolTip> ItemToolTipClass;
 };

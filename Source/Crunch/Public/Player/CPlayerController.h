@@ -8,51 +8,62 @@
 #include "GenericTeamAgentInterface.h"
 #include "CPlayerController.generated.h"
 
-
 class ACPlayerCharacter;
 class UGameplayWidget;
-
-
+class UInputMappingContext;
+class UInputAction;
+struct FInputActionValue;
 /**
- * 
+ *
  */
 UCLASS(Abstract)
 class CRUNCH_API ACPlayerController : public APlayerController, public IGenericTeamAgentInterface
 {
-	GENERATED_BODY()
-	
+    GENERATED_BODY()
+
 public:
-virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+    virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
-	// Only called on the server
-	virtual void OnPossess(APawn* NewPawn) override;
+    // Only called on the server
+    virtual void OnPossess(APawn* NewPawn) override;
 
-	// Only called on the client, also on the listening server.
-	virtual void AcknowledgePossession(APawn* NewPawn) override;
+    // Only called on the client, also on the listening server.
+    virtual void AcknowledgePossession(APawn* NewPawn) override;
 
-	virtual void SetGenericTeamId(const FGenericTeamId& NewTeamID) override;
+    virtual void SetGenericTeamId(const FGenericTeamId& NewTeamID) override;
 
-	virtual FGenericTeamId GetGenericTeamId() const override;
+    virtual FGenericTeamId GetGenericTeamId() const override;
 
-
-
-
+    virtual void SetupInputComponent() override;
 
 private:
+    void SpawnGameplayWidget();
 
-	void SpawnGameplayWidget();
+    UPROPERTY()
+    ACPlayerCharacter* PlayerCharacter;
 
+    UPROPERTY(EditDefaultsOnly, Category = "UI")
+    TSubclassOf<UGameplayWidget> GameplayWidgetClass;
 
-	UPROPERTY()
-	ACPlayerCharacter* PlayerCharacter;
+    UPROPERTY()
+    UGameplayWidget* GameplayWidget;
 
-	UPROPERTY(EditDefaultsOnly, Category = "UI")
-	TSubclassOf<UGameplayWidget> GameplayWidgetClass;
+    UPROPERTY(Replicated)
+    FGenericTeamId TeamID;
 
-	UPROPERTY()
-	UGameplayWidget* GameplayWidget;
+    UPROPERTY(EditDefaultsOnly, Category = "Input")
+    UInputMappingContext* UIInputMapping;
 
-	UPROPERTY(Replicated)
-	FGenericTeamId TeamID;
+    UPROPERTY(EditDefaultsOnly, Category = "Input")
+    UInputAction* ShopToggle_InputAction;
 
+    UPROPERTY(EditDefaultsOnly, Category = "Input")
+    UInputAction* IA_Test;
+
+public:
+    UFUNCTION()
+    void ToggleShop();
+
+    UFUNCTION()
+    void Test(const FInputActionValue& Value);
 };

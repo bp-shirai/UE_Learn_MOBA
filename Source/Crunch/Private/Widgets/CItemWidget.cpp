@@ -5,6 +5,9 @@
 #include "Components/Image.h"
 #include "Components/TextBlock.h"
 
+#include "Widgets/ItemToolTip.h"
+#include "Inventory/PA_ShopItem.h"
+
 void UCItemWidget::NativeConstruct()
 {
     Super::NativeConstruct();
@@ -20,7 +23,7 @@ void UCItemWidget::SetIcon(UTexture2D* IconTexture)
 FReply UCItemWidget::NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
 {
     FReply SuperReply = Super::NativeOnMouseButtonDown(InGeometry, InMouseEvent);
-    
+
     if (InMouseEvent.IsMouseButtonDown(EKeys::RightMouseButton))
     {
         return FReply::Handled().SetUserFocus(TakeWidget());
@@ -37,8 +40,8 @@ FReply UCItemWidget::NativeOnMouseButtonDown(const FGeometry& InGeometry, const 
 FReply UCItemWidget::NativeOnMouseButtonUp(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
 {
     FReply SuperReply = Super::NativeOnMouseButtonUp(InGeometry, InMouseEvent);
-   
-    if(HasAnyUserFocus())
+
+    if (HasAnyUserFocus())
     {
         if (InMouseEvent.GetEffectingButton() == EKeys::RightMouseButton)
         {
@@ -63,4 +66,19 @@ void UCItemWidget::RightButtonClicked()
 void UCItemWidget::LeftButtonClicked()
 {
     UE_LOG(LogTemp, Warning, TEXT("LeftButtonClicked"));
+}
+
+UItemToolTip* UCItemWidget::SetToolTipWidget(const UPA_ShopItem* Item)
+{
+    if (GetOwningPlayer() && ItemToolTipClass && Item)
+    {
+        UItemToolTip* ToolTip = CreateWidget<UItemToolTip>(GetOwningPlayer(), ItemToolTipClass);
+        if (ToolTip)
+        {
+            ToolTip->SetItem(Item);
+            SetToolTip(ToolTip);
+            return ToolTip;
+        }
+    }
+    return nullptr;
 }

@@ -8,10 +8,12 @@
 void UCShopItemWidget::NativeOnListItemObjectSet(UObject* ListItemObject)
 {
     IUserObjectListEntry::NativeOnListItemObjectSet(ListItemObject);
-
+    
     ShopItem = Cast<UPA_ShopItem>(ListItemObject);
     if (ShopItem)
     {
         SetIcon(ShopItem->GetIcon());
+
+        SetToolTipWidget(ShopItem);
     }
 }
