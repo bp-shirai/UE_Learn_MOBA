@@ -1,19 +1,20 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "Widgets/CShopWidget.h"
+#include "Widgets/ShopWidget.h"
 
 #include "Framework/CAssetManager.h"
 #include "Inventory/InventoryComponent.h"
 #include "Inventory/PA_ShopItem.h"
-#include "Widgets/CShopItemWidget.h"
+#include "Widgets/ShopItemWidget.h"
 
 #include "Components/TileView.h"
 
-void UCShopWidget::NativeConstruct()
+void UShopWidget::NativeConstruct()
 {
     Super::NativeConstruct();
 
     SetIsFocusable(true);
+    
     LoadShopItems();
 
     ShopItemList->OnEntryWidgetGenerated().AddUObject(this, &ThisClass::ShopItemWidgetGenerated);
@@ -21,15 +22,19 @@ void UCShopWidget::NativeConstruct()
     if (APawn* OwnerPawn = GetOwningPlayerPawn())
     {
         OwnerInventoryComponent = OwnerPawn->GetComponentByClass<UInventoryComponent>();
+        if (!OwnerInventoryComponent)
+        {
+            UE_LOG(LogTemp, Warning, TEXT("%s : Owner[%s] InventoryComponent not found"), *GetName(), *OwnerPawn->GetName());
+        }
     }
 }
 
-void UCShopWidget::LoadShopItems()
+void UShopWidget::LoadShopItems()
 {
     UCAssetManager::Get().LoadShopItems(FStreamableDelegate::CreateUObject(this, &ThisClass::ShopItemLoadFinished));
 }
 
-void UCShopWidget::ShopItemLoadFinished()
+void UShopWidget::ShopItemLoadFinished()
 {
     TArray<const UPA_ShopItem*> ShopItems;
     UCAssetManager::Get().GetLoadedShopItems(ShopItems);
@@ -40,15 +45,15 @@ void UCShopWidget::ShopItemLoadFinished()
     }
 }
 
-void UCShopWidget::ShopItemWidgetGenerated(UUserWidget& NewWidget)
+void UShopWidget::ShopItemWidgetGenerated(UUserWidget& NewWidget)
 {
-    UCShopItemWidget* ItemWidget = Cast<UCShopItemWidget>(&NewWidget);
+    UShopItemWidget* ItemWidget = Cast<UShopItemWidget>(&NewWidget);
     if (ItemWidget)
     {
         if (OwnerInventoryComponent)
         {
             ItemWidget->OnItemPurchaseIssued.AddUObject(OwnerInventoryComponent, &UInventoryComponent::TryPurchase);
-            //ItemWidget->OnShopItemClicked.AddUObject(this, &ThisClass::ShopItemClicked);
+            // ItemWidget->OnShopItemClicked.AddUObject(this, &ThisClass::ShopItemClicked);
         }
         ItemMap.Add(ItemWidget->GetShopItem(), ItemWidget);
     }

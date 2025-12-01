@@ -19,7 +19,7 @@
 #include "GAS/CHeroAttributeSet.h"
 #include "GAS/CAbilitySystemStatics.h"
 
-#include "Framework/CTickablesSubsystem.h"
+#include "Framework/TickablesSubsystem.h"
 #include "Crunch.h"
 #include "Player/CPlayerController.h"
 #include "Inventory/InventoryComponent.h"

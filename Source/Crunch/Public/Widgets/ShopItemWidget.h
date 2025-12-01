@@ -3,22 +3,22 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Widgets/CItemWidget.h"
+#include "Widgets/ItemWidget.h"
 #include "Blueprint/IUserObjectListEntry.h"
-#include "CShopItemWidget.generated.h"
+#include "ShopItemWidget.generated.h"
 
-class UCShopWidget;
-class UCShopItemWidget;
+class UShopWidget;
+class UShopItemWidget;
 class UPA_ShopItem;
 
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnItemPurchaseIssued, const UPA_ShopItem*);
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnShopItemSelected, const UCShopItemWidget*);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnShopItemSelected, const UShopItemWidget*);
 
 /**
  *
  */
 UCLASS(Abstract)
-class CRUNCH_API UCShopItemWidget : public UCItemWidget, public IUserObjectListEntry
+class CRUNCH_API UShopItemWidget : public UItemWidget, public IUserObjectListEntry
 {
     GENERATED_BODY()
 

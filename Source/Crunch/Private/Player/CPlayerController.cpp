@@ -36,6 +36,7 @@ void ACPlayerController::AcknowledgePossession(APawn* NewPawn)
     {
         PlayerCharacter->ClientSideInit();
 
+        // GameplayWidget is created only for the local player.
         if (IsLocalPlayerController())
         {
             SpawnGameplayWidget();

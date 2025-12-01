@@ -11,7 +11,7 @@ class UAbilitySystemComponent;
 class UPA_ShopItem;
 class UInventoryItem;
 
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnItemAddedDelegate, UInventoryItem* /*NewItem*/);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnItemAddedDelegate, const UInventoryItem* /*NewItem*/);
 
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class CRUNCH_API UInventoryComponent : public UActorComponent
@@ -22,7 +22,16 @@ public:
     UInventoryComponent();
 
     void TryPurchase(const UPA_ShopItem* ItemToPurchase);
+
     float GetGold() const;
+    FORCEINLINE int GetCapacity() const { return Capacity; }
+
+    void ItemSlotChanged(const FInventoryItemHandle& Handle, int NewSlotNumber);
+
+    UInventoryItem* GetInventoryItemByHandle(const FInventoryItemHandle& Handle) const;
+    bool IsAllSlotOccupied() const;
+    UInventoryItem* GetAvailableStackForItem(const UPA_ShopItem* Item) const;
+    bool IsFullFor(const UPA_ShopItem* Item) const;
 
     FOnItemAddedDelegate OnItemAdded;
 
@@ -35,6 +44,9 @@ private:
 
     UPROPERTY()
     TMap<FInventoryItemHandle, UInventoryItem*> InventoryMap;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Inventory")
+    int Capacity{6};
 
 #pragma region--------------- Server ---------------------------------------------
 

@@ -41,7 +41,15 @@ void UInventoryComponent::Server_Purchase_Implementation(const UPA_ShopItem* Ite
     UAbilitySystemComponent* OwnerASC = OwnerAbilitySystemComponent.Get();
     if (!OwnerASC) return;
 
-    if (GetGold() < ItemToPurchase->GetPrice()) return;
+    if (GetGold() < ItemToPurchase->GetPrice())
+    {
+        return; // Don't have enough Gold.
+    }
+
+    if (IsAllSlotOccupied())
+    {
+        return; // There is not enough space.
+    }
 
     OwnerASC->ApplyModToAttribute(UCHeroAttributeSet::GetGoldAttribute(), EGameplayModOp::Additive, -ItemToPurchase->GetPrice());
 
@@ -60,8 +68,8 @@ void UInventoryComponent::GrantItem(const UPA_ShopItem* NewItem)
     FInventoryItemHandle NewHandle = FInventoryItemHandle::CreateHandle();
     InventoryItem->InitItem(NewHandle, NewItem);
     InventoryMap.Add(NewHandle, InventoryItem);
-    OnItemAdded.Broadcast(InventoryItem);
 
+    OnItemAdded.Broadcast(InventoryItem);
     UE_LOG(LogTemp, Warning, TEXT("[Server] UInventoryComponent::GrantItem : ItemName : %s HandleId = %d"), *NewItem->GetItemName().ToString(), NewHandle.GetHandleId());
 
     Client_ItemAdded(NewHandle, NewItem);
@@ -75,16 +83,66 @@ void UInventoryComponent::GrantItem(const UPA_ShopItem* NewItem)
 
 void UInventoryComponent::Client_ItemAdded_Implementation(FInventoryItemHandle AssignedHandle, const UPA_ShopItem* NewItem)
 {
-    if(GetOwner()->HasAuthority()) return;
+    if (GetOwner()->HasAuthority()) return;
 
-    UInventoryItem* InventoryItem  = NewObject<UInventoryItem>();
+    UInventoryItem* InventoryItem = NewObject<UInventoryItem>();
     InventoryItem->InitItem(AssignedHandle, NewItem);
     InventoryMap.Add(AssignedHandle, InventoryItem);
+
     OnItemAdded.Broadcast(InventoryItem);
-
     UE_LOG(LogTemp, Warning, TEXT("[Client] UInventoryComponent::ItemAdded : ItemName : %s HandleId = %d"), *NewItem->GetItemName().ToString(), AssignedHandle.GetHandleId());
-
 }
 
 #pragma endregion
 
+void UInventoryComponent::ItemSlotChanged(const FInventoryItemHandle& Handle, int NewSlotNumber)
+{
+    if (UInventoryItem* FoundItem = GetInventoryItemByHandle(Handle))
+    {
+        FoundItem->SetSlot(NewSlotNumber);
+    }
+}
+
+UInventoryItem* UInventoryComponent::GetInventoryItemByHandle(const FInventoryItemHandle& Handle) const
+{
+    UInventoryItem* const* FoundItem = InventoryMap.Find(Handle);
+    if (FoundItem)
+    {
+        return *FoundItem;
+    }
+
+    return nullptr;
+}
+
+bool UInventoryComponent::IsAllSlotOccupied() const
+{
+    return InventoryMap.Num() >= GetCapacity();
+}
+
+UInventoryItem* UInventoryComponent::GetAvailableStackForItem(const UPA_ShopItem* Item) const
+{
+    if (!Item || Item->IsStackable()) return nullptr;
+
+    for (const auto& [Handle, InventoryItem] : InventoryMap)
+    {
+        if (InventoryItem && InventoryItem->IsForItem(Item) && !InventoryItem->IsStackFull())
+        {
+            return InventoryItem;
+        }
+    }
+
+    return nullptr;
+}
+
+bool UInventoryComponent::IsFullFor(const UPA_ShopItem* Item) const
+{
+    if (!Item) return false;
+
+    if (IsAllSlotOccupied())
+    {
+        return GetAvailableStackForItem(Item) == nullptr;
+    }
+
+    return false;
+}
+  

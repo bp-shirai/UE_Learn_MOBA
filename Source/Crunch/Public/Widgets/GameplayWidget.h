@@ -12,8 +12,10 @@ class UAbilitySystemComponent;
 class UGameplayAbility;
 class UAbilityListView;
 class UStatsGauge;
-class UCShopWidget;
+class UShopWidget;
 class UWidgetAnimation;
+class UInventoryWidget;
+
 /**
  *
  */
@@ -54,7 +56,10 @@ private:
     UStatsGauge* Strength;
 
     UPROPERTY(meta = (BindWidget))
-    UCShopWidget* ShopWidget;
+    UShopWidget* ShopWidget;
+
+    UPROPERTY(meta = (BindWidget))
+    UInventoryWidget* InventoryWidget;
 
     UPROPERTY(Transient, meta = (BindWidgetAnim))
     UWidgetAnimation* ShopPopup_Anim;
@@ -64,8 +69,6 @@ private:
     void SetShowMouseCursor(bool bShowCursor);
     void SetFocusToGameAndUI();
     void SetFocusToGameOnly();
-
-
 
     UPROPERTY(Transient)
     TWeakObjectPtr<UAbilitySystemComponent> OwnerASC;

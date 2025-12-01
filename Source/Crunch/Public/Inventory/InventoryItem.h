@@ -21,17 +21,38 @@ class CRUNCH_API UInventoryItem : public UObject
 {
     GENERATED_BODY()
 public:
+    UInventoryItem();
+
+    bool IsValid() const;
     void InitItem(const FInventoryItemHandle& NewHandle, const UPA_ShopItem* NewShopItem);
-    const UPA_ShopItem* GetShopItem() const { return ShopItem; }
-    FInventoryItemHandle GetHandle() const { return Handle; }
+    FORCEINLINE const UPA_ShopItem* GetShopItem() const { return ShopItem; }
+    FORCEINLINE FInventoryItemHandle GetHandle() const { return Handle; }
 
     void ApplyGASModifications(UAbilitySystemComponent* AbilitySystemComponent);
+
+    FORCEINLINE int GetStackCount() const { return StackCount; }
+
+    void SetSlot(int NewSlot);
+
+    bool IsStackFull() const;
+    bool IsForItem(const UPA_ShopItem* Item) const;
+
+    // Return true is was able to add.
+    bool AddStackCount();
+
+    // Returns true if the stack is not empty after reducing.
+    bool ReduceStackCount();
+
+    // Return true if was able to set.
+    bool SetStackCount(int NewStackCount);
 
 private:
     UPROPERTY()
     const UPA_ShopItem* ShopItem;
 
     FInventoryItemHandle Handle;
+    int StackCount;
+    int Slot;
 
     FActiveGameplayEffectHandle AppliedEquippedEffectHandle;
     FGameplayAbilitySpecHandle GrantedAbilitySpecHandle;

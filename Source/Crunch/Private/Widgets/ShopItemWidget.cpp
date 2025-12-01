@@ -1,11 +1,11 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "Widgets/CShopItemWidget.h"
+#include "Widgets/ShopItemWidget.h"
 
 #include "Inventory/PA_ShopItem.h"
 
 
-void UCShopItemWidget::NativeOnListItemObjectSet(UObject* ListItemObject)
+void UShopItemWidget::NativeOnListItemObjectSet(UObject* ListItemObject)
 {
     IUserObjectListEntry::NativeOnListItemObjectSet(ListItemObject);
     
@@ -18,12 +18,12 @@ void UCShopItemWidget::NativeOnListItemObjectSet(UObject* ListItemObject)
     }
 }
 
-void UCShopItemWidget::RightButtonClicked()
+void UShopItemWidget::RightButtonClicked()
 {
     OnItemPurchaseIssued.Broadcast(ShopItem);
 }
 
-void UCShopItemWidget::LeftButtonClicked()
+void UShopItemWidget::LeftButtonClicked()
 {
     OnShopItemClicked.Broadcast(this);
 }

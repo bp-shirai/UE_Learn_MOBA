@@ -10,6 +10,11 @@
 #include "GAS/CAbilitySystemStatics.h"
 #include "Templates/SubclassOf.h"
 
+UInventoryItem::UInventoryItem()
+    : StackCount(1)
+{
+}
+
 void UInventoryItem::InitItem(const FInventoryItemHandle& NewHandle, const UPA_ShopItem* NewShopItem)
 {
     Handle   = NewHandle;
@@ -40,5 +45,65 @@ void UInventoryItem::ApplyGASModifications(UAbilitySystemComponent* AbilitySyste
             GrantedAbilitySpecHandle = AbilitySystemComponent->GiveAbility(GrantedAbility);
         }
     }
+}
 
+bool UInventoryItem::IsValid() const
+{
+    return ShopItem != nullptr;
+}
+
+void UInventoryItem::SetSlot(int NewSlot)
+{
+    Slot = NewSlot;
+}
+
+bool UInventoryItem::IsStackFull() const
+{
+    return StackCount >= ShopItem->GetMaxStackCount();
+}
+
+bool UInventoryItem::IsForItem(const UPA_ShopItem* Item) const
+{
+    if (!Item) return false;
+
+    return ShopItem == Item;
+}
+
+bool UInventoryItem::AddStackCount()
+{
+    if (IsStackFull())
+    {
+        return false;
+    }
+    else
+    {
+        StackCount++;
+        return true;
+    }
+}
+
+bool UInventoryItem::ReduceStackCount()
+{
+    --StackCount;
+    if (StackCount <= 0)
+    {
+        return false;
+    }
+    else
+    {
+        return true;
+    }
+}
+
+bool UInventoryItem::SetStackCount(int NewStackCount)
+{
+    if (NewStackCount > 0 && NewStackCount <= ShopItem->GetMaxStackCount())
+    {
+        StackCount = NewStackCount;
+        return true;
+    }
+    else
+    {
+        return false;
+    }
 }

@@ -8,7 +8,7 @@
 
 #include "Widgets/ValueGauge.h"
 #include "Widgets/AbilityListView.h"
-#include "Widgets/CShopWidget.h"
+#include "Widgets/ShopWidget.h"
 #include "GAS/CAttributeSet.h"
 #include "GAS/CAbilitySystemComponent.h"
 

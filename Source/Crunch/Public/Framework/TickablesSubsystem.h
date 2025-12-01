@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "Subsystems/WorldSubsystem.h"
 #include "Kismet/KismetMathLibrary.h"
-#include "CTickablesSubsystem.generated.h"
+#include "TickablesSubsystem.generated.h"
 
 UENUM(BlueprintType)
 enum class ECEasingType : uint8
@@ -55,12 +55,12 @@ enum class ECEasingType : uint8
 };
 
 USTRUCT()
-struct FCTickableFunction
+struct FTickableFunction
 {
     GENERATED_BODY()
 
-    FCTickableFunction() {}
-    FCTickableFunction(UObject* InOwner, TFunction<bool(float)> InCallback) : Owner(InOwner), Callback(InCallback) {}
+    FTickableFunction() {}
+    FTickableFunction(UObject* InOwner, TFunction<bool(float)> InCallback) : Owner(InOwner), Callback(InCallback) {}
 
     TWeakObjectPtr<UObject> Owner;
     TFunction<bool(float)> Callback;
@@ -71,13 +71,13 @@ struct FCTickableFunction
 };
 
 USTRUCT()
-struct FCActiveEasingFunc
+struct FActiveEasingFunc
 {
     GENERATED_BODY()
 
-    FCActiveEasingFunc() {}
+    FActiveEasingFunc() {}
 
-    FCActiveEasingFunc(ECEasingType InEasingType, float InEasingExp, float InPlayRate, TFunction<void(float)> InCallback)
+    FActiveEasingFunc(ECEasingType InEasingType, float InEasingExp, float InPlayRate, TFunction<void(float)> InCallback)
         : EasingType(InEasingType), EasingExp(InEasingExp), PlayRate(InPlayRate), Callback(InCallback) {}
 
     ECEasingType EasingType = ECEasingType::Linear;
@@ -124,13 +124,13 @@ struct FCActiveEasingFunc
  *
  */
 UCLASS()
-class CRUNCH_API UCTickablesSubsystem : public UTickableWorldSubsystem
+class CRUNCH_API UTickablesSubsystem : public UTickableWorldSubsystem
 {
     GENERATED_BODY()
 
-    TArray<FCTickableFunction> TickableFuncs;
+    TArray<FTickableFunction> TickableFuncs;
 
-    TArray<FCActiveEasingFunc> ActiveEasingFuncs;
+    TArray<FActiveEasingFunc> ActiveEasingFuncs;
 
 public:
     virtual void Tick(float DeltaTime) override;

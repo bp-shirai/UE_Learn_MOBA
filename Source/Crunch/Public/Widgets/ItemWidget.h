@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
 
-#include "CItemWidget.generated.h"
+#include "ItemWidget.generated.h"
 
 class UImage;
 class UTextBlock;
@@ -16,7 +16,7 @@ class UPA_ShopItem;
  *
  */
 UCLASS(Abstract)
-class CRUNCH_API UCItemWidget : public UUserWidget
+class CRUNCH_API UItemWidget : public UUserWidget
 {
     GENERATED_BODY()
 
@@ -39,4 +39,6 @@ private:
 
     UPROPERTY(EditDefaultsOnly, Category = "ToolTip")
     TSubclassOf<UItemToolTip> ItemToolTipClass;
+
+    void ReplaceToolTip(UItemToolTip* NewToolTip);
 };

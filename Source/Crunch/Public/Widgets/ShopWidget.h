@@ -4,11 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "CShopWidget.generated.h"
+#include "ShopWidget.generated.h"
 
 
 class UTileView;
-class UCShopItemWidget;
+class UShopItemWidget;
 class UPA_ShopItem;
 class UInventoryComponent;
 
@@ -16,7 +16,7 @@ class UInventoryComponent;
  * 
  */
 UCLASS(Abstract)
-class CRUNCH_API UCShopWidget : public UUserWidget
+class CRUNCH_API UShopWidget : public UUserWidget
 {
 	GENERATED_BODY()
 	
@@ -32,7 +32,7 @@ private:
 	void ShopItemWidgetGenerated(UUserWidget& NewWidget);
 
 	UPROPERTY()
-	TMap<const UPA_ShopItem*, const UCShopItemWidget*> ItemMap;
+	TMap<const UPA_ShopItem*, const UShopItemWidget*> ItemMap;
 
 	UPROPERTY()
 	UInventoryComponent* OwnerInventoryComponent;

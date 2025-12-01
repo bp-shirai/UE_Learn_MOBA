@@ -1,6 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "Widgets/CItemWidget.h"
+#include "Widgets/ItemWidget.h"
 
 #include "Components/Image.h"
 #include "Components/TextBlock.h"
@@ -8,19 +8,19 @@
 #include "Widgets/ItemToolTip.h"
 #include "Inventory/PA_ShopItem.h"
 
-void UCItemWidget::NativeConstruct()
+void UItemWidget::NativeConstruct()
 {
     Super::NativeConstruct();
 
     SetIsFocusable(true);
 }
 
-void UCItemWidget::SetIcon(UTexture2D* IconTexture)
+void UItemWidget::SetIcon(UTexture2D* IconTexture)
 {
     Icon->SetBrushFromTexture(IconTexture);
 }
 
-FReply UCItemWidget::NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
+FReply UItemWidget::NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
 {
     FReply SuperReply = Super::NativeOnMouseButtonDown(InGeometry, InMouseEvent);
 
@@ -37,7 +37,7 @@ FReply UCItemWidget::NativeOnMouseButtonDown(const FGeometry& InGeometry, const 
     return SuperReply;
 }
 
-FReply UCItemWidget::NativeOnMouseButtonUp(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
+FReply UItemWidget::NativeOnMouseButtonUp(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
 {
     FReply SuperReply = Super::NativeOnMouseButtonUp(InGeometry, InMouseEvent);
 
@@ -58,27 +58,51 @@ FReply UCItemWidget::NativeOnMouseButtonUp(const FGeometry& InGeometry, const FP
     return SuperReply;
 }
 
-void UCItemWidget::RightButtonClicked()
+void UItemWidget::RightButtonClicked()
 {
     UE_LOG(LogTemp, Warning, TEXT("RightButtonClicked"));
 }
 
-void UCItemWidget::LeftButtonClicked()
+void UItemWidget::LeftButtonClicked()
 {
     UE_LOG(LogTemp, Warning, TEXT("LeftButtonClicked"));
 }
 
-UItemToolTip* UCItemWidget::SetToolTipWidget(const UPA_ShopItem* Item)
+UItemToolTip* UItemWidget::SetToolTipWidget(const UPA_ShopItem* Item)
 {
     if (GetOwningPlayer() && ItemToolTipClass && Item)
     {
-        UItemToolTip* ToolTip = CreateWidget<UItemToolTip>(GetOwningPlayer(), ItemToolTipClass);
-        if (ToolTip)
+        UItemToolTip* NewToolTip = CreateWidget<UItemToolTip>(GetOwningPlayer(), ItemToolTipClass);
+        if (NewToolTip)
         {
-            ToolTip->SetItem(Item);
-            SetToolTip(ToolTip);
-            return ToolTip;
+            NewToolTip->SetItem(Item);
+            // SetToolTip(NewToolTip);
+            ReplaceToolTip(NewToolTip);
+            return NewToolTip;
         }
     }
+    else
+    {
+        ReplaceToolTip(nullptr);
+    }
+
     return nullptr;
+}
+
+void UItemWidget::ReplaceToolTip(UItemToolTip* NewToolTip)
+{
+    if (UWidget* CurrentToolTip = GetToolTip())
+    {
+        CurrentToolTip->RemoveFromParent();
+        CurrentToolTip->ConditionalBeginDestroy(); // If necessary
+    }
+
+    if (NewToolTip)
+    {
+        SetToolTip(NewToolTip);
+    }
+    else
+    {
+        SetToolTip(nullptr);
+    }
 }
