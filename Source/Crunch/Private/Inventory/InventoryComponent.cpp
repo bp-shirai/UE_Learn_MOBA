@@ -46,7 +46,7 @@ void UInventoryComponent::Server_Purchase_Implementation(const UPA_ShopItem* Ite
         return; // Don't have enough Gold.
     }
 
-    if (IsAllSlotOccupied())
+    if (IsFullFor(ItemToPurchase))
     {
         return; // There is not enough space.
     }
@@ -64,17 +64,27 @@ void UInventoryComponent::GrantItem(const UPA_ShopItem* NewItem)
 {
     if (!GetOwner()->HasAuthority()) return;
 
-    UInventoryItem* InventoryItem  = NewObject<UInventoryItem>();
-    FInventoryItemHandle NewHandle = FInventoryItemHandle::CreateHandle();
-    InventoryItem->InitItem(NewHandle, NewItem);
-    InventoryMap.Add(NewHandle, InventoryItem);
+    if (UInventoryItem* StackItem = GetAvailableStackForItem(NewItem))
+    {
+        StackItem->AddStackCount();
+        OnItemStackCountChanged.Broadcast(StackItem->GetHandle(), StackItem->GetStackCount());
 
-    OnItemAdded.Broadcast(InventoryItem);
-    UE_LOG(LogTemp, Warning, TEXT("[Server] UInventoryComponent::GrantItem : ItemName : %s HandleId = %d"), *NewItem->GetItemName().ToString(), NewHandle.GetHandleId());
+        Client_ItemStackCountChanged(StackItem->GetHandle(), StackItem->GetStackCount());
+    }
+    else
+    {
+        UInventoryItem* InventoryItem  = NewObject<UInventoryItem>();
+        FInventoryItemHandle NewHandle = FInventoryItemHandle::CreateHandle();
+        InventoryItem->InitItem(NewHandle, NewItem);
+        InventoryMap.Add(NewHandle, InventoryItem);
 
-    Client_ItemAdded(NewHandle, NewItem);
+        OnItemAdded.Broadcast(InventoryItem);
+    	UE_LOG(LogTemp, Warning, TEXT("[Server] Adding Shop Item: %s, with Id: %d"), *(InventoryItem->GetShopItem()->GetItemName().ToString()), NewHandle.GetHandleId());
 
-    InventoryItem->ApplyGASModifications(OwnerAbilitySystemComponent.Get());
+        Client_ItemAdded(NewHandle, NewItem);
+
+        InventoryItem->ApplyGASModifications(OwnerAbilitySystemComponent.Get());
+    }
 }
 
 #pragma endregion
@@ -93,8 +103,24 @@ void UInventoryComponent::Client_ItemAdded_Implementation(FInventoryItemHandle A
     UE_LOG(LogTemp, Warning, TEXT("[Client] UInventoryComponent::ItemAdded : ItemName : %s HandleId = %d"), *NewItem->GetItemName().ToString(), AssignedHandle.GetHandleId());
 }
 
+void UInventoryComponent::Client_ItemStackCountChanged_Implementation(FInventoryItemHandle Handle, int NewCount)
+{
+    if (GetOwner()->HasAuthority()) return;
+
+    UInventoryItem* FoundItem = GetInventoryItemByHandle(Handle);
+    if (FoundItem)
+    {
+        FoundItem->SetStackCount(NewCount);
+        OnItemStackCountChanged.Broadcast(Handle, NewCount);
+    }
+}
+
+
+
 #pragma endregion
 
+
+#pragma region -------------------- Checking Functions -------------------------------------------------
 void UInventoryComponent::ItemSlotChanged(const FInventoryItemHandle& Handle, int NewSlotNumber)
 {
     if (UInventoryItem* FoundItem = GetInventoryItemByHandle(Handle))
@@ -121,7 +147,7 @@ bool UInventoryComponent::IsAllSlotOccupied() const
 
 UInventoryItem* UInventoryComponent::GetAvailableStackForItem(const UPA_ShopItem* Item) const
 {
-    if (!Item || Item->IsStackable()) return nullptr;
+    if (!Item || !Item->IsStackable()) return nullptr;
 
     for (const auto& [Handle, InventoryItem] : InventoryMap)
     {
@@ -145,4 +171,5 @@ bool UInventoryComponent::IsFullFor(const UPA_ShopItem* Item) const
 
     return false;
 }
-  
+
+#pragma endregion

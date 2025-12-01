@@ -76,33 +76,29 @@ UItemToolTip* UItemWidget::SetToolTipWidget(const UPA_ShopItem* Item)
         if (NewToolTip)
         {
             NewToolTip->SetItem(Item);
-            // SetToolTip(NewToolTip);
-            ReplaceToolTip(NewToolTip);
+            SetToolTip(NewToolTip);
+            
             return NewToolTip;
         }
     }
-    else
-    {
-        ReplaceToolTip(nullptr);
-    }
-
+ 
     return nullptr;
 }
 
-void UItemWidget::ReplaceToolTip(UItemToolTip* NewToolTip)
-{
-    if (UWidget* CurrentToolTip = GetToolTip())
-    {
-        CurrentToolTip->RemoveFromParent();
-        CurrentToolTip->ConditionalBeginDestroy(); // If necessary
-    }
+// void UItemWidget::ReplaceToolTip(UItemToolTip* NewToolTip)
+// {
+//     if (UWidget* CurrentToolTip = GetToolTip())
+//     {
+//         CurrentToolTip->RemoveFromParent();
+//         CurrentToolTip->ConditionalBeginDestroy(); // If necessary
+//     }
 
-    if (NewToolTip)
-    {
-        SetToolTip(NewToolTip);
-    }
-    else
-    {
-        SetToolTip(nullptr);
-    }
-}
+//     if (NewToolTip)
+//     {
+//         SetToolTip(NewToolTip);
+//     }
+//     else
+//     {
+//         SetToolTip(nullptr);
+//     }
+// }

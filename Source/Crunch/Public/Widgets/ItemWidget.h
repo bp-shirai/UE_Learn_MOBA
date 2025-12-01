@@ -40,5 +40,5 @@ private:
     UPROPERTY(EditDefaultsOnly, Category = "ToolTip")
     TSubclassOf<UItemToolTip> ItemToolTipClass;
 
-    void ReplaceToolTip(UItemToolTip* NewToolTip);
+    //void ReplaceToolTip(UItemToolTip* NewToolTip);
 };

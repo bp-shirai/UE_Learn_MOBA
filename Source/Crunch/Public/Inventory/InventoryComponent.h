@@ -12,6 +12,8 @@ class UPA_ShopItem;
 class UInventoryItem;
 
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnItemAddedDelegate, const UInventoryItem* /*NewItem*/);
+DECLARE_MULTICAST_DELEGATE_TwoParams(FOnItemStackCountChangedDelegate, const FInventoryItemHandle& /*ItemHandle*/, int /*NewCount*/);
+
 
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class CRUNCH_API UInventoryComponent : public UActorComponent
@@ -34,6 +36,8 @@ public:
     bool IsFullFor(const UPA_ShopItem* Item) const;
 
     FOnItemAddedDelegate OnItemAdded;
+    FOnItemStackCountChangedDelegate OnItemStackCountChanged;
+
 
 protected:
     virtual void BeginPlay() override;
@@ -60,6 +64,10 @@ private:
 private:
     UFUNCTION(Client, Reliable)
     void Client_ItemAdded(FInventoryItemHandle AssignedHandle, const UPA_ShopItem* NewItem);
+
+    UFUNCTION(Client, Reliable)
+    void Client_ItemStackCountChanged(FInventoryItemHandle Handle, int NewCount);
+
 
 #pragma endregion
 };

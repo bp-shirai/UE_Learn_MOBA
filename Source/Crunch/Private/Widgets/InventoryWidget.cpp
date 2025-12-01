@@ -22,7 +22,8 @@ void UInventoryWidget::NativeConstruct()
         if (InventoryComponent)
         {
             InventoryComponent->OnItemAdded.AddUObject(this, &ThisClass::ItemAdded);
-            
+            InventoryComponent->OnItemStackCountChanged.AddUObject(this, &ThisClass::ItemStackCountChanged);
+
             int Capacity = InventoryComponent->GetCapacity();
 
             ItemList->ClearChildren();
@@ -41,6 +42,8 @@ void UInventoryWidget::NativeConstruct()
                     }
 
                     ItemWidgets.Add(NewEmptyWidget);
+
+                    NewEmptyWidget->OnInventoryItemDropped.AddUObject(this, &ThisClass::HandleItemDragDrop);
                 }
             }
         }
@@ -78,4 +81,42 @@ UInventoryItemWidget* UInventoryWidget::GetNextAvailableSlot() const
     }
 
     return nullptr;
+}
+
+void UInventoryWidget::ItemStackCountChanged(const FInventoryItemHandle& Handle, int NewCount)
+{
+    if (UInventoryItemWidget** FoundWidget = PopulatedItemEntryWidgets.Find(Handle))
+    {
+        (*FoundWidget)->UpdateStackCount();
+    }
+}
+
+void UInventoryWidget::HandleItemDragDrop(UInventoryItemWidget* DestinationWidget, UInventoryItemWidget* SourceWidget)
+{
+    if (!DestinationWidget || !SourceWidget) return;
+
+    const UInventoryItem* SourceItem      = SourceWidget->GetInventoryItem();
+    const UInventoryItem* DestinationItem = DestinationWidget->GetInventoryItem(); // If the slot is empty, it is nullptr.
+    
+
+    DestinationWidget->UpdateInventoryItem(SourceItem);
+    SourceWidget->UpdateInventoryItem(DestinationItem);
+
+    //UE_LOG(LogTemp, Warning, TEXT("HandleItemDragDrop : Src[%s] Dest[%s]"), *GetNameSafe(SourceItem), *GetNameSafe(DestinationItem));
+
+    PopulatedItemEntryWidgets[DestinationWidget->GetItemHandle()] = DestinationWidget;
+
+    if (InventoryComponent)
+    {
+        InventoryComponent->ItemSlotChanged(DestinationWidget->GetItemHandle(), DestinationWidget->GetSlotNumber());
+    }
+
+    if (!SourceWidget->IsEmpty())
+    {
+        PopulatedItemEntryWidgets[SourceWidget->GetItemHandle()] = SourceWidget;
+        if (InventoryComponent)
+        {
+            InventoryComponent->ItemSlotChanged(SourceWidget->GetItemHandle(), SourceWidget->GetSlotNumber());
+        }
+    }
 }
