@@ -23,6 +23,9 @@ public:
 	void LoadShopItems(const FStreamableDelegate& LoadFinishedCallback);
 	bool GetLoadedShopItems(TArray<const UPA_ShopItem*>& OutItems) const;
 
+	const FItemCollection* GetCombinationForItem(const UPA_ShopItem* Item) const;
+	const FItemCollection* GetIngredientsForItem(const UPA_ShopItem* Item) const;
+
 private:
 
 	void ShopItemLoadFinished(FStreamableDelegate Callback);
@@ -30,9 +33,9 @@ private:
 	void AddToCombinationMap(const UPA_ShopItem* Ingredient, const UPA_ShopItem* CombinationItem);
 
 	UPROPERTY()
-	TMap<const UPA_ShopItem*, FCItemCollection> CombinationMap;
+	TMap<const UPA_ShopItem*, FItemCollection> CombinationMap;
 
 	UPROPERTY()
-	TMap<const UPA_ShopItem*, FCItemCollection> IngredientMap;
+	TMap<const UPA_ShopItem*, FItemCollection> IngredientMap;
 
 };

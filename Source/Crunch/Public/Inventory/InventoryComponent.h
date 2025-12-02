@@ -13,7 +13,7 @@ class UInventoryItem;
 
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnItemAddedDelegate, const UInventoryItem* /*NewItem*/);
 DECLARE_MULTICAST_DELEGATE_TwoParams(FOnItemStackCountChangedDelegate, const FInventoryItemHandle& /*ItemHandle*/, int /*NewCount*/);
-
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnItemRemovedDelegate, const FInventoryItemHandle& /*ItemHandle*/);
 
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class CRUNCH_API UInventoryComponent : public UActorComponent
@@ -24,6 +24,8 @@ public:
     UInventoryComponent();
 
     void TryPurchase(const UPA_ShopItem* ItemToPurchase);
+    void TryActivateItem(const FInventoryItemHandle& ItemHandle);
+    void SellItem(const FInventoryItemHandle& ItemHandle);
 
     float GetGold() const;
     FORCEINLINE int GetCapacity() const { return Capacity; }
@@ -35,9 +37,12 @@ public:
     UInventoryItem* GetAvailableStackForItem(const UPA_ShopItem* Item) const;
     bool IsFullFor(const UPA_ShopItem* Item) const;
 
+    bool FoundIngredientForItem(const UPA_ShopItem* Item, TArray<UInventoryItem*>& OutIngredients);
+    UInventoryItem* TryGetItemForShopItem(const UPA_ShopItem* Item) const;
+
     FOnItemAddedDelegate OnItemAdded;
     FOnItemStackCountChangedDelegate OnItemStackCountChanged;
-
+    FOnItemRemovedDelegate OnItemRemoved;
 
 protected:
     virtual void BeginPlay() override;
@@ -57,7 +62,17 @@ private:
     UFUNCTION(Server, Reliable, WithValidation)
     void Server_Purchase(const UPA_ShopItem* ItemToPurchase);
 
+    UFUNCTION(Server, Reliable, WithValidation)
+    void Server_ActivateItem(FInventoryItemHandle ItemHandle);
+
+    UFUNCTION(Server, Reliable, WithValidation)
+    void Server_SellItem(FInventoryItemHandle ItemHandle);
+
     void GrantItem(const UPA_ShopItem* NewItem);
+    void ComsumeItem(UInventoryItem* Item);
+    void RemoveItem(UInventoryItem* Item);
+
+    void CheckItemCombination(const UInventoryItem* NewItem);
 #pragma endregion
 
 #pragma region--------------- Client ---------------------------------------------
@@ -68,6 +83,8 @@ private:
     UFUNCTION(Client, Reliable)
     void Client_ItemStackCountChanged(FInventoryItemHandle Handle, int NewCount);
 
+    UFUNCTION(Client, Reliable)
+    void Client_ItemRemoved(FInventoryItemHandle Handle);
 
 #pragma endregion
 };

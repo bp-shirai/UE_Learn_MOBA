@@ -12,7 +12,7 @@ class UItemWidget;
 /**
  *
  */
-UCLASS()
+UCLASS(Abstract)
 class CRUNCH_API UInventoryItemDragDropOp : public UDragDropOperation
 {
     GENERATED_BODY()

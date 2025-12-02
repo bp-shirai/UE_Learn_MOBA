@@ -12,7 +12,7 @@ class UInventoryItem;
 class UInventoryItemDragDropOp;
 
 DECLARE_MULTICAST_DELEGATE_TwoParams(FOnInventoryItemDropped, UInventoryItemWidget* /*DestinationWidget*/, UInventoryItemWidget* /*SourceWidget*/);
-
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnButtonClick, const FInventoryItemHandle& /*ItemHandle*/);
 /**
  *
  */
@@ -37,6 +37,8 @@ public:
     UTexture2D* GetIconTexture() const;
 
     FOnInventoryItemDropped OnInventoryItemDropped;
+    FOnButtonClick OnLeftButtonClicked;
+    FOnButtonClick OnRightButtonClicked;
 
 private:
     UPROPERTY(EditDefaultsOnly, Category = "Visual")
@@ -58,6 +60,9 @@ private:
     const UInventoryItem* InventoryItem;
 
     int SlotNumber;
+
+    virtual void RightButtonClicked() override;
+    virtual void LeftButtonClicked() override;
 
 #pragma region---------------- Drag Drop ---------------------------------------------------
 

@@ -121,3 +121,19 @@ FInventoryItemHandle UInventoryItemWidget::GetItemHandle() const
 
     return FInventoryItemHandle::InvalidHandle;
 }
+
+void UInventoryItemWidget::RightButtonClicked()
+{
+    if (!IsEmpty())
+    {
+        OnRightButtonClicked.Broadcast(GetItemHandle());
+    }
+}
+
+void UInventoryItemWidget::LeftButtonClicked()
+{
+    if (!IsEmpty())
+    {
+        OnLeftButtonClicked.Broadcast(GetItemHandle());
+    }
+}

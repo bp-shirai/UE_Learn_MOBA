@@ -10,13 +10,13 @@ class UGameplayEffect;
 class UGameplayAbility;
 
 USTRUCT(BlueprintType)
-struct FCItemCollection
+struct FItemCollection
 {
     GENERATED_BODY()
 public:
 
-	FCItemCollection() : Items() {}
-    FCItemCollection(const TArray<const UPA_ShopItem*>& InItems) : Items(InItems) {}
+	FItemCollection() : Items() {}
+    FItemCollection(const TArray<const UPA_ShopItem*>& InItems) : Items(InItems) {}
     void AddItem(const UPA_ShopItem* NewItem, bool bAddUnique = false);
     bool Contains(const UPA_ShopItem* Item) const;
     const TArray<const UPA_ShopItem*>& GetItems() const { return Items; }

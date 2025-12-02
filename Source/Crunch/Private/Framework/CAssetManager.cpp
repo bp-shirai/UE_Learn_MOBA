@@ -3,8 +3,6 @@
 #include "Framework/CAssetManager.h"
 #include "Engine/StreamableManager.h"
 
-#include "Logging/LogVerbosity.h"
-
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(CAssetManager)
 
@@ -63,14 +61,14 @@ void UCAssetManager::BuildItemMaps()
                 AddToCombinationMap(IngredientItem, Item);
             }
 
-            IngredientMap.Add(Item, FCItemCollection(IngredientItems));
+            IngredientMap.Add(Item, FItemCollection(IngredientItems));
         }
     }
 }
 
 void UCAssetManager::AddToCombinationMap(const UPA_ShopItem* Ingredient, const UPA_ShopItem* CombinationItem)
 {
-    FCItemCollection* Combinations = CombinationMap.Find(Ingredient);
+    FItemCollection* Combinations = CombinationMap.Find(Ingredient);
     if (Combinations)
     {
         if (!Combinations->Contains(CombinationItem))
@@ -80,6 +78,16 @@ void UCAssetManager::AddToCombinationMap(const UPA_ShopItem* Ingredient, const U
     }
     else
     {
-        CombinationMap.Add(Ingredient, FCItemCollection({CombinationItem}));
+        CombinationMap.Add(Ingredient, FItemCollection({CombinationItem}));
     }
+}
+
+const FItemCollection* UCAssetManager::GetCombinationForItem(const UPA_ShopItem* Item) const
+{
+    return CombinationMap.Find(Item);
+}
+
+const FItemCollection* UCAssetManager::GetIngredientsForItem(const UPA_ShopItem* Item) const
+{
+    return IngredientMap.Find(Item);
 }

@@ -28,7 +28,10 @@ public:
     FORCEINLINE const UPA_ShopItem* GetShopItem() const { return ShopItem; }
     FORCEINLINE FInventoryItemHandle GetHandle() const { return Handle; }
 
+    bool TryActivateGrantedAbility(UAbilitySystemComponent* AbilitySystemComponent);
+    void ApplyConsumeEffect(UAbilitySystemComponent* AbilitySystemComponent);
     void ApplyGASModifications(UAbilitySystemComponent* AbilitySystemComponent);
+    void RemoveGASModifications(UAbilitySystemComponent* AbilitySystemComponent);
 
     FORCEINLINE int GetStackCount() const { return StackCount; }
 

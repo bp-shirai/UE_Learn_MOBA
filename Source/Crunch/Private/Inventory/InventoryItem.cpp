@@ -9,6 +9,7 @@
 #include "Inventory/PA_ShopItem.h"
 #include "GAS/CAbilitySystemStatics.h"
 #include "Templates/SubclassOf.h"
+#include "UObject/Object.h"
 
 UInventoryItem::UInventoryItem()
     : StackCount(1)
@@ -105,5 +106,43 @@ bool UInventoryItem::SetStackCount(int NewStackCount)
     else
     {
         return false;
+    }
+}
+
+bool UInventoryItem::TryActivateGrantedAbility(UAbilitySystemComponent* AbilitySystemComponent)
+{
+    if (!GrantedAbilitySpecHandle.IsValid()) return false;
+
+    if (AbilitySystemComponent && AbilitySystemComponent->TryActivateAbility(GrantedAbilitySpecHandle))
+    {
+        return true;
+    }
+
+    return false;
+}
+
+void UInventoryItem::ApplyConsumeEffect(UAbilitySystemComponent* AbilitySystemComponent)
+{
+    if (!IsValid()) return;
+
+    TSubclassOf<UGameplayEffect> ComsumeEffect = ShopItem->GetConsumeEffect();
+    if (ComsumeEffect)
+    {
+        AbilitySystemComponent->BP_ApplyGameplayEffectToSelf(ComsumeEffect, 1, AbilitySystemComponent->MakeEffectContext());
+    }
+}
+
+void UInventoryItem::RemoveGASModifications(UAbilitySystemComponent* AbilitySystemComponent)
+{
+    if (!AbilitySystemComponent) return;
+
+    if (AppliedEquippedEffectHandle.IsValid())
+    {
+        AbilitySystemComponent->RemoveActiveGameplayEffect(AppliedEquippedEffectHandle);
+    }
+
+    if (GrantedAbilitySpecHandle.IsValid())
+    {
+        AbilitySystemComponent->SetRemoveAbilityOnEnd(GrantedAbilitySpecHandle);
     }
 }
