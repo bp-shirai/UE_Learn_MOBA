@@ -6,34 +6,39 @@
 #include "Blueprint/UserWidget.h"
 #include "ShopWidget.generated.h"
 
-
 class UTileView;
 class UShopItemWidget;
 class UPA_ShopItem;
 class UInventoryComponent;
+class UItemTreeWidget;
 
 /**
- * 
+ *
  */
 UCLASS(Abstract)
 class CRUNCH_API UShopWidget : public UUserWidget
 {
-	GENERATED_BODY()
-	
-public:	
-	virtual void NativeConstruct() override;
+    GENERATED_BODY()
+
+public:
+    virtual void NativeConstruct() override;
 
 private:
-	UPROPERTY(meta=(BindWidget))
-	UTileView* ShopItemList;
+    UPROPERTY(meta = (BindWidget))
+    UTileView* ShopItemList;
 
-	void LoadShopItems();
-	void ShopItemLoadFinished();
-	void ShopItemWidgetGenerated(UUserWidget& NewWidget);
+    UPROPERTY(meta = (BindWidget))
+    UItemTreeWidget* CombinationTree;
 
-	UPROPERTY()
-	TMap<const UPA_ShopItem*, const UShopItemWidget*> ItemMap;
+    void LoadShopItems();
+    void ShopItemLoadFinished();
+    void ShopItemWidgetGenerated(UUserWidget& NewWidget);
 
-	UPROPERTY()
-	UInventoryComponent* OwnerInventoryComponent;
+    UPROPERTY()
+    TMap<const UPA_ShopItem*, const UShopItemWidget*> ItemMap;
+
+    UPROPERTY()
+    UInventoryComponent* OwnerInventoryComponent;
+
+    void ShowItemCombination(const UShopItemWidget* ItemWidget);
 };

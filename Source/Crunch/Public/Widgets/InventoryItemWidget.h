@@ -74,4 +74,11 @@ private:
     TSubclassOf<UInventoryItemDragDropOp> DragDropClass;
 
 #pragma endregion
+
+#pragma region---------------- GAS ------------------------------------------------------
+public:
+    void StartCooldown(float InCooldownDuration, float InTimeRemaining);
+
+private:
+#pragma endregion
 };

@@ -19,7 +19,7 @@ DECLARE_MULTICAST_DELEGATE_OneParam(FOnShopItemSelected, const UShopItemWidget*)
 /**
  *
  */
-UCLASS(Abstract)
+UCLASS()
 class CRUNCH_API UShopItemWidget : public UItemWidget, public IUserObjectListEntry, public ITreeNodeInterface
 {
     GENERATED_BODY()

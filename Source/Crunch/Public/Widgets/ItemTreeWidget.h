@@ -13,10 +13,12 @@ class UCanvasPanelSlot;
 /**
  *
  */
-UCLASS(Abstract)
+UCLASS()
 class CRUNCH_API UItemTreeWidget : public UUserWidget
 {
     GENERATED_BODY()
+public:
+    void DrawFromNode(const ITreeNodeInterface* NodeInterface);
 
 private:
     void ClearTree();
@@ -28,6 +30,8 @@ private:
 
     UPROPERTY(meta = (BindWidget))
     UCanvasPanel* RootPanel;
+
+    const UObject* CurrentCenterItem;
 
     UPROPERTY(EditDefaultsOnly, Category = "Tree")
     FVector2D NodeSize{60.f};

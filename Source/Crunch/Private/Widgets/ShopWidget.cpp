@@ -2,19 +2,20 @@
 
 #include "Widgets/ShopWidget.h"
 
+#include "Components/TileView.h"
+
 #include "Framework/CAssetManager.h"
 #include "Inventory/InventoryComponent.h"
 #include "Inventory/PA_ShopItem.h"
 #include "Widgets/ShopItemWidget.h"
-
-#include "Components/TileView.h"
+#include "Widgets/ItemTreeWidget.h"
 
 void UShopWidget::NativeConstruct()
 {
     Super::NativeConstruct();
 
     SetIsFocusable(true);
-    
+
     LoadShopItems();
 
     ShopItemList->OnEntryWidgetGenerated().AddUObject(this, &ThisClass::ShopItemWidgetGenerated);
@@ -56,5 +57,15 @@ void UShopWidget::ShopItemWidgetGenerated(UUserWidget& NewWidget)
             // ItemWidget->OnShopItemClicked.AddUObject(this, &ThisClass::ShopItemClicked);
         }
         ItemMap.Add(ItemWidget->GetShopItem(), ItemWidget);
+
+        ItemWidget->OnShopItemClicked.AddUObject(this, &ThisClass::ShowItemCombination);
+    }
+}
+
+void UShopWidget::ShowItemCombination(const UShopItemWidget* ItemWidget)
+{
+    if (CombinationTree)
+    {
+        CombinationTree->DrawFromNode(ItemWidget);
     }
 }

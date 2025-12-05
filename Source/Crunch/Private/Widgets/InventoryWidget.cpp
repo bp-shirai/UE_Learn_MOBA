@@ -27,6 +27,10 @@ void UInventoryWidget::NativeConstruct()
             InventoryComponent->OnItemAdded.AddUObject(this, &ThisClass::ItemAdded);
             InventoryComponent->OnItemRemoved.AddUObject(this, &ThisClass::ItemRemoved);
             InventoryComponent->OnItemStackCountChanged.AddUObject(this, &ThisClass::ItemStackCountChanged);
+            InventoryComponent->OnItemAbilityCommitted.AddUObject(this, &ThisClass::ItemAbilityCommitted);
+
+
+
 
             int Capacity = InventoryComponent->GetCapacity();
 
@@ -240,5 +244,14 @@ void UInventoryWidget::NativeOnFocusChanging(const FWeakWidgetPath& PreviousFocu
     if (!NewWidgetPath.ContainsWidget(ContextMenuWidget->GetCachedWidget().Get()))
     {
         ClearContextMenu();
+    }
+}
+
+void UInventoryWidget::ItemAbilityCommitted(const FInventoryItemHandle& Handle, float CooldownDuration, float TimeRemaining)
+{
+    UInventoryItemWidget** FoundWidget = PopulatedItemEntryWidgets.Find(Handle);
+    if (FoundWidget && *FoundWidget)
+    {
+        (*FoundWidget)->StartCooldown(CooldownDuration, TimeRemaining);
     }
 }

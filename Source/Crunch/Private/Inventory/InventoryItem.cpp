@@ -2,6 +2,7 @@
 
 #include "Inventory/InventoryItem.h"
 
+#include "Abilities/GameplayAbility.h"
 #include "AbilitySystemComponent.h"
 #include "AbilitySystemBlueprintLibrary.h"
 #include "GameplayEffect.h"
@@ -145,4 +146,19 @@ void UInventoryItem::RemoveGASModifications(UAbilitySystemComponent* AbilitySyst
     {
         AbilitySystemComponent->SetRemoveAbilityOnEnd(GrantedAbilitySpecHandle);
     }
+}
+
+bool UInventoryItem::IsGrantedAbility(TSubclassOf<UGameplayAbility> AbilityClass) const
+{
+    if (!IsValid()) return false;
+
+    TSubclassOf<UGameplayAbility> GrantedAbility = ShopItem->GetGrantedAbility();
+    return GrantedAbility == AbilityClass;
+}
+
+bool UInventoryItem::IsGrantingAnyAbility() const
+{
+    if (!IsValid()) return false;
+
+    return ShopItem->GetGrantedAbility() != nullptr;
 }

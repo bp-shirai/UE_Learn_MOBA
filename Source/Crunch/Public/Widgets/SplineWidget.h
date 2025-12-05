@@ -9,7 +9,7 @@
 /**
  *
  */
-UCLASS(Abstract)
+UCLASS()
 class CRUNCH_API USplineWidget : public UUserWidget
 {
     GENERATED_BODY()

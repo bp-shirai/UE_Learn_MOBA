@@ -137,3 +137,8 @@ void UInventoryItemWidget::LeftButtonClicked()
         OnLeftButtonClicked.Broadcast(GetItemHandle());
     }
 }
+
+void UInventoryItemWidget::StartCooldown(float InCooldownDuration, float InTimeRemaining)
+{
+
+}

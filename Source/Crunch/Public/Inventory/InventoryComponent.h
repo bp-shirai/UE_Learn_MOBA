@@ -10,10 +10,12 @@
 class UAbilitySystemComponent;
 class UPA_ShopItem;
 class UInventoryItem;
+class UGameplayAbility;
 
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnItemAddedDelegate, const UInventoryItem* /*NewItem*/);
 DECLARE_MULTICAST_DELEGATE_TwoParams(FOnItemStackCountChangedDelegate, const FInventoryItemHandle& /*ItemHandle*/, int /*NewCount*/);
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnItemRemovedDelegate, const FInventoryItemHandle& /*ItemHandle*/);
+DECLARE_MULTICAST_DELEGATE_ThreeParams(FOnItemAbilityCommitted, const FInventoryItemHandle& /*ItemHandle*/, float /*CooldownDuration*/, float /*CooldownTimeRemaining*/);
 
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class CRUNCH_API UInventoryComponent : public UActorComponent
@@ -37,12 +39,13 @@ public:
     UInventoryItem* GetAvailableStackForItem(const UPA_ShopItem* Item) const;
     bool IsFullFor(const UPA_ShopItem* Item) const;
 
-    bool FoundIngredientForItem(const UPA_ShopItem* Item, TArray<UInventoryItem*>& OutIngredients);
+    bool FoundIngredientForItem(const UPA_ShopItem* Item, TArray<UInventoryItem*>& OutIngredients, const TArray<const UPA_ShopItem*>& IgnoreItems = {});
     UInventoryItem* TryGetItemForShopItem(const UPA_ShopItem* Item) const;
 
     FOnItemAddedDelegate OnItemAdded;
     FOnItemStackCountChangedDelegate OnItemStackCountChanged;
     FOnItemRemovedDelegate OnItemRemoved;
+    FOnItemAbilityCommitted OnItemAbilityCommitted;
 
 protected:
     virtual void BeginPlay() override;
@@ -56,6 +59,8 @@ private:
 
     UPROPERTY(EditDefaultsOnly, Category = "Inventory")
     int Capacity{6};
+
+    void AbilityCommitted(UGameplayAbility* CommittedAbility);
 
 #pragma region--------------- Server ---------------------------------------------
 
@@ -72,7 +77,7 @@ private:
     void ComsumeItem(UInventoryItem* Item);
     void RemoveItem(UInventoryItem* Item);
 
-    void CheckItemCombination(const UInventoryItem* NewItem);
+    bool TryItemCombination(const UPA_ShopItem* NewItem);
 #pragma endregion
 
 #pragma region--------------- Client ---------------------------------------------

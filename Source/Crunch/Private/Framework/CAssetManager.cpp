@@ -3,7 +3,6 @@
 #include "Framework/CAssetManager.h"
 #include "Engine/StreamableManager.h"
 
-
 #include UE_INLINE_GENERATED_CPP_BY_NAME(CAssetManager)
 
 UCAssetManager& UCAssetManager::Get()
@@ -73,7 +72,8 @@ void UCAssetManager::AddToCombinationMap(const UPA_ShopItem* Ingredient, const U
     {
         if (!Combinations->Contains(CombinationItem))
         {
-            CombinationMap.Add(CombinationItem);
+            // CombinationMap.Add(CombinationItem);
+            Combinations->AddItem(CombinationItem);
         }
     }
     else

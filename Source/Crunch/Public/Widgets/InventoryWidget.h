@@ -47,6 +47,8 @@ private:
     void ItemAdded(const UInventoryItem* InventoryItem);
     void ItemRemoved(const FInventoryItemHandle& Handle);
     void ItemStackCountChanged(const FInventoryItemHandle& Handle, int NewCount);
+    void ItemAbilityCommitted(const FInventoryItemHandle& Handle, float CooldownDuration, float TimeRemaining);
+
 
     UInventoryItemWidget* GetNextAvailableSlot() const;
 

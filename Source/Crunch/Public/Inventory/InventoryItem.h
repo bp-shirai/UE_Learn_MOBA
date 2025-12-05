@@ -39,6 +39,8 @@ public:
 
     bool IsStackFull() const;
     bool IsForItem(const UPA_ShopItem* Item) const;
+    bool IsGrantedAbility(TSubclassOf<UGameplayAbility> AbilityClass) const;
+    bool IsGrantingAnyAbility() const;
 
     // Return true is was able to add.
     bool AddStackCount();
