@@ -374,3 +374,17 @@ void UInventoryComponent::AbilityCommitted(UGameplayAbility* CommittedAbility)
         }
     }
 }
+
+void UInventoryComponent::TryActivateItemInSlot(int SlotNumber)
+{
+    UE_LOG(LogTemp, Warning, TEXT("TryActivateItemInSlot: %d"), SlotNumber);
+    
+    for (const auto& [Handle, InventoryItem] : InventoryMap)
+    {
+        if (InventoryItem && InventoryItem->GetSlot() == SlotNumber)
+        {
+            TryActivateItem(Handle);
+            break;
+        }
+    }
+}

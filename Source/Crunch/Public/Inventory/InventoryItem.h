@@ -39,6 +39,8 @@ public:
     FORCEINLINE int GetStackCount() const { return StackCount; }
 
     void SetSlot(int NewSlot);
+    FORCEINLINE int GetSlot() const { return Slot; }
+
 
     bool IsStackFull() const;
     bool IsForItem(const UPA_ShopItem* Item) const;

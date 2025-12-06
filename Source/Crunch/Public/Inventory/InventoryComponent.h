@@ -48,6 +48,8 @@ public:
     FOnItemRemovedDelegate OnItemRemoved;
     FOnItemAbilityCommitted OnItemAbilityCommitted;
 
+    void TryActivateItemInSlot(int SlotNumber);
+
 protected:
     virtual void BeginPlay() override;
 

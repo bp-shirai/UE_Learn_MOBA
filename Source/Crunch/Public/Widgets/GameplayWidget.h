@@ -15,6 +15,7 @@ class UStatsGauge;
 class UShopWidget;
 class UWidgetAnimation;
 class UInventoryWidget;
+class USkeletalMeshRenderActorWidget;
 
 /**
  *
@@ -60,6 +61,10 @@ private:
 
     UPROPERTY(meta = (BindWidget))
     UInventoryWidget* InventoryWidget;
+
+    UPROPERTY(meta = (BindWidget))
+    USkeletalMeshRenderActorWidget* HeadShotWidget;
+
 
     UPROPERTY(Transient, meta = (BindWidgetAnim))
     UWidgetAnimation* ShopPopup_Anim;

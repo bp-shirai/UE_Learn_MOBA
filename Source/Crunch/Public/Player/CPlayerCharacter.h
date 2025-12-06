@@ -67,6 +67,8 @@ private:
     UPROPERTY(EditDefaultsOnly, Category = "Input")
     UInputAction* LearnAbilityLeader_InputAction;
 
+    UPROPERTY(EditDefaultsOnly, Category = "Input")
+    UInputAction* UseInventoryItem_InputAction;
 
     UPROPERTY(EditDefaultsOnly, Category = "Input")
     TMap<ECAbilityInputID, UInputAction*> GameplayAbilityInputActions;
@@ -76,6 +78,8 @@ private:
     void HandleAbilityInput(const FInputActionValue& Value, ECAbilityInputID InputID);
     void HandleLearnAbilityLeaderDown(const FInputActionValue& Value);
     void HandleLearnAbilityLeaderUp(const FInputActionValue& Value);
+    void UseInventoryItem(const FInputActionValue& Value);
+
     bool bIsLearnAbilityLeaderDown{false};
 
     void SetInputEnableFromPlayerController(bool bEnable);
@@ -83,8 +87,6 @@ private:
     FVector GetLookRightDir() const;
     FVector GetLookFwdDir() const;
     FVector GetMoveFwdDir() const;
-  
-
 
 #pragma endregion
 #pragma region------- Death and Respawn -----------------------------------
@@ -116,10 +118,8 @@ private:
     void TickCameraLocalOffsetLerp(FVector Goal);
 #pragma endregion
 
-
 #pragma region------- Inventory ------------------------------------------
 private:
-
     UPROPERTY()
     UInventoryComponent* InventoryComponent;
 

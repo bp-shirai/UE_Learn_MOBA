@@ -82,7 +82,7 @@ void ACPlayerCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerI
     EnhancedInputComp->BindAction(Move_InputAction, ETriggerEvent::Triggered, this, &ThisClass::HandleMoveInput);
     EnhancedInputComp->BindAction(LearnAbilityLeader_InputAction, ETriggerEvent::Started, this, &ThisClass::HandleLearnAbilityLeaderDown);
     EnhancedInputComp->BindAction(LearnAbilityLeader_InputAction, ETriggerEvent::Completed, this, &ThisClass::HandleLearnAbilityLeaderUp);
-  
+    EnhancedInputComp->BindAction(UseInventoryItem_InputAction, ETriggerEvent::Triggered, this, &ThisClass::UseInventoryItem);
 
     for (const auto& [InputID, InputAction] : GameplayAbilityInputActions)
     {
@@ -236,3 +236,11 @@ void ACPlayerCharacter::HandleLearnAbilityLeaderUp(const FInputActionValue& Valu
     bIsLearnAbilityLeaderDown = false;
 }
 
+void ACPlayerCharacter::UseInventoryItem(const FInputActionValue& Value)
+{
+    int KeyValue = FMath::RoundToInt(Value.Get<float>());
+    if (InventoryComponent)
+    {
+        InventoryComponent->TryActivateItemInSlot(KeyValue - 1);
+    }
+}
