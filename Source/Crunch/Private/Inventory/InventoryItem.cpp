@@ -5,6 +5,9 @@
 #include "Abilities/GameplayAbility.h"
 #include "AbilitySystemComponent.h"
 #include "AbilitySystemBlueprintLibrary.h"
+#include "GAS/CAbilitySystemComponent.h"
+#include "GAS/CAttributeSet.h"
+#include "GameplayAbilitySpec.h"
 #include "GameplayEffect.h"
 
 #include "Inventory/PA_ShopItem.h"
@@ -17,35 +20,37 @@ UInventoryItem::UInventoryItem()
 {
 }
 
-void UInventoryItem::InitItem(const FInventoryItemHandle& NewHandle, const UPA_ShopItem* NewShopItem)
+void UInventoryItem::InitItem(const FInventoryItemHandle& NewHandle, const UPA_ShopItem* NewShopItem, UAbilitySystemComponent* NewOwnerAbilitySystemComponent)
 {
-    Handle   = NewHandle;
-    ShopItem = NewShopItem;
+    Handle                      = NewHandle;
+    ShopItem                    = NewShopItem;
+    OwnerAbilitySystemComponent = NewOwnerAbilitySystemComponent;
+
+    if (UAbilitySystemComponent* OwnerASC = GetOwnerAbilitySystemComponent())
+    {
+        OwnerASC->GetGameplayAttributeValueChangeDelegate(UCAttributeSet::GetManaAttribute()).AddUObject(this, &ThisClass::ManaUpdated);
+    }
+
+    ApplyGASModifications();
 }
 
-void UInventoryItem::ApplyGASModifications(UAbilitySystemComponent* AbilitySystemComponent)
+void UInventoryItem::ApplyGASModifications()
 {
-    if (!GetShopItem() || !AbilitySystemComponent) return;
-    if (!AbilitySystemComponent->GetOwner() || !AbilitySystemComponent->GetOwner()->HasAuthority()) return;
+    UAbilitySystemComponent* OwnerASC = GetOwnerAbilitySystemComponent();
+
+    if (!GetShopItem() || !OwnerASC) return;
+    if (!OwnerASC->GetOwner() || !OwnerASC->GetOwner()->HasAuthority()) return;
 
     TSubclassOf<UGameplayEffect> EquipEffect = GetShopItem()->GetEquippedEffect();
     if (EquipEffect)
     {
-        AppliedEquippedEffectHandle = AbilitySystemComponent->BP_ApplyGameplayEffectToSelf(EquipEffect, 1, AbilitySystemComponent->MakeEffectContext());
+        AppliedEquippedEffectHandle = OwnerASC->BP_ApplyGameplayEffectToSelf(EquipEffect, 1, OwnerASC->MakeEffectContext());
     }
 
     TSubclassOf<UGameplayAbility> GrantedAbility = GetShopItem()->GetGrantedAbility();
     if (GrantedAbility)
     {
-        const FGameplayAbilitySpec* FoundSpec = AbilitySystemComponent->FindAbilitySpecFromClass(GrantedAbility);
-        if (FoundSpec)
-        {
-            GrantedAbilitySpecHandle = FoundSpec->Handle;
-        }
-        else
-        {
-            GrantedAbilitySpecHandle = AbilitySystemComponent->GiveAbility(GrantedAbility);
-        }
+        GrantedAbilitySpecHandle = OwnerASC->GiveAbility(FGameplayAbilitySpec(GrantedAbility));
     }
 }
 
@@ -110,11 +115,12 @@ bool UInventoryItem::SetStackCount(int NewStackCount)
     }
 }
 
-bool UInventoryItem::TryActivateGrantedAbility(UAbilitySystemComponent* AbilitySystemComponent)
+bool UInventoryItem::TryActivateGrantedAbility()
 {
+    UAbilitySystemComponent* OwnerASC = GetOwnerAbilitySystemComponent();
     if (!GrantedAbilitySpecHandle.IsValid()) return false;
 
-    if (AbilitySystemComponent && AbilitySystemComponent->TryActivateAbility(GrantedAbilitySpecHandle))
+    if (OwnerASC && OwnerASC->TryActivateAbility(GrantedAbilitySpecHandle))
     {
         return true;
     }
@@ -122,29 +128,36 @@ bool UInventoryItem::TryActivateGrantedAbility(UAbilitySystemComponent* AbilityS
     return false;
 }
 
-void UInventoryItem::ApplyConsumeEffect(UAbilitySystemComponent* AbilitySystemComponent)
+void UInventoryItem::ApplyConsumeEffect()
 {
-    if (!IsValid()) return;
+    UAbilitySystemComponent* OwnerASC = GetOwnerAbilitySystemComponent();
+    if (!IsValid() || !OwnerASC) return;
 
     TSubclassOf<UGameplayEffect> ComsumeEffect = ShopItem->GetConsumeEffect();
     if (ComsumeEffect)
     {
-        AbilitySystemComponent->BP_ApplyGameplayEffectToSelf(ComsumeEffect, 1, AbilitySystemComponent->MakeEffectContext());
+        OwnerASC->BP_ApplyGameplayEffectToSelf(ComsumeEffect, 1, OwnerASC->MakeEffectContext());
     }
 }
 
-void UInventoryItem::RemoveGASModifications(UAbilitySystemComponent* AbilitySystemComponent)
+void UInventoryItem::RemoveGASModifications()
 {
-    if (!AbilitySystemComponent) return;
+    UAbilitySystemComponent* OwnerASC = GetOwnerAbilitySystemComponent();
+    if (!OwnerASC) return;
 
-    if (AppliedEquippedEffectHandle.IsValid())
-    {
-        AbilitySystemComponent->RemoveActiveGameplayEffect(AppliedEquippedEffectHandle);
-    }
+    OwnerASC->GetGameplayAttributeValueChangeDelegate(UCAttributeSet::GetManaAttribute()).RemoveAll(this);
 
-    if (GrantedAbilitySpecHandle.IsValid())
+    if (OwnerASC->GetOwner()->HasAuthority())
     {
-        AbilitySystemComponent->SetRemoveAbilityOnEnd(GrantedAbilitySpecHandle);
+        if (AppliedEquippedEffectHandle.IsValid())
+        {
+            OwnerASC->RemoveActiveGameplayEffect(AppliedEquippedEffectHandle);
+        }
+
+        if (GrantedAbilitySpecHandle.IsValid())
+        {
+            OwnerASC->SetRemoveAbilityOnEnd(GrantedAbilitySpecHandle);
+        }
     }
 }
 
@@ -161,4 +174,45 @@ bool UInventoryItem::IsGrantingAnyAbility() const
     if (!IsValid()) return false;
 
     return ShopItem->GetGrantedAbility() != nullptr;
+}
+
+float UInventoryItem::GetAbilityCooldownTimeRemaining() const
+{
+    if (!IsGrantingAnyAbility()) return 0.f;
+
+    return UCAbilitySystemStatics::GetCooldownRemainingFor(ShopItem->GetGrantedAbilityCDO(), GetOwnerAbilitySystemComponent());
+}
+
+float UInventoryItem::GetAbilityCooldownDuration() const
+{
+    if (!IsGrantingAnyAbility()) return 0.f;
+
+    return UCAbilitySystemStatics::GetCooldownDurationFor(ShopItem->GetGrantedAbilityCDO(), GetOwnerAbilitySystemComponent(), 1);
+}
+
+float UInventoryItem::GetAbilityManaCost() const
+{
+    if (!IsGrantingAnyAbility()) return 0.f;
+
+    return UCAbilitySystemStatics::GetManaCostFor(ShopItem->GetGrantedAbilityCDO(), GetOwnerAbilitySystemComponent(), 1);
+}
+
+bool UInventoryItem::CanCastAbility() const
+{
+    UAbilitySystemComponent* OwnerASC = GetOwnerAbilitySystemComponent();
+
+    if (!IsGrantingAnyAbility() || !OwnerASC) return false;
+
+    FGameplayAbilitySpec* Spec = OwnerASC->FindAbilitySpecFromHandle(GrantedAbilitySpecHandle);
+    if (Spec)
+    {
+        return UCAbilitySystemStatics::CheckAbilityCost(*Spec, OwnerASC);
+    }
+
+    return UCAbilitySystemStatics::CheckAbilityCostStatic(ShopItem->GetGrantedAbilityCDO(), OwnerASC);
+}
+
+void UInventoryItem::ManaUpdated(const FOnAttributeChangeData& Data)
+{
+    OnAbilityCanCastUpdated.Broadcast(CanCastAbility());
 }

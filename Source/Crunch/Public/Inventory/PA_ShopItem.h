@@ -14,8 +14,7 @@ struct FItemCollection
 {
     GENERATED_BODY()
 public:
-
-	FItemCollection() : Items() {}
+    FItemCollection() : Items() {}
     FItemCollection(const TArray<const UPA_ShopItem*>& InItems) : Items(InItems) {}
     void AddItem(const UPA_ShopItem* NewItem, bool bAddUnique = false);
     bool Contains(const UPA_ShopItem* Item) const;
@@ -45,6 +44,8 @@ public:
     TSubclassOf<UGameplayEffect> GetEquippedEffect() const { return EquippedEffect; }
     TSubclassOf<UGameplayEffect> GetConsumeEffect() const { return ConsumeEffect; }
     TSubclassOf<UGameplayAbility> GetGrantedAbility() const { return GrantedAbility; }
+    UGameplayAbility* GetGrantedAbilityCDO() const;
+
     bool IsConsumable() const { return bIsConsumable; }
     bool IsStackable() const { return bIsStackable; }
     int32 GetMaxStackCount() const { return MaxStackCount; }

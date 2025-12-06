@@ -26,6 +26,7 @@ public:
 
 protected:
     UItemToolTip* SetToolTipWidget(const UPA_ShopItem* Item);
+    UImage* GetItemIcon() const { return Icon; };
 
 private:
     virtual FReply NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
@@ -40,5 +41,5 @@ private:
     UPROPERTY(EditDefaultsOnly, Category = "ToolTip")
     TSubclassOf<UItemToolTip> ItemToolTipClass;
 
-    //void ReplaceToolTip(UItemToolTip* NewToolTip);
+    // void ReplaceToolTip(UItemToolTip* NewToolTip);
 };

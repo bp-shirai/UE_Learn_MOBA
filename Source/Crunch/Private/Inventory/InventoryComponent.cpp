@@ -3,6 +3,7 @@
 #include "Inventory/InventoryComponent.h"
 #include "AbilitySystemComponent.h"
 #include "AbilitySystemBlueprintLibrary.h"
+#include "GameplayAbilitySpecHandle.h"
 #include "GameplayEffectTypes.h"
 
 #include "Inventory/PA_ShopItem.h"
@@ -94,7 +95,6 @@ void UInventoryComponent::GrantItem(const UPA_ShopItem* NewItem)
     }
     else
     {
-
         if (TryItemCombination(NewItem))
         {
             return;
@@ -102,16 +102,18 @@ void UInventoryComponent::GrantItem(const UPA_ShopItem* NewItem)
 
         UInventoryItem* InventoryItem  = NewObject<UInventoryItem>();
         FInventoryItemHandle NewHandle = FInventoryItemHandle::CreateHandle();
-        InventoryItem->InitItem(NewHandle, NewItem);
+        InventoryItem->InitItem(NewHandle, NewItem, GetOwnerAbilitySystemComponent());
         InventoryMap.Add(NewHandle, InventoryItem);
 
         OnItemAdded.Broadcast(InventoryItem);
         UE_LOG(LogTemp, Warning, TEXT("[Server] Adding Shop Item: %s, with Id: %d"), *(InventoryItem->GetShopItem()->GetItemName().ToString()), NewHandle.GetHandleId());
 
-        Client_ItemAdded(NewHandle, NewItem);
+        FGameplayAbilitySpecHandle GrantedAbilitySpecHandle = InventoryItem->GetGrantedAbilitySpecHandle();
 
-        InventoryItem->ApplyGASModifications(OwnerAbilitySystemComponent.Get());
 
+        Client_ItemAdded(NewHandle, NewItem, GrantedAbilitySpecHandle);
+
+        // InventoryItem->ApplyGASModifications();
         // CheckItemCombination(InventoryItem);
     }
 }
@@ -121,7 +123,7 @@ void UInventoryComponent::Server_ActivateItem_Implementation(FInventoryItemHandl
     UInventoryItem* InventoryItem = GetInventoryItemByHandle(ItemHandle);
     if (!InventoryItem) return;
 
-    InventoryItem->TryActivateGrantedAbility(OwnerAbilitySystemComponent.Get());
+    InventoryItem->TryActivateGrantedAbility();
 
     const UPA_ShopItem* Item = InventoryItem->GetShopItem();
     if (Item && Item->IsConsumable())
@@ -140,7 +142,7 @@ void UInventoryComponent::ComsumeItem(UInventoryItem* Item)
     if (!GetOwner()->HasAuthority()) return;
     if (!Item) return;
 
-    Item->ApplyConsumeEffect(OwnerAbilitySystemComponent.Get());
+    Item->ApplyConsumeEffect();
     if (!Item->ReduceStackCount())
     {
         RemoveItem(Item);
@@ -157,7 +159,7 @@ void UInventoryComponent::RemoveItem(UInventoryItem* Item)
     if (!GetOwner()->HasAuthority()) return;
     if (!Item) return;
 
-    Item->RemoveGASModifications(OwnerAbilitySystemComponent.Get());
+    Item->RemoveGASModifications();
     OnItemRemoved.Broadcast(Item->GetHandle());
     InventoryMap.Remove(Item->GetHandle());
 
@@ -168,12 +170,15 @@ void UInventoryComponent::RemoveItem(UInventoryItem* Item)
 
 #pragma region--------------- Client ---------------------------------------------
 
-void UInventoryComponent::Client_ItemAdded_Implementation(FInventoryItemHandle AssignedHandle, const UPA_ShopItem* NewItem)
+void UInventoryComponent::Client_ItemAdded_Implementation(FInventoryItemHandle AssignedHandle, const UPA_ShopItem* NewItem,  FGameplayAbilitySpecHandle GrantedAbilitySpecHandle)
 {
     if (GetOwner()->HasAuthority()) return;
 
     UInventoryItem* InventoryItem = NewObject<UInventoryItem>();
-    InventoryItem->InitItem(AssignedHandle, NewItem);
+    InventoryItem->InitItem(AssignedHandle, NewItem, GetOwnerAbilitySystemComponent());
+
+    InventoryItem->SetGrantedAbilitySpecHandle(GrantedAbilitySpecHandle);
+
     InventoryMap.Add(AssignedHandle, InventoryItem);
 
     OnItemAdded.Broadcast(InventoryItem);
@@ -184,10 +189,11 @@ void UInventoryComponent::Client_ItemStackCountChanged_Implementation(FInventory
 {
     if (GetOwner()->HasAuthority()) return;
 
-    UInventoryItem* FoundItem = GetInventoryItemByHandle(Handle);
-    if (!FoundItem) return;
+    if (UInventoryItem* InventoryItem = GetInventoryItemByHandle(Handle))
+    {
+        InventoryItem->SetStackCount(NewCount);
+    }
 
-    FoundItem->SetStackCount(NewCount);
     OnItemStackCountChanged.Broadcast(Handle, NewCount);
 }
 
@@ -195,8 +201,10 @@ void UInventoryComponent::Client_ItemRemoved_Implementation(FInventoryItemHandle
 {
     if (GetOwner()->HasAuthority()) return;
 
-    UInventoryItem* FoundItem = GetInventoryItemByHandle(Handle);
-    if (!FoundItem) return;
+    if (UInventoryItem* InventoryItem = GetInventoryItemByHandle(Handle))
+    {
+        InventoryItem->RemoveGASModifications();
+    }
 
     OnItemRemoved.Broadcast(Handle);
     InventoryMap.Remove(Handle);

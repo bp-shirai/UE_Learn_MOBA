@@ -12,6 +12,9 @@
 class UPA_ShopItem;
 class UInventoryComponent;
 class UAbilitySystemComponent;
+struct FOnAttributeChangeData;
+
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnAbilityCanCastUpdatedDelegate, bool /*bCanCast*/);
 
 /**
  *
@@ -24,14 +27,14 @@ public:
     UInventoryItem();
 
     bool IsValid() const;
-    void InitItem(const FInventoryItemHandle& NewHandle, const UPA_ShopItem* NewShopItem);
+    void InitItem(const FInventoryItemHandle& NewHandle, const UPA_ShopItem* NewShopItem, UAbilitySystemComponent* NewOwnerAbilitySystemComponent = nullptr);
     FORCEINLINE const UPA_ShopItem* GetShopItem() const { return ShopItem; }
     FORCEINLINE FInventoryItemHandle GetHandle() const { return Handle; }
 
-    bool TryActivateGrantedAbility(UAbilitySystemComponent* AbilitySystemComponent);
-    void ApplyConsumeEffect(UAbilitySystemComponent* AbilitySystemComponent);
-    void ApplyGASModifications(UAbilitySystemComponent* AbilitySystemComponent);
-    void RemoveGASModifications(UAbilitySystemComponent* AbilitySystemComponent);
+    bool TryActivateGrantedAbility();
+    void ApplyConsumeEffect();
+    void ApplyGASModifications();
+    void RemoveGASModifications();
 
     FORCEINLINE int GetStackCount() const { return StackCount; }
 
@@ -51,6 +54,16 @@ public:
     // Return true if was able to set.
     bool SetStackCount(int NewStackCount);
 
+    float GetAbilityCooldownTimeRemaining() const;
+    float GetAbilityCooldownDuration() const;
+    float GetAbilityManaCost() const;
+    bool CanCastAbility() const;
+    FGameplayAbilitySpecHandle GetGrantedAbilitySpecHandle() const { return GrantedAbilitySpecHandle; }
+    void SetGrantedAbilitySpecHandle(const FGameplayAbilitySpecHandle& SpecHandle) { GrantedAbilitySpecHandle = SpecHandle; }
+
+    FOnAbilityCanCastUpdatedDelegate OnAbilityCanCastUpdated;
+    void ManaUpdated(const FOnAttributeChangeData& Data);
+
 private:
     UPROPERTY()
     const UPA_ShopItem* ShopItem;
@@ -61,4 +74,7 @@ private:
 
     FActiveGameplayEffectHandle AppliedEquippedEffectHandle;
     FGameplayAbilitySpecHandle GrantedAbilitySpecHandle;
+
+    TWeakObjectPtr<UAbilitySystemComponent> OwnerAbilitySystemComponent;
+    UAbilitySystemComponent* GetOwnerAbilitySystemComponent() const { return OwnerAbilitySystemComponent.Get(); }
 };

@@ -11,6 +11,7 @@ class UAbilitySystemComponent;
 class UPA_ShopItem;
 class UInventoryItem;
 class UGameplayAbility;
+struct FGameplayAbilitySpecHandle;
 
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnItemAddedDelegate, const UInventoryItem* /*NewItem*/);
 DECLARE_MULTICAST_DELEGATE_TwoParams(FOnItemStackCountChangedDelegate, const FInventoryItemHandle& /*ItemHandle*/, int /*NewCount*/);
@@ -54,6 +55,8 @@ private:
     UPROPERTY()
     TWeakObjectPtr<UAbilitySystemComponent> OwnerAbilitySystemComponent;
 
+    UAbilitySystemComponent* GetOwnerAbilitySystemComponent() const { return OwnerAbilitySystemComponent.Get(); }
+
     UPROPERTY()
     TMap<FInventoryItemHandle, UInventoryItem*> InventoryMap;
 
@@ -83,7 +86,7 @@ private:
 #pragma region--------------- Client ---------------------------------------------
 private:
     UFUNCTION(Client, Reliable)
-    void Client_ItemAdded(FInventoryItemHandle AssignedHandle, const UPA_ShopItem* NewItem);
+    void Client_ItemAdded(FInventoryItemHandle AssignedHandle, const UPA_ShopItem* NewItem, FGameplayAbilitySpecHandle GrantedAbilitySpecHandle);
 
     UFUNCTION(Client, Reliable)
     void Client_ItemStackCountChanged(FInventoryItemHandle Handle, int NewCount);

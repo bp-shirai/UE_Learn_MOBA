@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "Inventory/PA_ShopItem.h"
+#include "Abilities/GameplayAbility.h"
 #include "UObject/PrimaryAssetId.h"
 
 FPrimaryAssetId UPA_ShopItem::GetPrimaryAssetId() const
@@ -28,4 +29,9 @@ void FItemCollection::AddItem(const UPA_ShopItem* NewItem, bool bAddUnique)
 bool FItemCollection::Contains(const UPA_ShopItem* Item) const
 {
     return Items.Contains(Item);
+}
+
+UGameplayAbility* UPA_ShopItem::GetGrantedAbilityCDO() const
+{
+    return GrantedAbility ? Cast<UGameplayAbility>(GrantedAbility.GetDefaultObject()) : nullptr;
 }

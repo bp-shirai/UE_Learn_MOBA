@@ -4,6 +4,7 @@
 
 #include "Components/SlateWrapperTypes.h"
 #include "Components/TextBlock.h"
+#include "Components/Image.h"
 
 #include "Inventory/InventoryItem.h"
 #include "Inventory/PA_ShopItem.h"
@@ -24,6 +25,9 @@ bool UInventoryItemWidget::IsEmpty() const
 
 void UInventoryItemWidget::EmptySlot()
 {
+    ClearCooldown();
+    UnBindCanCastAbilityDelegate();
+
     InventoryItem = nullptr;
 
     SetIcon(EmptyTexture);
@@ -37,6 +41,8 @@ void UInventoryItemWidget::EmptySlot()
 
 void UInventoryItemWidget::UpdateInventoryItem(const UInventoryItem* Item)
 {
+    UnBindCanCastAbilityDelegate();
+
     InventoryItem = Item;
     if (!InventoryItem || !InventoryItem->IsValid() || InventoryItem->GetStackCount() <= 0)
     // if (IsEmpty())
@@ -62,6 +68,34 @@ void UInventoryItemWidget::UpdateInventoryItem(const UInventoryItem* Item)
     else
     {
         StackCount->SetVisibility(ESlateVisibility::Hidden);
+    }
+
+    ClearCooldown();
+
+    if (InventoryItem->IsGrantingAnyAbility())
+    {
+        UpdateCanCastDisplay(InventoryItem->CanCastAbility());
+        float AbilityCooldownRemaining = InventoryItem->GetAbilityCooldownTimeRemaining();
+        float AbilityCooldownDuration  = InventoryItem->GetAbilityCooldownDuration();
+        if (AbilityCooldownRemaining > 0.f)
+        {
+            StartCooldown(AbilityCooldownDuration, AbilityCooldownRemaining);
+        }
+
+        float AbilityCost = InventoryItem->GetAbilityManaCost();
+        ManaCost->SetVisibility(AbilityCost == 0.f ? ESlateVisibility::Hidden : ESlateVisibility::Visible);
+        ManaCost->SetText(FText::AsNumber(AbilityCost));
+        CooldownDuration->SetVisibility(AbilityCooldownDuration == 0.f ? ESlateVisibility::Hidden : ESlateVisibility::Visible);
+        CooldownDuration->SetText(FText::AsNumber(AbilityCooldownDuration));
+
+        BindCanCastAbilityDelegate();
+    }
+    else
+    {
+        UpdateCanCastDisplay(true);
+        ManaCost->SetVisibility(ESlateVisibility::Hidden);
+        CooldownDuration->SetVisibility(ESlateVisibility::Hidden);
+        CooldownCount->SetVisibility(ESlateVisibility::Hidden);
     }
 }
 
@@ -138,7 +172,72 @@ void UInventoryItemWidget::LeftButtonClicked()
     }
 }
 
+#pragma region---------------- GAS ------------------------------------------------------
+
 void UInventoryItemWidget::StartCooldown(float InCooldownDuration, float InTimeRemaining)
 {
+    CooldownTimeRemaining = InTimeRemaining;
+    CooldownTimeDuration  = InCooldownDuration;
 
+    GetWorld()->GetTimerManager().SetTimer(Handle_CooldownDuration, this, &ThisClass::CooldownFinished, CooldownTimeRemaining);
+    GetWorld()->GetTimerManager().SetTimer(Handle_CooldownUpdate, this, &ThisClass::UpdateCooldown, CooldownUpdateInterval, true);
+
+    CooldownCount->SetVisibility(ESlateVisibility::Visible);
+}
+
+void UInventoryItemWidget::CooldownFinished()
+{
+    GetWorld()->GetTimerManager().ClearTimer(Handle_CooldownUpdate);
+    CooldownCount->SetVisibility(ESlateVisibility::Hidden);
+    if (GetItemIcon())
+    {
+        GetItemIcon()->GetDynamicMaterial()->SetScalarParameterValue(MaterialParam_CooldownAmt, 1.f);
+    }
+}
+
+void UInventoryItemWidget::UpdateCooldown()
+{
+    CooldownTimeRemaining -= CooldownUpdateInterval;
+    const float CooldownAmt                   = 1.f - CooldownTimeRemaining / CooldownTimeDuration;
+    CooldownFormatOpt.MaximumFractionalDigits = CooldownTimeRemaining > 1.f ? 0 : 1;
+    CooldownCount->SetText(FText::AsNumber(CooldownTimeRemaining, &CooldownFormatOpt));
+}
+
+void UInventoryItemWidget::ClearCooldown()
+{
+    CooldownFinished();
+}
+
+void UInventoryItemWidget::SetIcon(UTexture2D* IconTexture)
+{
+    if (GetItemIcon())
+    {
+        GetItemIcon()->GetDynamicMaterial()->SetTextureParameterValue(MaterialParam_IconTexture, IconTexture);
+        return;
+    }
+
+    Super::SetIcon(IconTexture);
+}
+
+#pragma endregion
+
+void UInventoryItemWidget::UpdateCanCastDisplay(bool bCanCast)
+{
+    GetItemIcon()->GetDynamicMaterial()->SetScalarParameterValue(MaterialParam_CanCast, bCanCast ? 1.f : 0.f);
+}
+
+void UInventoryItemWidget::BindCanCastAbilityDelegate()
+{
+    if (InventoryItem)
+    {
+        const_cast<UInventoryItem*>(InventoryItem)->OnAbilityCanCastUpdated.AddUObject(this, &ThisClass::UpdateCanCastDisplay);
+    }
+}
+
+void UInventoryItemWidget::UnBindCanCastAbilityDelegate()
+{
+    if (InventoryItem)
+    {
+        const_cast<UInventoryItem*>(InventoryItem)->OnAbilityCanCastUpdated.RemoveAll(this);
+    }
 }
