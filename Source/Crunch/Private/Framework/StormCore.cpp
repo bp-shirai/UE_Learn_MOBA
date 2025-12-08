@@ -11,6 +11,7 @@
 #include "Components/DecalComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Camera/CameraComponent.h"
+#include "Math/MathFwd.h"
 #include "Net/UnrealNetwork.h"
 
 AStormCore::AStormCore()
@@ -40,6 +41,19 @@ void AStormCore::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifeti
 void AStormCore::BeginPlay()
 {
     Super::BeginPlay();
+
+    if (TeamOneGoal && TeamTwoGoal)
+    {
+        FVector TeamOneGoalLoc = TeamOneGoal->GetActorLocation();
+        FVector TeamTwoGoalLoc = TeamTwoGoal->GetActorLocation();
+
+        FVector GoalOffset = TeamOneGoalLoc - TeamTwoGoalLoc;
+        GoalOffset.Z = 0;
+
+        TravelLength = GoalOffset.Length();
+    }
+
+    CoreCaptureSpeed = 0.f;
 }
 
 void AStormCore::Tick(float DeltaTime)
@@ -125,7 +139,7 @@ void AStormCore::UpdateTeamWeight()
     }
 
     OnTeamInfluencerCountUpdate.Broadcast(TeamOneInfluencerCount, TeamTwoInfluencerCount);
-    
+
     UpdateGoal();
 }
 
@@ -218,4 +232,15 @@ void AStormCore::ExpandFinished()
     {
         AnimInstance->Montage_Play(AM_Capture);
     }
+}
+
+float AStormCore::GetProgress() const
+{
+    if (!TeamTwoGoal || TravelLength == 0.f) return 0.5f;
+
+    FVector TeamTwoGoalLoc = TeamTwoGoal->GetActorLocation();
+    FVector VectorFromTeamOne = GetActorLocation() - TeamTwoGoalLoc;
+    VectorFromTeamOne.Z = 0;
+
+    return VectorFromTeamOne.Length() / TravelLength;
 }

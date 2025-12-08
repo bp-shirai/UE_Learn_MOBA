@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "Player/CPlayerController.h"
+#include "Engine/TimerHandle.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "Net/UnrealNetwork.h"
@@ -46,20 +47,23 @@ void ACPlayerController::AcknowledgePossession(APawn* NewPawn)
 
 void ACPlayerController::SpawnGameplayWidget()
 {
+    if (!GameplayWidgetClass)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("[%s] SpawnGameplayWidgetClass is null"), *GetName());
+        return;
+    }
+
     if (GameplayWidget)
     {
         GameplayWidget->RemoveFromParent();
         GameplayWidget = nullptr;
     }
 
-    if (GameplayWidgetClass)
+    GameplayWidget = CreateWidget<UGameplayWidget>(this, GameplayWidgetClass);
+    if (GameplayWidget)
     {
-        GameplayWidget = CreateWidget<UGameplayWidget>(this, GameplayWidgetClass);
-        if (GameplayWidget)
-        {
-            GameplayWidget->AddToViewport();
-            GameplayWidget->ConfigureAbilities(PlayerCharacter->GetAbilities());
-        }
+        GameplayWidget->AddToViewport();
+        GameplayWidget->ConfigureAbilities(PlayerCharacter->GetAbilities());
     }
 }
 
@@ -75,13 +79,9 @@ FGenericTeamId ACPlayerController::GetGenericTeamId() const
 
 void ACPlayerController::ToggleShop()
 {
-    if (HasLocalNetOwner())
+    if (GameplayWidget)
     {
-        
-        if (GameplayWidget)
-        {
-            GameplayWidget->ToggleShop();
-        }
+        GameplayWidget->ToggleShop();
     }
 }
 
@@ -98,7 +98,8 @@ void ACPlayerController::SetupInputComponent()
 
     if (UEnhancedInputComponent* EnhancedInputComp = CastChecked<UEnhancedInputComponent>(InputComponent))
     {
-        EnhancedInputComp->BindAction(ShopToggle_InputAction, ETriggerEvent::Triggered, this, &ThisClass::ToggleShop);
+        EnhancedInputComp->BindAction(IA_ToggleShop, ETriggerEvent::Triggered, this, &ThisClass::ToggleShop);
+        EnhancedInputComp->BindAction(IA_ToggleGameplayMenu, ETriggerEvent::Triggered, this, &ThisClass::ToggleGameplayMenu);
         EnhancedInputComp->BindAction(IA_Test, ETriggerEvent::Triggered, this, &ThisClass::Test);
     }
 }
@@ -106,4 +107,47 @@ void ACPlayerController::SetupInputComponent()
 void ACPlayerController::Test(const FInputActionValue& Value)
 {
     UE_LOG(LogTemp, Warning, TEXT("Test"));
+}
+
+void ACPlayerController::ToggleGameplayMenu()
+{
+    if (GameplayWidget)
+    {
+        GameplayWidget->ToggleGameplayMenu();
+    }
+}
+
+void ACPlayerController::MatchFinished(AActor* ViewTarget, int WiningTeam)
+{
+    if (!HasAuthority()) return;
+
+    SetViewTargetWithBlend(ViewTarget, MatchFinishViewBlendTime);
+    if (PlayerCharacter)
+    {
+        PlayerCharacter->DisableInput(this);
+    }
+
+    Client_MatchFinished(ViewTarget, WiningTeam);
+}
+
+void ACPlayerController::Client_MatchFinished_Implementation(AActor* ViewTarget, int WiningTeam)
+{
+    FString WinLoseMsg = TEXT("You Win!");
+    if (GetGenericTeamId() == WiningTeam)
+    {
+        WinLoseMsg = TEXT("You Lose...");
+    }
+
+    GameplayWidget->SetGameplayMenuTitle(WinLoseMsg);
+
+    FTimerHandle Handle;
+    GetWorldTimerManager().SetTimer(Handle, this, &ThisClass::ShowWinLoseState, MatchFinishViewBlendTime);
+}
+
+void ACPlayerController::ShowWinLoseState()
+{
+    if (GameplayWidget)
+    {
+        GameplayWidget->ShowGameplayMenu();
+    }
 }

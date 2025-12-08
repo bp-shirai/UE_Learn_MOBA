@@ -16,6 +16,10 @@ class UShopWidget;
 class UWidgetAnimation;
 class UInventoryWidget;
 class USkeletalMeshRenderActorWidget;
+class UMatchStatWidget;
+class UGameplayMenu;
+class UWidgetSwitcher;
+class UCanvasPanel;
 
 /**
  *
@@ -30,6 +34,12 @@ public:
     void ConfigureAbilities(const TMap<ECAbilityInputID, TSubclassOf<UGameplayAbility>>& Abilities);
 
     void ToggleShop();
+
+    UFUNCTION()
+    void ToggleGameplayMenu();
+    
+    void ShowGameplayMenu();
+    void SetGameplayMenuTitle(const FString& NewTitle);
 
 private:
     UPROPERTY(meta = (BindWidget))
@@ -65,6 +75,20 @@ private:
     UPROPERTY(meta = (BindWidget))
     USkeletalMeshRenderActorWidget* HeadShotWidget;
 
+    UPROPERTY(meta = (BindWidget))
+    UMatchStatWidget* MatchStatWidget;
+
+    UPROPERTY(meta = (BindWidget))
+    UGameplayMenu* GameplayMenu;
+
+    UPROPERTY(meta = (BindWidget))
+    UWidgetSwitcher* MainSwitcher;
+
+    UPROPERTY(meta = (BindWidget))
+    UCanvasPanel* GameplayWidgetRootPanel;
+
+    UPROPERTY(meta = (BindWidget))
+    UCanvasPanel* GameplayMenuRootPanel;
 
     UPROPERTY(Transient, meta = (BindWidgetAnim))
     UWidgetAnimation* ShopPopup_Anim;

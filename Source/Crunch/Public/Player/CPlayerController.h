@@ -36,8 +36,18 @@ public:
 
     virtual void SetupInputComponent() override;
 
+    void MatchFinished(AActor* ViewTarget, int WiningTeam);
+
 private:
+    UFUNCTION(Client, Reliable)
+    void Client_MatchFinished(AActor* ViewTarget, int WiningTeam);
+
     void SpawnGameplayWidget();
+
+    void ShowWinLoseState();
+
+    UPROPERTY(EditDefaultsOnly, Category = "View")
+    float MatchFinishViewBlendTime{2.f};
 
     UPROPERTY()
     ACPlayerCharacter* PlayerCharacter;
@@ -55,7 +65,10 @@ private:
     UInputMappingContext* UIInputMapping;
 
     UPROPERTY(EditDefaultsOnly, Category = "Input")
-    UInputAction* ShopToggle_InputAction;
+    UInputAction* IA_ToggleShop;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Input")
+    UInputAction* IA_ToggleGameplayMenu;
 
     UPROPERTY(EditDefaultsOnly, Category = "Input")
     UInputAction* IA_Test;
@@ -63,6 +76,9 @@ private:
 public:
     UFUNCTION()
     void ToggleShop();
+
+    UFUNCTION()
+    void ToggleGameplayMenu();
 
     UFUNCTION()
     void Test(const FInputActionValue& Value);

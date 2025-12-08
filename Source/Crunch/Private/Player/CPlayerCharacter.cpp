@@ -41,7 +41,7 @@ ACPlayerCharacter::ACPlayerCharacter()
     // bUseControllerRotationRoll  = false;
 
     GetCharacterMovement()->bOrientRotationToMovement = true;
-    GetCharacterMovement()->RotationRate              = FRotator(0.f, 720.f, 0.f);
+    GetCharacterMovement()->RotationRate              = {0.f, 720.f, 0.f};
 
     HeroAttributeSet = CreateDefaultSubobject<UCHeroAttributeSet>(TEXT("HeroAttributeSet"));
 

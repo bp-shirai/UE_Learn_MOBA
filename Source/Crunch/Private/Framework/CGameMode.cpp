@@ -4,6 +4,11 @@
 #include "GameFramework/PlayerStart.h"
 #include "EngineUtils.h"
 
+#include "Framework/StormCore.h"
+#include "Player/CPlayerController.h"
+
+#include UE_INLINE_GENERATED_CPP_BY_NAME(CGameMode)
+
 APlayerController* ACGameMode::SpawnPlayerController(ENetRole InRemoteRole, const FString& Options)
 {
     APlayerController* NewPlayerController             = Super::SpawnPlayerController(InRemoteRole, Options);
@@ -48,4 +53,38 @@ AActor* ACGameMode::FindNextStartSpotForTeam(const FGenericTeamId& TeamID) const
     }
 
     return nullptr;
+}
+
+AStormCore* ACGameMode::GetStormCore()
+{
+    UWorld* World = GetWorld();
+    if (!World) return nullptr;
+
+    for (TActorIterator<AStormCore> It(World); It; ++It)
+    {
+        return *It;
+    }
+
+    return nullptr;
+}
+
+void ACGameMode::StartPlay()
+{
+    Super::StartPlay();
+
+    if (AStormCore* StormCore = GetStormCore())
+    {
+        StormCore->OnGoalReached.AddUObject(this, &ThisClass::MatchFinished);
+    }
+}
+
+void ACGameMode::MatchFinished(AActor* ViewTarget, int WiningTeam)
+{
+    UWorld* World = GetWorld();
+    if (!World) return;
+
+    for (TActorIterator<ACPlayerController> It(World); It; ++It)
+    {
+        It->MatchFinished(ViewTarget, WiningTeam);
+    }
 }

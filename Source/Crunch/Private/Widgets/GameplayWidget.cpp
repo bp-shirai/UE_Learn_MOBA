@@ -2,6 +2,8 @@
 
 #include "Widgets/GameplayWidget.h"
 #include "Components/SlateWrapperTypes.h"
+#include "Components/CanvasPanel.h"
+#include "Components/WidgetSwitcher.h"
 #include "GameFramework/PlayerController.h"
 #include "AbilitySystemComponent.h"
 #include "AbilitySystemBlueprintLibrary.h"
@@ -9,9 +11,9 @@
 #include "Widgets/ValueGauge.h"
 #include "Widgets/AbilityListView.h"
 #include "Widgets/ShopWidget.h"
+#include "Widgets/GameplayMenu.h"
 #include "GAS/CAttributeSet.h"
 #include "GAS/CAbilitySystemComponent.h"
-
 
 void UGameplayWidget::NativeConstruct()
 {
@@ -29,6 +31,13 @@ void UGameplayWidget::NativeConstruct()
         UE_LOG(LogTemp, Warning, TEXT("GameplayWidget: %s, ASC is null : %s"), *GetName(), *GetOwningPlayer()->GetName());
     }
 
+    SetShowMouseCursor(false);
+    SetFocusToGameOnly();
+
+    if (GameplayMenu)
+    {
+        GameplayMenu->GetResumeButtonDelegate().AddDynamic(this, &ThisClass::ToggleGameplayMenu);
+    }
 }
 
 void UGameplayWidget::ConfigureAbilities(const TMap<ECAbilityInputID, TSubclassOf<UGameplayAbility>>& Abilities)
@@ -97,4 +106,33 @@ void UGameplayWidget::SetFocusToGameOnly()
 {
     FInputModeGameOnly InputMode;
     GetOwningPlayer()->SetInputMode(InputMode);
+}
+
+void UGameplayWidget::ToggleGameplayMenu()
+{
+    if (MainSwitcher->GetActiveWidget() == GameplayMenuRootPanel)
+    {
+        MainSwitcher->SetActiveWidget(GameplayWidgetRootPanel);
+        SetOwningPawnInputEnabled(true);
+        SetShowMouseCursor(false);
+        SetFocusToGameOnly();
+    }
+    else
+    {
+        ShowGameplayMenu();
+    }
+}
+
+void UGameplayWidget::ShowGameplayMenu()
+{
+    MainSwitcher->SetActiveWidget(GameplayMenuRootPanel);
+    SetOwningPawnInputEnabled(false);
+    SetShowMouseCursor(true);
+    SetFocusToGameAndUI();
+    GameplayMenu->SetFocus();
+}
+
+void UGameplayWidget::SetGameplayMenuTitle(const FString& NewTitle)
+{
+    GameplayMenu->SetTitleText(NewTitle);
 }
