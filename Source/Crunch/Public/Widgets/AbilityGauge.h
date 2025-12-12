@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-
+#include "GameplayAbilitySpecHandle.h"
 #include "Blueprint/IUserObjectListEntry.h"
 #include "AbilityGauge.generated.h"
 
@@ -45,7 +45,6 @@ class CRUNCH_API UAbilityGauge : public UUserWidget, public IUserObjectListEntry
 public:
     virtual void NativeConstruct() override;
     virtual void NativeOnListItemObjectSet(UObject* ListItemObject) override;
-
     void ConfigureWithWidgetData(const FAbilityWidgetData* WidgetData);
 
 private:
@@ -66,6 +65,11 @@ private:
 
     UPROPERTY(EditDefaultsOnly, Category = "Visual")
     FName UpgradePointAvailableParamName{"UpgradeAvailable"};
+
+    UPROPERTY(EditDefaultsOnly, Category = "Tool Tip")
+    TSubclassOf<class UAbilityToolTip> AbilityToolTipClass;
+
+    void CreateToolTipWidget(const FAbilityWidgetData* AbilityWidgetData);
 
     UPROPERTY(meta = (BindWidget))
     UImage* Icon;
@@ -102,7 +106,7 @@ private:
     void CooldownUpdate();
 
     const UAbilitySystemComponent* OwnerAbilitySystemComponent;
-    const FGameplayAbilitySpec* CachedAbilitySpec;
+    FGameplayAbilitySpecHandle CachedAbilitySpecHandle;
 
     const FGameplayAbilitySpec* GetAbilitySpec();
 
@@ -113,5 +117,4 @@ private:
 
     void UpgradePointUpdated(const FOnAttributeChangeData& Data);
     void ManaUpdated(const FOnAttributeChangeData& Data);
-
 };

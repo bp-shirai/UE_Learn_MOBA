@@ -42,15 +42,14 @@ struct FCRAnimTask
     float Duration     = 0.f;
     float Elapsed      = 0.f;
     UCurveFloat* Curve = nullptr;
+    bool bLoop         = false;
+    bool bAutoReverse  = false;
+    bool bReversing    = false;
 
-    TFunction<void(float Alpha, float EasedAlpha)> UpdateCallback; // 毎フレーム呼ばれる
+    TFunction<void(float Alpha, float EasedAlpha)> Update; // 毎フレーム呼ばれる
     TFunction<void()> OnComplete;
     TFunction<void()> OnCancelled;
     TFunction<void()> OnLoop;
-
-    bool bLoop        = false;
-    bool bAutoReverse = false;
-    bool bReversing   = false;
 
     // 内部用
     void Reset()
@@ -63,18 +62,27 @@ struct FCRAnimTask
 // ハンドルにアニメーション機能を持たせるためのラッパー（ユーザーは意識しない）
 struct FCRAnimHandle
 {
-    FCRHandle RawHandle = InvalidCRHandle;
-    UCR* CR             = nullptr;
+  friend class UCR;
 
-    // チェーン可能にする最強のメソッド
-    // FCRAnimHandle& OnComplete(TFunction<void()> Callback);
-    // FCRAnimHandle& OnCancelled(TFunction<void()> Callback);
-    // FCRAnimHandle& OnLoop(TFunction<void()> Callback);
-    // FCRAnimHandle& SetLoop(bool bEnable = true);
-    // FCRAnimHandle& SetAutoReverse(bool bEnable = true);
+private:
+    TWeakPtr<FCRAnimTask> WeakTask;   // これが鍵！
+
+    explicit FCRAnimHandle(TSharedPtr<FCRAnimTask> InTask)
+        : WeakTask(InTask) {}
+
+public:
+    FCRAnimHandle() = default;
+
+    // チェーン可能な最強API
+    FCRAnimHandle& OnComplete(TFunction<void()> Callback);
+    FCRAnimHandle& OnCancelled(TFunction<void()> Callback);
+    FCRAnimHandle& OnLoop(TFunction<void()> Callback);
+    FCRAnimHandle& SetLoop(bool bEnable = true);
+    FCRAnimHandle& SetAutoReverse(bool bEnable = true);
 
     void Cancel();
     bool IsRunning() const;
+    operator bool() const { return WeakTask.IsValid(); }
 };
 
 /**

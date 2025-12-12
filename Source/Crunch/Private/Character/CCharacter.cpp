@@ -60,6 +60,7 @@ void ACCharacter::BindGASChangeDelegates()
         AbilitySystemComponent->RegisterGameplayTagEvent(Tags::Stats::Dead).AddUObject(this, &ThisClass::Death_TagUpdated);
         AbilitySystemComponent->RegisterGameplayTagEvent(Tags::Stats::Stun).AddUObject(this, &ThisClass::Stun_TagUpdated);
         AbilitySystemComponent->RegisterGameplayTagEvent(Tags::Stats::Aim).AddUObject(this, &ThisClass::Aim_TagUpdated);
+        AbilitySystemComponent->RegisterGameplayTagEvent(Tags::Stats::Focus).AddUObject(this, &ThisClass::Focus_TagUpdated);
 
         AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(UCAttributeSet::GetMoveSpeedAttribute()).AddUObject(this, &ThisClass::MoveSpeed_Updated);
         AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(UCAttributeSet::GetMaxHealthAttribute()).AddUObject(this, &ThisClass::MaxHealth_Updated);
@@ -389,6 +390,7 @@ void ACCharacter::OnAimStateChanged(bool bIsAiming)
     // Override in child class
 }
 
+
 #pragma endregion
 
 void ACCharacter::MoveSpeed_Updated(const FOnAttributeChangeData& Data)
@@ -410,4 +412,9 @@ void ACCharacter::MaxMana_Updated(const FOnAttributeChangeData& Data)
     {
         AttributeSet->RescaleMana();
     }
+}
+
+void ACCharacter::Focus_TagUpdated(const FGameplayTag Tag, int32 NewCount)
+{
+    bIsInFocusMode = NewCount > 0;
 }

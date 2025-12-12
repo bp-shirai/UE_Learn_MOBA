@@ -12,7 +12,6 @@ UCAbility_Launched::UCAbility_Launched()
     FAbilityTriggerData TriggerData;
     TriggerData.TriggerSource = EGameplayAbilityTriggerSource::GameplayEvent;
     TriggerData.TriggerTag    = Tags::Ability::Passive::Launch_Activate;
-
     AbilityTriggers.Add(TriggerData);
 
     ActivationBlockedTags.RemoveTag(Tags::Stats::Stun);
@@ -20,7 +19,7 @@ UCAbility_Launched::UCAbility_Launched()
 
 void UCAbility_Launched::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData)
 {
-    if (K2_CommitAbility() == false)
+    if (!K2_CommitAbility())
     {
         K2_EndAbility();
         return;
@@ -33,7 +32,7 @@ void UCAbility_Launched::ActivateAbility(const FGameplayAbilitySpecHandle Handle
         {
             const FVector PushVelocity = TriggerEventData->TargetData.Get(0)->GetHitResult()->ImpactNormal;
             PushSelf(PushVelocity);
-            UE_LOG(LogTemp, Warning, TEXT("UCAbility_Launched::ActivateAbility: Pushing self with velocity %s"), *PushVelocity.ToString());
+            // UE_LOG(LogTemp, Warning, TEXT("UCAbility_Launched::ActivateAbility: Pushing self with velocity %s"), *PushVelocity.ToString());
         }
     }
 

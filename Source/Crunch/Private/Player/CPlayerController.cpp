@@ -53,12 +53,6 @@ void ACPlayerController::SpawnGameplayWidget()
         return;
     }
 
-    if (GameplayWidget)
-    {
-        GameplayWidget->RemoveFromParent();
-        GameplayWidget = nullptr;
-    }
-
     GameplayWidget = CreateWidget<UGameplayWidget>(this, GameplayWidgetClass);
     if (GameplayWidget)
     {
@@ -121,7 +115,6 @@ void ACPlayerController::MatchFinished(AActor* ViewTarget, int WiningTeam)
 {
     if (!HasAuthority()) return;
 
-    SetViewTargetWithBlend(ViewTarget, MatchFinishViewBlendTime);
     if (PlayerCharacter)
     {
         PlayerCharacter->DisableInput(this);
@@ -132,6 +125,8 @@ void ACPlayerController::MatchFinished(AActor* ViewTarget, int WiningTeam)
 
 void ACPlayerController::Client_MatchFinished_Implementation(AActor* ViewTarget, int WiningTeam)
 {
+    SetViewTargetWithBlend(ViewTarget, MatchFinishViewBlendTime);
+
     FString WinLoseMsg = TEXT("You Win!");
     if (GetGenericTeamId() == WiningTeam)
     {

@@ -6,7 +6,6 @@
 #include "Components/TextBlock.h"
 #include "GameplayEffectTypes.h"
 
-
 #include "GAS/CAbilitySystemComponent.h"
 #include "GAS/CAttributeSet.h"
 
@@ -52,19 +51,18 @@ void UValueGauge::SetValue(float NewValue, float NewMaxValue)
 
 void UValueGauge::SetAndBoundToGameplayAttribute(UAbilitySystemComponent* ASC, const FGameplayAttribute& Attribute, const FGameplayAttribute& MaxAttribute)
 {
-    if (ASC)
-    {
-        bool bFound;
-        float Value    = ASC->GetGameplayAttributeValue(Attribute, bFound);
-        float MaxValue = ASC->GetGameplayAttributeValue(MaxAttribute, bFound);
-        if (bFound)
-        {
-            SetValue(Value, MaxValue);
-        }
+    if (!ASC) return;
 
-        ASC->GetGameplayAttributeValueChangeDelegate(Attribute).AddUObject(this, &ThisClass::ValueChanged);
-        ASC->GetGameplayAttributeValueChangeDelegate(MaxAttribute).AddUObject(this, &ThisClass::MaxValueChanged);
+    bool bFound;
+    float Value    = ASC->GetGameplayAttributeValue(Attribute, bFound);
+    float MaxValue = ASC->GetGameplayAttributeValue(MaxAttribute, bFound);
+    if (bFound)
+    {
+        SetValue(Value, MaxValue);
     }
+
+    ASC->GetGameplayAttributeValueChangeDelegate(Attribute).AddUObject(this, &ThisClass::ValueChanged);
+    ASC->GetGameplayAttributeValueChangeDelegate(MaxAttribute).AddUObject(this, &ThisClass::MaxValueChanged);
 }
 
 void UValueGauge::ValueChanged(const FOnAttributeChangeData& ChangedData)

@@ -201,6 +201,11 @@ void UInventoryItemWidget::UpdateCooldown()
     const float CooldownAmt                   = 1.f - CooldownTimeRemaining / CooldownTimeDuration;
     CooldownFormatOpt.MaximumFractionalDigits = CooldownTimeRemaining > 1.f ? 0 : 1;
     CooldownCount->SetText(FText::AsNumber(CooldownTimeRemaining, &CooldownFormatOpt));
+    
+    if (GetItemIcon())
+	{
+		GetItemIcon()->GetDynamicMaterial()->SetScalarParameterValue(MaterialParam_CooldownAmt, CooldownAmt);
+	}
 }
 
 void UInventoryItemWidget::ClearCooldown()

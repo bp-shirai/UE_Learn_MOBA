@@ -118,6 +118,14 @@ void UCAbility_ComboNext::TryCommitCombo()
 
 void UCAbility_ComboNext::DoDamage(FGameplayEventData Data)
 {
+    int HitResultCount = UAbilitySystemBlueprintLibrary::GetDataCountFromTargetData(Data.TargetData);
+
+    for (int i = 0; i < HitResultCount; i++)
+    {
+        FHitResult HitResult                        = UAbilitySystemBlueprintLibrary::GetHitResultFromTargetData(Data.TargetData, i);
+        TSubclassOf<UGameplayEffect> GameplayEffect = GetDamageEffectForCurrentCombo();
+        ApplyGameplayEffectToHitResultActor(HitResult, GameplayEffect, GetAbilityLevel(CurrentSpecHandle, CurrentActorInfo));
+    }
 }
 
 void UCAbility_ComboNext::HandleComboEvent(FGameplayTag EventTag, FGameplayEventData EventData)

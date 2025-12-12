@@ -6,8 +6,16 @@ namespace Tags
 {
     namespace Ability
     {
+        UE_DECLARE_GAMEPLAY_TAG_EXTERN(Generic_Damage);
+        UE_DECLARE_GAMEPLAY_TAG_EXTERN(Generic_Target);
+
+        UE_DECLARE_GAMEPLAY_TAG_EXTERN(Target_Updated);
+
         UE_DECLARE_GAMEPLAY_TAG_EXTERN(BasicAttack);
         UE_DECLARE_GAMEPLAY_TAG_EXTERN(BasicAttack_Pressed);
+        UE_DECLARE_GAMEPLAY_TAG_EXTERN(BasicAttack_Released);
+        UE_DECLARE_GAMEPLAY_TAG_EXTERN(BasicAttack_SendServer);
+
         UE_DECLARE_GAMEPLAY_TAG_EXTERN(AbilityOne);
         UE_DECLARE_GAMEPLAY_TAG_EXTERN(AbilityTwo);
         UE_DECLARE_GAMEPLAY_TAG_EXTERN(AbilityThree);
@@ -26,6 +34,10 @@ namespace Tags
 
         UE_DECLARE_GAMEPLAY_TAG_EXTERN(UpperCut_Launch);
         UE_DECLARE_GAMEPLAY_TAG_EXTERN(UpperCut_Cooldown);
+
+        UE_DECLARE_GAMEPLAY_TAG_EXTERN(Shoot);
+        UE_DECLARE_GAMEPLAY_TAG_EXTERN(Shoot_Hand_R);
+        UE_DECLARE_GAMEPLAY_TAG_EXTERN(Shoot_Hand_L);
 
         UE_DECLARE_GAMEPLAY_TAG_EXTERN(Data_Damage);
         UE_DECLARE_GAMEPLAY_TAG_EXTERN(Data_Duration);
@@ -52,6 +64,9 @@ namespace Tags
 
         UE_DECLARE_GAMEPLAY_TAG_EXTERN(Mana_Full);
         UE_DECLARE_GAMEPLAY_TAG_EXTERN(Mana_Empty);
+
+        UE_DECLARE_GAMEPLAY_TAG_EXTERN(Crosshair);
+        UE_DECLARE_GAMEPLAY_TAG_EXTERN(Focus);
 
     } // namespace Stats
 

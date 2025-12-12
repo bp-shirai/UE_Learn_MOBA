@@ -84,7 +84,7 @@ FCRHandle UCR::Sequence(UWorld* World, const TArray<TFunction<void()>>& Steps)
         Steps[Index++]();
         if (Index < Steps.Num())
         {
-            UCR::Delay(CR->GetWorld(), 0.f, Next);
+            // UCR::Delay(CR->GetWorld(), 0.f, Next);
         }
     };
 
@@ -95,56 +95,51 @@ FCRHandle UCR::Sequence(UWorld* World, const TArray<TFunction<void()>>& Steps)
 // ====================================================================
 // 汎用アニメーション本体（これが TimelineComponent を完全に殺す）
 // ====================================================================
-FCRAnimHandle UCR::Anim(UObject* Owner, float Duration, TFunction<void(float Alpha, float EasedAlpha)> Update, UCurveFloat* Curve)
+FCRAnimHandle UCR::Anim(UObject* Owner, float Duration, TFunction<void(float, float)> Update, UCurveFloat* Curve)
 {
     if (Duration <= 0.f || !Update) return {};
 
-    FCRAnimTask Task;
-    Task.Duration       = Duration;
-    Task.Curve          = Curve;
-    Task.UpdateCallback = MoveTemp(Update);
+    // 共有タスクを作成（これが天才的なポイント）
+    TSharedPtr<FCRAnimTask> Task = MakeShared<FCRAnimTask>();
+    Task->Duration               = Duration;
+    Task->Curve                  = Curve;
+    Task->Update                 = MoveTemp(Update);
 
-    // タスクを包むラムダ（所有権と安全性を完璧に保証）
-    TWeakObjectPtr<UCR> WeakThis = this;
+    TWeakObjectPtr<UObject> WeakOwner = Owner;
+    TWeakPtr<FCRAnimTask> WeakTask    = Task;
 
-    FCRHandle Handle = Run(Owner, [WeakThis, Task](float DeltaTime) mutable -> bool
-    {
-        if (!WeakThis.IsValid()) return false;
+    FCRHandle RawHandle = Run(Owner, [WeakOwner, WeakTask](float DeltaTime) mutable -> bool
+                              {
+        if (!WeakOwner.IsValid() || !WeakTask.IsValid()) return false;
 
-        Task.Elapsed += DeltaTime;
-        float Alpha = FMath::Clamp(Task.Elapsed / Task.Duration, 0.f, 1.f);
-        float Eased = Task.Curve ? Task.Curve->GetFloatValue(Task.bReversing ? (1.f - Alpha) : Alpha) : Alpha;
+        TSharedPtr<FCRAnimTask> PinnedTask = WeakTask.Pin();
+        if (!PinnedTask) return false;
 
-        Task.UpdateCallback(Alpha, Eased);
+        PinnedTask->Elapsed += DeltaTime;
+        float Alpha = FMath::Clamp(PinnedTask->Elapsed / PinnedTask->Duration, 0.f, 1.f);
+        float Eased = PinnedTask->Curve 
+            ? PinnedTask->Curve->GetFloatValue(PinnedTask->bReversing ? (1.f - Alpha) : Alpha)
+            : Alpha;
 
-        // 終了判定
+        PinnedTask->Update(Alpha, Eased);
+
         if (Alpha >= 1.f)
         {
-            if (Task.OnComplete) Task.OnComplete();
+            if (PinnedTask->OnComplete) PinnedTask->OnComplete();
 
-            if (Task.bLoop)
+            if (PinnedTask->bLoop)
             {
-                if (Task.OnLoop) Task.OnLoop();
-                Task.Elapsed = 0.f;
-                if (Task.bAutoReverse) Task.bReversing = !Task.bReversing;
+                if (PinnedTask->OnLoop) PinnedTask->OnLoop();
+                PinnedTask->Reset();
+                if (PinnedTask->bAutoReverse) PinnedTask->bReversing = !PinnedTask->bReversing;
                 return true;
             }
             return false;
         }
+        return true; });
 
-        return true;
-    });
-
-    // ハンドルに拡張機能を付与
-    FCRAnimHandle AnimHandle;
-    AnimHandle.RawHandle = Handle;
-    AnimHandle.CR        = this;
-
-    // コールバックを遅延バインド（Taskはムーブ済みなので、ここでキャプチャ）
-    // → 実際は別途Mapで管理する方法もあるが、シンプルにするためここでは省略
-    // （必要ならTaskをTSharedPtr<FCRAnimTask>にしてMap管理も可）
-
-    return AnimHandle;
+    // ハンドルにタスクを紐づける
+    return FCRAnimHandle(Task);
 }
 
 // ====================================================================
@@ -156,9 +151,7 @@ FCRAnimHandle UCR::LerpFloat(UObject* Owner, float& TargetValue, float From, flo
 {
     TargetValue = From;
     return Anim(Owner, Duration, [&TargetValue, From, To, Curve](float Alpha, float Eased)
-    {
-        TargetValue = FMath::Lerp(From, To, Curve ? Eased : Alpha);
-    }, Curve);
+                { TargetValue = FMath::Lerp(From, To, Curve ? Eased : Alpha); }, Curve);
 }
 
 FCRAnimHandle UCR::MoveTo(UObject* Owner, USceneComponent* Component, FVector TargetLocation, float Duration, UCurveFloat* Curve)
@@ -166,9 +159,7 @@ FCRAnimHandle UCR::MoveTo(UObject* Owner, USceneComponent* Component, FVector Ta
     if (!Component) return {};
     FVector Start = Component->GetRelativeLocation();
     return Anim(Owner, Duration, [Component, Start, TargetLocation](float Alpha, float Eased)
-    { 
-        Component->SetRelativeLocation(FMath::Lerp(Start, TargetLocation, Eased));
-    }, Curve);
+                { Component->SetRelativeLocation(FMath::Lerp(Start, TargetLocation, Eased)); }, Curve);
 }
 
 FCRAnimHandle UCR::RotateTo(UObject* Owner, USceneComponent* Component, FRotator TargetRotation, float Duration, UCurveFloat* Curve)
@@ -179,15 +170,52 @@ FCRAnimHandle UCR::RotateTo(UObject* Owner, USceneComponent* Component, FRotator
                 { Component->SetRelativeRotation(FMath::Lerp(Start, TargetRotation, Eased)); }, Curve);
 }
 
+FCRAnimHandle& FCRAnimHandle::OnComplete(TFunction<void()> Callback)
+{
+    if (auto Task = WeakTask.Pin())
+    {
+        Task->OnComplete = MoveTemp(Callback);
+    }
+    return *this;
+}
+
+FCRAnimHandle& FCRAnimHandle::OnLoop(TFunction<void()> Callback)
+{
+    if (auto Task = WeakTask.Pin())
+    {
+        Task->OnLoop = MoveTemp(Callback);
+    }
+    return *this;
+}
+
+FCRAnimHandle& FCRAnimHandle::SetLoop(bool bEnable)
+{
+    if (auto Task = WeakTask.Pin())
+    {
+        Task->bLoop = bEnable;
+    }
+    return *this;
+}
+
+FCRAnimHandle& FCRAnimHandle::SetAutoReverse(bool bEnable)
+{
+    if (auto Task = WeakTask.Pin())
+    {
+        Task->bAutoReverse = bEnable;
+    }
+    return *this;
+}
+
 void FCRAnimHandle::Cancel()
 {
-    if (CR && RawHandle != InvalidCRHandle)
+    if (auto Task = WeakTask.Pin())
     {
-        CR->Cancel(RawHandle);
+        if (Task->OnCancelled) Task->OnCancelled();
+        // Runしたタスクは自動で消えるので、ここでは何もしない（安全）
     }
 }
 
 bool FCRAnimHandle::IsRunning() const
 {
-    return CR && CR->IsRunning(RawHandle);
+    return WeakTask.IsValid() && WeakTask.Pin().IsValid();
 }

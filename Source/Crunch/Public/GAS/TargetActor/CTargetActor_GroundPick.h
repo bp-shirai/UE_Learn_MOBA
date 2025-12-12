@@ -26,6 +26,8 @@ public:
 
     void SetTargetOptions(bool bTargetEnemy, bool bTargetFriendly);
 
+    void SetShouldDrawDebug(bool bShouldDraw) { bDebug = bShouldDraw; }
+
 protected:
     UPROPERTY(VisibleAnywhere, Category = "Visual")
     UDecalComponent* TargetAreaDecal;

@@ -28,7 +28,14 @@ public class Crunch : ModuleRules
 			"GameplayAbilities",
 			"AIModule",
 			"GameplayBehaviorsModule",
-			"AnimGraphRuntime"
+			"AnimGraphRuntime",
+			"Niagara",
+			"OnlineSubsystem",
+			"OnlineSubsystemEOS",
+			"OnlineSubsystemUtils",
+			"Networking",
+			"HTTP",
+			"Json"
 		});
 
 		// Uncomment if you are using online features

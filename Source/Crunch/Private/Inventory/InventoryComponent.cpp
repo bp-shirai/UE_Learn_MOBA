@@ -110,7 +110,6 @@ void UInventoryComponent::GrantItem(const UPA_ShopItem* NewItem)
 
         FGameplayAbilitySpecHandle GrantedAbilitySpecHandle = InventoryItem->GetGrantedAbilitySpecHandle();
 
-
         Client_ItemAdded(NewHandle, NewItem, GrantedAbilitySpecHandle);
 
         // InventoryItem->ApplyGASModifications();
@@ -170,15 +169,13 @@ void UInventoryComponent::RemoveItem(UInventoryItem* Item)
 
 #pragma region--------------- Client ---------------------------------------------
 
-void UInventoryComponent::Client_ItemAdded_Implementation(FInventoryItemHandle AssignedHandle, const UPA_ShopItem* NewItem,  FGameplayAbilitySpecHandle GrantedAbilitySpecHandle)
+void UInventoryComponent::Client_ItemAdded_Implementation(FInventoryItemHandle AssignedHandle, const UPA_ShopItem* NewItem, FGameplayAbilitySpecHandle GrantedAbilitySpecHandle)
 {
     if (GetOwner()->HasAuthority()) return;
 
     UInventoryItem* InventoryItem = NewObject<UInventoryItem>();
     InventoryItem->InitItem(AssignedHandle, NewItem, GetOwnerAbilitySystemComponent());
-
     InventoryItem->SetGrantedAbilitySpecHandle(GrantedAbilitySpecHandle);
-
     InventoryMap.Add(AssignedHandle, InventoryItem);
 
     OnItemAdded.Broadcast(InventoryItem);
@@ -378,7 +375,7 @@ void UInventoryComponent::AbilityCommitted(UGameplayAbility* CommittedAbility)
 void UInventoryComponent::TryActivateItemInSlot(int SlotNumber)
 {
     UE_LOG(LogTemp, Warning, TEXT("TryActivateItemInSlot: %d"), SlotNumber);
-    
+
     for (const auto& [Handle, InventoryItem] : InventoryMap)
     {
         if (InventoryItem && InventoryItem->GetSlot() == SlotNumber)

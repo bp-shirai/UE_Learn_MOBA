@@ -9,6 +9,7 @@
 #include "GenericTeamAgentInterface.h"
 
 #include "GAS/CGameplayAbilityTypes.h"
+#include "Widgets/RenderActorTargetInterface.h"
 
 #include "CCharacter.generated.h"
 
@@ -24,7 +25,7 @@ struct FOnAttributeChangeData;
  */
 
 UCLASS(Abstract)
-class CRUNCH_API ACCharacter : public ACharacter, public IAbilitySystemInterface, public IGenericTeamAgentInterface
+class CRUNCH_API ACCharacter : public ACharacter, public IAbilitySystemInterface, public IGenericTeamAgentInterface, public IRenderActorTargetInterface
 {
     GENERATED_BODY()
 
@@ -61,13 +62,15 @@ protected:
 
     UPROPERTY()
     UCAttributeSet* AttributeSet;
-    
+
 private:
     void BindGASChangeDelegates();
 
     void Death_TagUpdated(const FGameplayTag Tag, int32 NewCount);
     void Stun_TagUpdated(const FGameplayTag Tag, int32 NewCount);
     void Aim_TagUpdated(const FGameplayTag Tag, int32 NewCount);
+    void Focus_TagUpdated(const FGameplayTag Tag, int32 NewCount);
+
     void SetIsAiming(bool bIsAiming);
     virtual void OnAimStateChanged(bool bIsAiming);
 
@@ -75,6 +78,8 @@ private:
     void MaxHealth_Updated(const FOnAttributeChangeData& Data);
     void MaxMana_Updated(const FOnAttributeChangeData& Data);
 
+    bool bIsInFocusMode{false};
+    
 #pragma endregion
 #pragma region-------- UI ---------------------------------------------------------
 
@@ -156,4 +161,16 @@ public:
     void AIPerceptionStimuliSourceEnable(bool bIsEnable);
 
 #pragma endregion
+
+
+private:
+    UPROPERTY(EditDefaultsOnly, Category = "Capture")
+    FVector HeadShotCaptureLocalPosition;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Capture")
+    FRotator HeadShotCaptureLocalRotation;
+    
+public:
+    virtual FVector GetCaptureLocalPosition() const override { return HeadShotCaptureLocalPosition; }
+    virtual FRotator GetCaptureLocalRotation() const override { return HeadShotCaptureLocalRotation; }
 };

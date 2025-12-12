@@ -24,6 +24,8 @@ void URenderActorWidget::NativeConstruct()
 {
     Super::NativeConstruct();
 
+    FrameRate = FMath::Max(FrameRate, 1);
+
     SpawnRenderActor();
     ConfigureRenderActor();
     BeginRenderCapture();
@@ -51,13 +53,7 @@ void URenderActorWidget::ConfigureRenderActor()
 
 void URenderActorWidget::BeginRenderCapture()
 {
-    if (FrameRate <= 0)
-    {
-        UE_LOG(LogTemp, Warning, TEXT("FrameRate must be greater than 0"));
-        return;
-    }
-
-    RenderTickInterval = 1.0f / static_cast<float>(FrameRate);
+    RenderTickInterval = 1.f / static_cast<float>(FrameRate);
 
     if (UWorld* World = GetWorld())
     {

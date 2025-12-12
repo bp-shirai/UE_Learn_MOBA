@@ -21,7 +21,7 @@ AStormCore::AStormCore()
     InfluenceRange = CreateDefaultSubobject<USphereComponent>("InfluenceRange");
     InfluenceRange->SetupAttachment(GetRootComponent());
     InfluenceRange->OnComponentBeginOverlap.AddDynamic(this, &ThisClass::NewInfluenceInRange);
-    InfluenceRange->OnComponentEndOverlap.AddDynamic(this, &ThisClass::NewInfluenceLeftRange);
+    InfluenceRange->OnComponentEndOverlap.AddDynamic(this, &ThisClass::InfluenceLeftRange);
 
     ViewCam = CreateDefaultSubobject<UCameraComponent>("ViewCam");
     ViewCam->SetupAttachment(GetRootComponent());
@@ -48,12 +48,13 @@ void AStormCore::BeginPlay()
         FVector TeamTwoGoalLoc = TeamTwoGoal->GetActorLocation();
 
         FVector GoalOffset = TeamOneGoalLoc - TeamTwoGoalLoc;
-        GoalOffset.Z = 0;
+        GoalOffset.Z       = 0;
 
         TravelLength = GoalOffset.Length();
     }
 
     CoreCaptureSpeed = 0.f;
+    TravelLength     = FMath::Max(TravelLength, 1.f);
 }
 
 void AStormCore::Tick(float DeltaTime)
@@ -94,11 +95,11 @@ void AStormCore::NewInfluenceInRange(UPrimitiveComponent* OverlappedComponent, A
     IGenericTeamAgentInterface* OtherTeam = Cast<IGenericTeamAgentInterface>(OtherActor);
     if (OtherTeam)
     {
-        if (OtherTeam->GetGenericTeamId().GetId() == 1)
+        if (OtherTeam->GetGenericTeamId() == 1)
         {
             TeamOneInfluencerCount++;
         }
-        else if (OtherTeam->GetGenericTeamId().GetId() == 2)
+        else if (OtherTeam->GetGenericTeamId() == 2)
         {
             TeamTwoInfluencerCount++;
         }
@@ -107,7 +108,7 @@ void AStormCore::NewInfluenceInRange(UPrimitiveComponent* OverlappedComponent, A
     }
 }
 
-void AStormCore::NewInfluenceLeftRange(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+void AStormCore::InfluenceLeftRange(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
     IGenericTeamAgentInterface* OtherTeam = Cast<IGenericTeamAgentInterface>(OtherActor);
     if (OtherTeam)
@@ -236,11 +237,11 @@ void AStormCore::ExpandFinished()
 
 float AStormCore::GetProgress() const
 {
-    if (!TeamTwoGoal || TravelLength == 0.f) return 0.5f;
+    if (!TeamTwoGoal) return 0.f;
 
-    FVector TeamTwoGoalLoc = TeamTwoGoal->GetActorLocation();
+    FVector TeamTwoGoalLoc    = TeamTwoGoal->GetActorLocation();
     FVector VectorFromTeamOne = GetActorLocation() - TeamTwoGoalLoc;
-    VectorFromTeamOne.Z = 0;
+    VectorFromTeamOne.Z       = 0;
 
     return VectorFromTeamOne.Length() / TravelLength;
 }

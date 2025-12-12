@@ -71,8 +71,6 @@ void UCAbility_Combo::ComboChangedEventReceived(FGameplayEventData Data)
     else
     {
         NextComboName = EventTag.GetTagLeafName();
-
-        // UE_LOG(LogTemp, Warning, TEXT("NextComboName: %s"), *NextComboName.ToString());
     }
 }
 
@@ -91,17 +89,14 @@ void UCAbility_Combo::HandleInputPress(float TimeWaited)
 
 void UCAbility_Combo::TryCommitCombo()
 {
-    if (NextComboName == NAME_None) return;
-
-    // if (UAnimInstance* OwnerAnimInstance = GetOwnerAnimInstance())
-    // {
-    //     OwnerAnimInstance->Montage_SetNextSection(OwnerAnimInstance->Montage_GetCurrentSection(), NextComboName, ComboMontage);
-    // }
-
-    if (UAbilitySystemComponent* ASC = GetAbilitySystemComponentFromActorInfo())
+    if (NextComboName == NAME_None)
     {
-        const FName CurrentComboName = ASC->GetCurrentMontageSectionName();
-        MontageSetNextSectionName(CurrentComboName, NextComboName);
+        return;
+    }
+
+    if (UAnimInstance* OwnerAnimInstance = GetOwnerAnimInstance())
+    {
+        OwnerAnimInstance->Montage_SetNextSection(OwnerAnimInstance->Montage_GetCurrentSection(ComboMontage), NextComboName, ComboMontage);
     }
 }
 
@@ -122,9 +117,9 @@ TSubclassOf<UGameplayEffect> UCAbility_Combo::GetDamageEffectForCurrentCombo() c
 {
     if (DamageEffectMap.Num() == 0) return DefaultDamageEffect;
 
-    if (UAbilitySystemComponent* ASC = GetAbilitySystemComponentFromActorInfo())
+    if (UAnimInstance* OwnerAnimInstance = GetOwnerAnimInstance())
     {
-        const FName CurrentComboName                       = ASC->GetCurrentMontageSectionName();
+        const FName CurrentComboName                       = OwnerAnimInstance->Montage_GetCurrentSection(ComboMontage);
         const TSubclassOf<UGameplayEffect>* FoundEffectPtr = DamageEffectMap.Find(CurrentComboName);
         if (FoundEffectPtr)
         {
@@ -137,9 +132,9 @@ TSubclassOf<UGameplayEffect> UCAbility_Combo::GetDamageEffectForCurrentCombo() c
 
 void UCAbility_Combo::DoDamage(FGameplayEventData Data)
 {
-    int32 HitResultCount = UAbilitySystemBlueprintLibrary::GetDataCountFromTargetData(Data.TargetData);
+    int HitResultCount = UAbilitySystemBlueprintLibrary::GetDataCountFromTargetData(Data.TargetData);
 
-    for (int32 i = 0; i < HitResultCount; i++)
+    for (int i = 0; i < HitResultCount; i++)
     {
         FHitResult HitResult                      = UAbilitySystemBlueprintLibrary::GetHitResultFromTargetData(Data.TargetData, i);
         TSubclassOf<UGameplayEffect> DamageEffect = GetDamageEffectForCurrentCombo();

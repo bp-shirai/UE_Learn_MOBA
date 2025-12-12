@@ -165,9 +165,9 @@ void UCAbility_UpperCut::HandleComboDamageEvent(FGameplayTag EventTag, const FGa
 
         const FCGenericDamageEffectDef* DamageDef = GetDamageEffectDefForCurrentCombo();
         if (!DamageDef) return;
-        
-        const int32 HitResultCount = UAbilitySystemBlueprintLibrary::GetDataCountFromTargetData(EventData.TargetData);
-        for (int32 i = 0; i < HitResultCount; i++)
+
+        const int HitResultCount = UAbilitySystemBlueprintLibrary::GetDataCountFromTargetData(EventData.TargetData);
+        for (int i = 0; i < HitResultCount; i++)
         {
             const FHitResult HitResult = UAbilitySystemBlueprintLibrary::GetHitResultFromTargetData(EventData.TargetData, i);
             const FVector PushVelocity = GetAvatarActorFromActorInfo()->GetActorTransform().TransformVector(DamageDef->PushVelocity);

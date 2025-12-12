@@ -4,8 +4,10 @@
 
 #include "Engine/World.h"
 #include "GameFramework/Character.h"
+#include "Components/SceneCaptureComponent2D.h"
 
 #include "Widgets/SkeletalMeshRenderActor.h"
+#include "Widgets/RenderActorTargetInterface.h"
 
 void USkeletalMeshRenderActorWidget::NativeConstruct()
 {
@@ -15,6 +17,16 @@ void USkeletalMeshRenderActorWidget::NativeConstruct()
     if (PlayerCharacter && SkeletalMeshRenderActor)
     {
         SkeletalMeshRenderActor->ConfigureSkeletalMesh(PlayerCharacter->GetMesh()->GetSkeletalMeshAsset(), PlayerCharacter->GetMesh()->GetAnimClass());
+
+        if (USceneCaptureComponent2D* SceneCapture = SkeletalMeshRenderActor->GetCaptureComponent())
+        {
+            IRenderActorTargetInterface* PlayerCharacterRenderTargetInterface = Cast<IRenderActorTargetInterface>(PlayerCharacter);
+            if (PlayerCharacterRenderTargetInterface)
+            {
+                SceneCapture->SetRelativeLocation(PlayerCharacterRenderTargetInterface->GetCaptureLocalPosition());
+                SceneCapture->SetRelativeRotation(PlayerCharacterRenderTargetInterface->GetCaptureLocalRotation());
+            }
+        }
     }
 }
 

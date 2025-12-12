@@ -31,6 +31,7 @@ public:
 
     virtual void PawnClientRestart() override;
     virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+    virtual void GetActorEyesViewPoint(FVector& OutLocation, FRotator& OutRotation) const override;
 
     const TMap<ECAbilityInputID, TSubclassOf<UGameplayAbility>>& GetAbilities() const;
 
@@ -42,6 +43,7 @@ private:
     UCameraComponent* ViewCam;
 
 #pragma region------- Gameplay Ability ---------------------------------------
+
 private:
     virtual void OnAimStateChanged(bool bIsAiming) override;
 

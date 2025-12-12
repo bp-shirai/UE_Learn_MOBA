@@ -4,8 +4,15 @@ namespace Tags
 {
     namespace Ability
     {
+        UE_DEFINE_GAMEPLAY_TAG(Generic_Damage, "Ability.Generic.Damage");
+        UE_DEFINE_GAMEPLAY_TAG(Generic_Target, "Ability.Generic.Target");
+        UE_DEFINE_GAMEPLAY_TAG(Target_Updated, "Ability.Target.Updated");
+
         UE_DEFINE_GAMEPLAY_TAG(BasicAttack, "Ability.BasicAttack");
         UE_DEFINE_GAMEPLAY_TAG(BasicAttack_Pressed, "Ability.BasicAttack.Pressed");
+        UE_DEFINE_GAMEPLAY_TAG(BasicAttack_Released, "Ability.BasicAttack.Released");
+        UE_DEFINE_GAMEPLAY_TAG(BasicAttack_SendServer, "Ability.BasicAttack.SendServer");
+
         UE_DEFINE_GAMEPLAY_TAG(AbilityOne, "Ability.AbilityOne");
         UE_DEFINE_GAMEPLAY_TAG(AbilityTwo, "Ability.AbilityTwo");
         UE_DEFINE_GAMEPLAY_TAG(AbilityThree, "Ability.AbilityThree");
@@ -26,6 +33,10 @@ namespace Tags
 
         UE_DEFINE_GAMEPLAY_TAG(UpperCut_Launch, "Ability.UpperCut.Launch");
         UE_DEFINE_GAMEPLAY_TAG(UpperCut_Cooldown, "Ability.UpperCut.Cooldown");
+
+        UE_DEFINE_GAMEPLAY_TAG(Shoot, "Ability.Shoot");
+        UE_DEFINE_GAMEPLAY_TAG(Shoot_Hand_L, "Ability.Shoot.Hand_L");
+        UE_DEFINE_GAMEPLAY_TAG(Shoot_Hand_R, "Ability.Shoot.Hand_R");
 
         UE_DEFINE_GAMEPLAY_TAG(Data_Damage, "Ability.Data.Damage");
         UE_DEFINE_GAMEPLAY_TAG(Data_Duration, "Ability.Data.Duration");
@@ -49,6 +60,9 @@ namespace Tags
         UE_DEFINE_GAMEPLAY_TAG(Health_Empty, "Stats.Health.Empty");
         UE_DEFINE_GAMEPLAY_TAG(Mana_Full, "Stats.Mana.Full");
         UE_DEFINE_GAMEPLAY_TAG(Mana_Empty, "Stats.Mana.Empty");
+
+        UE_DEFINE_GAMEPLAY_TAG(Crosshair, "Stats.Crosshair");
+        UE_DEFINE_GAMEPLAY_TAG(Focus, "Stats.Focus");
 
     } // namespace Stats
 

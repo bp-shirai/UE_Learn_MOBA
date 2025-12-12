@@ -44,13 +44,18 @@ public:
     UFUNCTION(BlueprintPure, Category = "GAS|Utils", meta = (CompactNodeTitle = "Get Value At Level"))
     static float GetScalableFloatValueAtLevel(const FScalableFloat& InScalableFloat, float InLevel = 1.f);
 
-    static float GetStaticColldownDurationForAbility(const UGameplayAbility* Ability);
+    static float GetStaticCooldownDurationForAbility(const UGameplayAbility* Ability);
     static float GetStaticCostForAbility(const UGameplayAbility* Ability);
+
+    static bool ActorHasTag(const AActor* ActorToCheck, const FGameplayTag& Tag);
     static bool IsHero(const AActor* ActorToCheck);
+    static bool IsActorDead(const AActor* ActorToCheck);
+
     static bool IsAbilityAtMaxLevel(const FGameplayAbilitySpec& Spec);
     static bool CheckAbilityCost(const FGameplayAbilitySpec& Spec, const UAbilitySystemComponent* ASC);
     static bool CheckAbilityCostStatic(const UGameplayAbility* AbilityCDO, const UAbilitySystemComponent* ASC);
     static float GetManaCostFor(const UGameplayAbility* AbilityCDO, const UAbilitySystemComponent* ASC, int32 AbilityLevel);
     static float GetCooldownDurationFor(const UGameplayAbility* AbilityCDO, const UAbilitySystemComponent* ASC, int32 AbilityLevel);
     static float GetCooldownRemainingFor(const UGameplayAbility* AbilityCDO, const UAbilitySystemComponent* ASC);
+    static void SendLocalGameplayCue(AActor* CueTargetActor, const FHitResult& HitResult, const FGameplayTag& GameplayCueTag);
 };

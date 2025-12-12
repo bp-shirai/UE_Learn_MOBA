@@ -37,12 +37,9 @@ void UCAbility_Dead::ActivateAbility(const FGameplayAbilitySpecHandle Handle, co
             Killer = nullptr;
         }
 
-        UE_LOG(LogTemp, Warning, TEXT("Killer = %s"), *GetNameSafe(Killer));
-
         TArray<AActor*> RewardTargets = GetRewardTargets();
         if (RewardTargets.Num() == 0 && !Killer)
         {
-            UE_LOG(LogTemp, Warning, TEXT("No Reward Targets Found"));
             K2_EndAbility();
             return;
         }
@@ -67,14 +64,11 @@ void UCAbility_Dead::ActivateAbility(const FGameplayAbilitySpecHandle Handle, co
                 EffectSpec.Data->SetSetByCallerMagnitude(Tags::Attribute::Experience, KillerExperienceReward);
                 EffectSpec.Data->SetSetByCallerMagnitude(Tags::Attribute::Gold, KillerGoldReward);
 
-                UE_LOG(LogTemp, Warning, TEXT("Killer Experience Reward = %f"), KillerExperienceReward);
-                UE_LOG(LogTemp, Warning, TEXT("Killer Gold Reward = %f"), KillerGoldReward);
-
                 K2_ApplyGameplayEffectSpecToTarget(EffectSpec, UAbilitySystemBlueprintLibrary::AbilityTargetDataFromActor(Killer));
-            }
 
-            TotalExperienceReward -= KillerExperienceReward;
-            TotalGoldReward -= KillerGoldReward;
+                TotalExperienceReward -= KillerExperienceReward;
+                TotalGoldReward -= KillerGoldReward;
+            }
         }
 
         float ExperiencePerTarget            = TotalExperienceReward / RewardTargets.Num();
@@ -86,12 +80,6 @@ void UCAbility_Dead::ActivateAbility(const FGameplayAbilitySpecHandle Handle, co
             EffectSpec.Data->SetSetByCallerMagnitude(Tags::Attribute::Gold, GoldPerTarget);
 
             K2_ApplyGameplayEffectSpecToTarget(EffectSpec, UAbilitySystemBlueprintLibrary::AbilityTargetDataFromActorArray(RewardTargets, true));
-        }
-
-        if (RewardTargets.Num() > 0)
-        {
-            UE_LOG(LogTemp, Warning, TEXT("Targets Experience Reward = %f"), ExperiencePerTarget);
-            UE_LOG(LogTemp, Warning, TEXT("Targets Gold Reward = %f"), GoldPerTarget);
         }
 
         K2_EndAbility();
@@ -116,8 +104,6 @@ TArray<AActor*> UCAbility_Dead::GetRewardTargets() const
         for (const FOverlapResult& OverlapResult : OverlapResults)
         {
             AActor* OtherActor = OverlapResult.GetActor();
-
-            // UE_LOG(LogTemp, Warning, TEXT("OtherActor = %s"), *GetNameSafe(OtherActor));
 
             const IGenericTeamAgentInterface* OtherTeam = Cast<IGenericTeamAgentInterface>(OtherActor);
             if (OtherTeam)

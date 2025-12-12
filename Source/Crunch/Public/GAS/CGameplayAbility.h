@@ -33,10 +33,20 @@ protected:
     void PushTarget(AActor* Target, const FVector& PushVelocity);
     void PushTargets(const TArray<AActor*> Targets, const FVector& PushVelocity);
     void PushTargets(const FGameplayAbilityTargetDataHandle& TargetData, const FVector& PushVelocity);
-
+	void PushTargetsFromOwnerLocation(const TArray<AActor*>& Targets, float PushSpeed);
+	void PushTargetsFromOwnerLocation(const FGameplayAbilityTargetDataHandle& TargetDataHandle, float PushSpeed);
+	void PushTargetsFromLocation(const FGameplayAbilityTargetDataHandle& TargetDataHandle, const FVector& FromLocation, float PushSpeed);
+	void PushTargetsFromLocation(const TArray<AActor*>& Targets, const FVector& FromLocation, float PushSpeed);
+    
     ACharacter* GetOwningAvatarCharacter();
 
     void ApplyGameplayEffectToHitResultActor(const FHitResult& HitResult, TSubclassOf<UGameplayEffect> GameplayEffectClass, int32 Level);
+    void SendLocalGameplayEvent(const FGameplayTag& EventTag, const FGameplayEventData& EventData);
+    AActor* GetAimTarget(float AimDistance, ETeamAttitude::Type TeamAttitude) const;
+    FGenericTeamId GetOwnerTeamId() const;
+    bool IsActorTeamAttitudeIs(const AActor* OtherActor, ETeamAttitude::Type TeamAttitude) const;
+    void PlayMontageLocally(UAnimMontage* MontageToPlay);
+    void StopMontageAfterCurrentSection(UAnimMontage* MontageToStop);
 
 private:
     UPROPERTY(EditDefaultsOnly, Category = "Debug")

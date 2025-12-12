@@ -29,11 +29,7 @@ void ARenderActor::BeginPlay()
 	SetActorLocation({0.f, 0.f, 100000.f});
 }
 
-// Called every frame
-void ARenderActor::Tick(float DeltaTime)
-{
-    Super::Tick(DeltaTime);
-}
+
 
 void ARenderActor::SetRenderTarget(UTextureRenderTarget2D* RenderTarget)
 {

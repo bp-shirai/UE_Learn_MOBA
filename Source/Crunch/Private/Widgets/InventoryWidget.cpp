@@ -29,9 +29,6 @@ void UInventoryWidget::NativeConstruct()
             InventoryComponent->OnItemStackCountChanged.AddUObject(this, &ThisClass::ItemStackCountChanged);
             InventoryComponent->OnItemAbilityCommitted.AddUObject(this, &ThisClass::ItemAbilityCommitted);
 
-
-
-
             int Capacity = InventoryComponent->GetCapacity();
 
             ItemList->ClearChildren();
@@ -52,7 +49,6 @@ void UInventoryWidget::NativeConstruct()
                     ItemWidgets.Add(NewEmptyWidget);
 
                     NewEmptyWidget->OnInventoryItemDropped.AddUObject(this, &ThisClass::HandleItemDragDrop);
-
                     NewEmptyWidget->OnLeftButtonClicked.AddUObject(InventoryComponent, &UInventoryComponent::TryActivateItem);
                     NewEmptyWidget->OnRightButtonClicked.AddUObject(this, &ThisClass::ToggleContextMenu);
 

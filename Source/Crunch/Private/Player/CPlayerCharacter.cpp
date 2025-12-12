@@ -146,8 +146,12 @@ void ACPlayerCharacter::HandleAbilityInput(const FInputActionValue& Value, ECAbi
 
     if (InputID == ECAbilityInputID::BasicAttack)
     {
-        // Server_SendGameplayEventToSelf(Tags::Ability::BasicAttack_Pressed, FGameplayEventData());
-        UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(this, Tags::Ability::BasicAttack_Pressed, FGameplayEventData());
+        if (AbilitySystemComponent && AbilitySystemComponent->HasMatchingGameplayTag(Tags::Ability::BasicAttack_SendServer))
+        {
+            Server_SendGameplayEventToSelf(bPressed ? Tags::Ability::BasicAttack_Pressed : Tags::Ability::BasicAttack_Released, FGameplayEventData());
+        }
+        FGameplayTag BasicAttackTag = bPressed ? Tags::Ability::BasicAttack_Pressed : Tags::Ability::BasicAttack_Released;
+        UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(this, BasicAttackTag, FGameplayEventData());
     }
 }
 
@@ -243,4 +247,10 @@ void ACPlayerCharacter::UseInventoryItem(const FInputActionValue& Value)
     {
         InventoryComponent->TryActivateItemInSlot(KeyValue - 1);
     }
+}
+
+void ACPlayerCharacter::GetActorEyesViewPoint(FVector& OutLocation, FRotator& OutRotation) const
+{
+    OutLocation = ViewCam->GetComponentLocation();
+    OutRotation = GetBaseAimRotation();
 }

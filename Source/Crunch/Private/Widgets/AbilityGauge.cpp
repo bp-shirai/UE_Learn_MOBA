@@ -12,7 +12,8 @@
 #include "GAS/CAbilitySystemStatics.h"
 #include "GAS/CAttributeSet.h"
 #include "GAS/CHeroAttributeSet.h"
-
+#include "GAS/CGameplayTags.h"
+#include "Widgets/AbilityToolTip.h"
 
 void UAbilityGauge::NativeConstruct()
 {
@@ -50,7 +51,7 @@ void UAbilityGauge::NativeOnListItemObjectSet(UObject* ListItemObject)
 
     AbilityCDO = Cast<UGameplayAbility>(ListItemObject);
 
-    float CooldownDuration = UCAbilitySystemStatics::GetStaticColldownDurationForAbility(AbilityCDO);
+    float CooldownDuration = UCAbilitySystemStatics::GetStaticCooldownDurationForAbility(AbilityCDO);
     float Cost             = UCAbilitySystemStatics::GetStaticCostForAbility(AbilityCDO);
 
     CostText->SetText(FText::AsNumber(Cost));
@@ -63,6 +64,23 @@ void UAbilityGauge::ConfigureWithWidgetData(const FAbilityWidgetData* WidgetData
     if (WidgetData)
     {
         Icon->GetDynamicMaterial()->SetTextureParameterValue(IconParamName, WidgetData->Icon.LoadSynchronous());
+        CreateToolTipWidget(WidgetData);
+    }
+}
+
+void UAbilityGauge::CreateToolTipWidget(const FAbilityWidgetData* AbilityWidgetData)
+{
+    if (!AbilityWidgetData || !AbilityToolTipClass)
+        return;
+
+    UAbilityToolTip* InstantiatedToolTip = CreateWidget<UAbilityToolTip>(GetOwningPlayer(), AbilityToolTipClass);
+    if (InstantiatedToolTip)
+    {
+        float CooldownDuration = UCAbilitySystemStatics::GetStaticCooldownDurationForAbility(AbilityCDO);
+        float Cost             = UCAbilitySystemStatics::GetStaticCostForAbility(AbilityCDO);
+        InstantiatedToolTip->SetAbilityInfo(AbilityWidgetData->AbilityName, AbilityWidgetData->Icon.LoadSynchronous(), AbilityWidgetData->Description, CooldownDuration, Cost);
+
+        SetToolTip(InstantiatedToolTip);
     }
 }
 
@@ -111,14 +129,17 @@ void UAbilityGauge::CooldownUpdate()
 
 const FGameplayAbilitySpec* UAbilityGauge::GetAbilitySpec()
 {
-    if (!CachedAbilitySpec)
+    if (!OwnerAbilitySystemComponent) return nullptr;
+    if (!AbilityCDO) return nullptr;
+
+    if (!CachedAbilitySpecHandle.IsValid())
     {
-        if (AbilityCDO && OwnerAbilitySystemComponent)
-        {
-            CachedAbilitySpec = OwnerAbilitySystemComponent->FindAbilitySpecFromClass(AbilityCDO->GetClass());
-        }
+        FGameplayAbilitySpec* FoundAbilitySpec = OwnerAbilitySystemComponent->FindAbilitySpecFromClass(AbilityCDO->GetClass());
+        CachedAbilitySpecHandle                = FoundAbilitySpec ? FoundAbilitySpec->Handle : FGameplayAbilitySpecHandle();
+        return FoundAbilitySpec;
     }
-    return CachedAbilitySpec;
+
+    return OwnerAbilitySystemComponent->FindAbilitySpecFromHandle(CachedAbilitySpecHandle);
 }
 
 void UAbilityGauge::AbilitySpecUpdated(const FGameplayAbilitySpec& AbilitySpec)

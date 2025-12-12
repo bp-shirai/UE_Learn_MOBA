@@ -47,8 +47,15 @@ void UCAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
             const FRotator BodyRotDelta = UKismetMathLibrary::NormalizedDeltaRotator(BodyRot, PrevBodyRot);
             PrevBodyRot                 = BodyRot;
 
-            YawSpeed         = BodyRotDelta.Yaw / DeltaSeconds;
-            SmoothedYawSpeed = UKismetMathLibrary::FInterpTo(SmoothedYawSpeed, YawSpeed, DeltaSeconds, YawSpeedSmoothLerpSpeed);
+            YawSpeed = BodyRotDelta.Yaw / DeltaSeconds;
+
+            float YawLerpSpeed = YawSpeedSmoothLerpSpeed;
+            if (YawSpeed == 0)
+            {
+                YawLerpSpeed = YawSpeedLerpToZeroSpeed;
+            }
+
+            SmoothedYawSpeed = UKismetMathLibrary::FInterpTo(SmoothedYawSpeed, YawSpeed, DeltaSeconds, YawLerpSpeed);
 
             if (bUseLookRotOffset)
             {

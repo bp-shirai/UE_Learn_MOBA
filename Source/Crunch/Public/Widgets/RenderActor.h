@@ -18,12 +18,10 @@ public:
     ARenderActor();
     void SetRenderTarget(UTextureRenderTarget2D* RenderTarget);
     void UpdateRender();
+    FORCEINLINE class USceneCaptureComponent2D* GetCaptureComponent() const { return CaptureComponent; }
 
 protected:
     virtual void BeginPlay() override;
-
-public:
-    virtual void Tick(float DeltaTime) override;
 
 private:
     UPROPERTY(VisibleDefaultsOnly, Category = "Render Actor")

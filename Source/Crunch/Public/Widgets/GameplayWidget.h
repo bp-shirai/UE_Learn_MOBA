@@ -20,6 +20,7 @@ class UMatchStatWidget;
 class UGameplayMenu;
 class UWidgetSwitcher;
 class UCanvasPanel;
+class UCrosshairWidget;
 
 /**
  *
@@ -89,6 +90,9 @@ private:
 
     UPROPERTY(meta = (BindWidget))
     UCanvasPanel* GameplayMenuRootPanel;
+
+    UPROPERTY(meta = (BindWidget))
+    UCrosshairWidget* CrosshairWidget;
 
     UPROPERTY(Transient, meta = (BindWidgetAnim))
     UWidgetAnimation* ShopPopup_Anim;

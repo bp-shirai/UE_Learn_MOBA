@@ -10,14 +10,10 @@ void UGameplayMenu::NativeConstruct()
 {
     Super::NativeConstruct();
 
-    // ResumeButton->OnClicked.AddDynamic(this, &ThisClass::ResumeButtonClicked);
     MainMenuButton->OnClicked.AddDynamic(this, &ThisClass::BackToMainMenu);
     QuitGameButton->OnClicked.AddDynamic(this, &ThisClass::QuitGame);
 }
 
-void UGameplayMenu::ResumeButtonClicked()
-{
-}
 
 void UGameplayMenu::BackToMainMenu()
 {

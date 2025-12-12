@@ -21,8 +21,6 @@ UCAbility_GroundBlast::UCAbility_GroundBlast()
 {
     InstancingPolicy = EGameplayAbilityInstancingPolicy::InstancedPerActor;
 
-    SetAssetTags(FGameplayTagContainer(Tags::Ability::AbilityTwo));
-
     BlockAbilitiesWithTag.AddTag(Tags::Ability::BasicAttack);
     ActivationOwnedTags.AddTag(Tags::Stats::Aim);
 }
@@ -31,33 +29,29 @@ void UCAbility_GroundBlast::ActivateAbility(const FGameplayAbilitySpecHandle Han
 {
     if (HasAuthorityOrPredictionKey(CurrentActorInfo, &CurrentActivationInfo))
     {
-        FGameplayTagContainer Tags(Tags::Ability::Combo_Damage);
+        UAbilityTask_PlayMontageAndWait* PlayMontageTask = UAbilityTask_PlayMontageAndWait::CreatePlayMontageAndWaitProxy(this, NAME_None, TargetingMontage);
+        // PlayMontageTask->OnBlendOut.AddDynamic(this, &ThisClass::HandlePlayEnd);
+        PlayMontageTask->OnCancelled.AddDynamic(this, &ThisClass::HandlePlayEnd);
+        PlayMontageTask->OnInterrupted.AddDynamic(this, &ThisClass::HandlePlayEnd);
+        PlayMontageTask->OnCompleted.AddDynamic(this, &ThisClass::HandlePlayEnd);
+        PlayMontageTask->ReadyForActivation();
 
-        UAbilityTask_PlayMontageAndWait* PlayMontage = UAbilityTask_PlayMontageAndWait::CreatePlayMontageAndWaitProxy(this, NAME_None, TargetingMontage);
-        // PlayMontage->OnBlendOut.AddDynamic(this, &ThisClass::HandlePlayEnd);
-        PlayMontage->OnCancelled.AddDynamic(this, &ThisClass::HandlePlayEnd);
-        PlayMontage->OnInterrupted.AddDynamic(this, &ThisClass::HandlePlayEnd);
-        PlayMontage->OnCompleted.AddDynamic(this, &ThisClass::HandlePlayEnd);
-        // PlayMontage->OnEvent.AddDynamic(this, &ThisClass::HandleComboEvent);
-        PlayMontage->ReadyForActivation();
-
-        UAbilityTask_WaitTargetData* WaitTargetData = UAbilityTask_WaitTargetData::WaitTargetData(this, NAME_None, EGameplayTargetingConfirmation::UserConfirmed, TargetActorClass);
-        WaitTargetData->ValidData.AddDynamic(this, &ThisClass::TargetConfirmed);
-        WaitTargetData->Cancelled.AddDynamic(this, &ThisClass::TargetCanceled);
-        WaitTargetData->ReadyForActivation();
+        UAbilityTask_WaitTargetData* WaitTargetDataTask = UAbilityTask_WaitTargetData::WaitTargetData(this, NAME_None, EGameplayTargetingConfirmation::UserConfirmed, TargetActorClass);
+        WaitTargetDataTask->ValidData.AddDynamic(this, &ThisClass::TargetConfirmed);
+        WaitTargetDataTask->Cancelled.AddDynamic(this, &ThisClass::TargetCanceled);
+        WaitTargetDataTask->ReadyForActivation();
 
         AGameplayAbilityTargetActor* TargetActor;
-        WaitTargetData->BeginSpawningActor(this, TargetActorClass, TargetActor);
+        WaitTargetDataTask->BeginSpawningActor(this, TargetActorClass, TargetActor);
 
         if (ACTargetActor_GroundPick* GroundPickActor = Cast<ACTargetActor_GroundPick>(TargetActor))
         {
             GroundPickActor->SetTargetAreaRadius(TargetAreaRadius);
             GroundPickActor->SetTargetTraceRange(TargetTraceRange);
-            GroundPickActor->bDebug = ShouldDrawDebug();
-            /// GroundPickActor->SetTargetOptions(true, false);
+            GroundPickActor->SetShouldDrawDebug(ShouldDrawDebug());
         }
 
-        WaitTargetData->FinishSpawningActor(this, TargetActor);
+        WaitTargetDataTask->FinishSpawningActor(this, TargetActor);
     }
 }
 

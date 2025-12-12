@@ -6,15 +6,15 @@
 #include "AbilitySystemBlueprintLibrary.h"
 #include "AbilitySystemGlobals.h"
 #include "AbilitySystemInterface.h"
-#include "GAS/CAbilitySystemComponent.h"
+#include "Abilities/GameplayAbility.h"
 #include "GameplayAbilitySpecHandle.h"
 #include "GameplayEffect.h"
-#include "Abilities/GameplayAbility.h"
 #include "GameplayEffectTypes.h"
+#include "GameplayCueManager.h"
 #include "GenericTeamAgentInterface.h"
 
+#include "GAS/CAbilitySystemComponent.h"
 #include "GAS/CGameplayTags.h"
-#include "Serialization/JsonTypes.h"
 
 int32 UCAbilitySystemStatics::GetGameplayTagID(const FGameplayTag& Tag)
 {
@@ -80,7 +80,7 @@ float UCAbilitySystemStatics::GetScalableFloatValueAtLevel(const FScalableFloat&
     return InScalableFloat.GetValueAtLevel(InLevel);
 }
 
-float UCAbilitySystemStatics::GetStaticColldownDurationForAbility(const UGameplayAbility* Ability)
+float UCAbilitySystemStatics::GetStaticCooldownDurationForAbility(const UGameplayAbility* Ability)
 {
     const UGameplayEffect* CooldownEffect = Ability ? Ability->GetCooldownGameplayEffect() : nullptr;
     if (!CooldownEffect) return 0.f;
@@ -104,10 +104,7 @@ float UCAbilitySystemStatics::GetStaticCostForAbility(const UGameplayAbility* Ab
 
 bool UCAbilitySystemStatics::IsHero(const AActor* ActorToCheck)
 {
-    const IAbilitySystemInterface* ActorASI = Cast<IAbilitySystemInterface>(ActorToCheck);
-    const UAbilitySystemComponent* ActorASC = ActorASI ? ActorASI->GetAbilitySystemComponent() : nullptr;
-
-    return ActorASC ? ActorASC->HasMatchingGameplayTag(Tags::Role::Hero) : false;
+    return ActorHasTag(ActorToCheck, Tags::Role::Hero);
 }
 
 bool UCAbilitySystemStatics::IsAbilityAtMaxLevel(const FGameplayAbilitySpec& Spec)
@@ -185,4 +182,30 @@ bool UCAbilitySystemStatics::CheckAbilityCostStatic(const UGameplayAbility* Abil
     if (!AbilityCDO || !ASC) return false;
 
     return AbilityCDO->CheckCost(FGameplayAbilitySpecHandle(), ASC->AbilityActorInfo.Get());
+}
+
+bool UCAbilitySystemStatics::ActorHasTag(const AActor* ActorToCheck, const FGameplayTag& Tag)
+{
+    if (const IAbilitySystemInterface* ActorISA = Cast<IAbilitySystemInterface>(ActorToCheck))
+    {
+        if (UAbilitySystemComponent* ActorASC = ActorISA->GetAbilitySystemComponent())
+        {
+            return ActorASC->HasMatchingGameplayTag(Tag);
+        }
+    }
+    return false;
+}
+
+bool UCAbilitySystemStatics::IsActorDead(const AActor* ActorToCheck)
+{
+    return ActorHasTag(ActorToCheck, Tags::Stats::Dead);
+}
+
+void UCAbilitySystemStatics::SendLocalGameplayCue(AActor* CueTargetActor, const FHitResult& HitResult, const FGameplayTag& GameplayCueTag)
+{
+    FGameplayCueParameters CueParams;
+    CueParams.Location = HitResult.ImpactPoint;
+    CueParams.Normal   = HitResult.ImpactNormal;
+
+    UAbilitySystemGlobals::Get().GetGameplayCueManager()->HandleGameplayCue(CueTargetActor, GameplayCueTag, EGameplayCueEvent::Executed, CueParams);
 }

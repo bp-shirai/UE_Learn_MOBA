@@ -62,7 +62,6 @@ public:
     UFUNCTION(BlueprintCallable, meta = (BlueprintThreadSafe))
     bool ShouldDoFullBody() const;
 
-
 private:
     UPROPERTY(Transient)
     ACharacter* OwnerCharacter;
@@ -83,6 +82,9 @@ private:
 
     UPROPERTY(EditAnywhere, Category = "Animation")
     float YawSpeedSmoothLerpSpeed{1.f};
+
+    UPROPERTY(EditAnywhere, Category = "Animation")
+    float YawSpeedLerpToZeroSpeed = 30.f;
 
     UPROPERTY(EditAnywhere, Category = "Animation")
     bool bUseYawSpeed{true};

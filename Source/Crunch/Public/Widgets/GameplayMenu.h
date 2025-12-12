@@ -22,8 +22,7 @@ public:
     virtual void NativeConstruct() override;
 
     FOnButtonClickedEvent& GetResumeButtonDelegate() { return ResumeButton->OnClicked; }
-    //FOnButtonClickedEvent& GetMainMenuButtonDelegate() { return MainMenuButton->OnClicked; }
-    //FOnButtonClickedEvent& GetQuitGameButtonDelegate() { return QuitGameButton->OnClicked; }
+  
 	void SetTitleText(const FString& NewTitle);
 
 
@@ -40,8 +39,6 @@ private:
     UPROPERTY(meta = (BindWidget))
     UButton* QuitGameButton;
 
-    UFUNCTION()
-    void ResumeButtonClicked();
 
     UFUNCTION()
     void BackToMainMenu();
