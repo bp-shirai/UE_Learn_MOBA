@@ -201,7 +201,7 @@ const TMap<ECAbilityInputID, TSubclassOf<UGameplayAbility>>& ACPlayerCharacter::
 
 void ACPlayerCharacter::OnAimStateChanged(bool bIsAiming)
 {
-    if (IsLocallyControlledByPlayer())
+    //if (IsLocallyControlledByPlayer())
     {
         LerpCameraToLocalOffsetLocation(bIsAiming ? CameraAimLocalOffset : FVector::ZeroVector);
     }

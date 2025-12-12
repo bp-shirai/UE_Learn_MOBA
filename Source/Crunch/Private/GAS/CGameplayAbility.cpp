@@ -186,7 +186,7 @@ AActor* UCGameplayAbility::GetAimTarget(float AimDistance, ETeamAttitude::Type T
 
     if (ShouldDrawDebug())
     {
-        DrawDebugLine(GetWorld(), Location, AimEnd, FColor::Red, false, 2.f, 0U, 3.f);
+        DrawDebugLine(GetWorld(), Location, AimEnd, FColor::Red, false, 2.f, 0U, 2.f);
     }
 
     TArray<FHitResult> HitResults;
@@ -218,9 +218,9 @@ bool UCGameplayAbility::IsActorTeamAttitudeIs(const AActor* OtherActor, ETeamAtt
 {
     if (!OtherActor) return false;
 
-    if (const IGenericTeamAgentInterface* OtherTeam = Cast<IGenericTeamAgentInterface>(OtherActor))
+    if (const IGenericTeamAgentInterface* OwnerTeam = Cast<IGenericTeamAgentInterface>(GetAvatarActorFromActorInfo()))
     {
-        return OtherTeam->GetTeamAttitudeTowards(*OtherActor) == TeamAttitude;
+        return OwnerTeam->GetTeamAttitudeTowards(*OtherActor) == TeamAttitude;
     }
 
     return false;
