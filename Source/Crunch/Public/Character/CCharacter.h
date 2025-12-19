@@ -47,6 +47,9 @@ public:
     virtual void Tick(float DeltaTime) override;
     virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+
+
+
 #pragma region--------- Ability System ---------------------------------------------
 public:
     virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;

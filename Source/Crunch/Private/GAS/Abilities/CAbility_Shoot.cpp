@@ -65,6 +65,8 @@ void UCAbility_Shoot::EndAbility(const FGameplayAbilitySpecHandle Handle, const 
         AimTargetASC = nullptr;
     }
 
+    AimTarget = nullptr;
+
     SendLocalGameplayEvent(Tags::Ability::Target_Updated, FGameplayEventData());
 
     StopShooting(FGameplayEventData());
@@ -76,7 +78,6 @@ void UCAbility_Shoot::StartShooting(FGameplayEventData Payload)
 {
     UE_LOG(LogTemp, Warning, TEXT("Start Shooting"));
     if (K2_HasAuthority())
-    // if (HasAuthorityOrPredictionKey(CurrentActorInfo, &CurrentActivationInfo))
     {
         UAbilityTask_PlayMontageAndWait* PlayShootMontage = UAbilityTask_PlayMontageAndWait::CreatePlayMontageAndWaitProxy(this, NAME_None, ShootMontage);
         PlayShootMontage->ReadyForActivation();
