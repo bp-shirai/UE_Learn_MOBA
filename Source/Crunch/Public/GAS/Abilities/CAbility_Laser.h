@@ -6,6 +6,8 @@
 #include "GAS/CGameplayAbility.h"
 #include "CAbility_Laser.generated.h"
 
+class ACTargetActor_Line;
+
 /**
  *
  */
@@ -28,10 +30,34 @@ private:
     UPROPERTY(EditDefaultsOnly, Category = "Effects")
     TSubclassOf<UGameplayEffect> GE_OnGoingConsumption;
 
+    UPROPERTY(EditDefaultsOnly, Category = "Effects")
+    TSubclassOf<UGameplayEffect> GE_HitDamage;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Effects")
+    float HitPushSpeed{3000.f};
+
     FActiveGameplayEffectHandle OnGoingConsumptionHandle;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Targeting")
+    TSubclassOf<ACTargetActor_Line> LaserTargetActorClass;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Targeting")
+    FName TargetActorAttachSocketName{"Lazer"};
+
+    UPROPERTY(EditDefaultsOnly, Category = "Targeting")
+    float TargetRange{4000.f};
+
+    UPROPERTY(EditDefaultsOnly, Category = "Targeting")
+    float DetectionCylinderRadius{30.f};
+
+    UPROPERTY(EditDefaultsOnly, Category = "Targeting")
+    float TargetingInterval{0.3f};
 
     UFUNCTION()
     void ShootLaser(FGameplayEventData Data);
 
     void OnManaChanged(const FOnAttributeChangeData& Data);
+
+    UFUNCTION()
+    void TargetReceived(const FGameplayAbilityTargetDataHandle& TargetData);
 };

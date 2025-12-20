@@ -48,7 +48,7 @@ private:
     AActor* AvatarActor;
 
     UPROPERTY(EditDefaultsOnly, Category = "VFX")
-    FName ParamName_LaserFXLength;
+    FName ParamName_LaserFXLength{"Length"};
 
     UPROPERTY(VisibleDefaultsOnly, Category = "Component")
     class USceneComponent* RootComp;
@@ -59,7 +59,7 @@ private:
     UPROPERTY(VisibleDefaultsOnly, Category = "Component")
     class USphereComponent* TargetEndDetectionSphere;
 
-    FTimerHandle Handle_PeriodicalTargeting;
+    FTimerHandle PeriodicalTargetingTimer;
 
     void DoTargetCheckAndReport();
 

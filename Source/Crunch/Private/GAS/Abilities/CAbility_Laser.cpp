@@ -2,14 +2,17 @@
 
 #include "GAS/Abilities/CAbility_Laser.h"
 
-#include "Abilities/Tasks/AbilityTask.h"
+#include "AbilitySystemComponent.h"
+#include "Abilities/GameplayAbilityTargetActor.h"
+#include "Abilities/GameplayAbilityTargetTypes.h"
 #include "Abilities/Tasks/AbilityTask_PlayMontageAndWait.h"
 #include "Abilities/Tasks/AbilityTask_WaitGameplayEvent.h"
 #include "Abilities/Tasks/AbilityTask_WaitCancel.h"
-#include "AbilitySystemComponent.h"
+#include "Abilities/Tasks/AbilityTask_WaitTargetData.h"
 
 #include "GAS/CAttributeSet.h"
 #include "GAS/CGameplayTags.h"
+#include "GAS/TargetActor/CTargetActor_Line.h"
 
 UCAbility_Laser::UCAbility_Laser()
 {
@@ -53,6 +56,24 @@ void UCAbility_Laser::ShootLaser(FGameplayEventData Data)
     {
         OwnerASC->GetGameplayAttributeValueChangeDelegate(UCAttributeSet::GetManaAttribute()).AddUObject(this, &ThisClass::OnManaChanged);
     }
+
+    // we'll spawn here on the local client.
+    // you get this really quick response to immediately on your client.
+    UAbilityTask_WaitTargetData* WaitDamageTargetTask = UAbilityTask_WaitTargetData::WaitTargetData(this, NAME_None, EGameplayTargetingConfirmation::CustomMulti, LaserTargetActorClass);
+    WaitDamageTargetTask->ValidData.AddDynamic(this, &ThisClass::TargetReceived);
+    WaitDamageTargetTask->ReadyForActivation();
+
+    AGameplayAbilityTargetActor* TargetActor;
+    WaitDamageTargetTask->BeginSpawningActor(this, LaserTargetActorClass, TargetActor);
+    ACTargetActor_Line* LineTargetActor = Cast<ACTargetActor_Line>(TargetActor);
+
+    if (LineTargetActor)
+        LineTargetActor->ConfigureTargetSetting(TargetRange, DetectionCylinderRadius, TargetingInterval, GetOwnerTeamId(), ShouldDrawDebug());
+
+    WaitDamageTargetTask->FinishSpawningActor(this, TargetActor);
+
+    if (LineTargetActor)
+        LineTargetActor->AttachToComponent(GetOwningComponentFromActorInfo(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, TargetActorAttachSocketName);
 }
 
 void UCAbility_Laser::OnManaChanged(const FOnAttributeChangeData& Data)
@@ -86,4 +107,14 @@ void UCAbility_Laser::CancelAbility(const FGameplayAbilitySpecHandle Handle, con
 {
     UE_LOG(LogTemp, Warning, TEXT("Laser Ability Cancel"));
     Super::CancelAbility(Handle, ActorInfo, ActivationInfo, bReplicateCancelAbility);
+}
+
+void UCAbility_Laser::TargetReceived(const FGameplayAbilityTargetDataHandle& TargetData)
+{
+    if (K2_HasAuthority())
+    {
+        BP_ApplyGameplayEffectToTarget(TargetData, GE_HitDamage, GetAbilityLevel());
+    }
+
+    PushTargets(TargetData, GetAvatarActorFromActorInfo()->GetActorForwardVector() * HitPushSpeed);
 }

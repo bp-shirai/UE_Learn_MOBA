@@ -5,7 +5,6 @@
 #include "Abilities/GameplayAbilityTargetTypes.h"
 #include "Components/SceneComponent.h"
 #include "DrawDebugHelpers.h"
-#include "Engine/HitResult.h"
 #include "Engine/OverlapResult.h"
 #include "GenericTeamAgentInterface.h"
 #include "AbilitySystemBlueprintLibrary.h"

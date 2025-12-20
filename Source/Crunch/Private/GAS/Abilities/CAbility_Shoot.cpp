@@ -65,6 +65,7 @@ void UCAbility_Shoot::EndAbility(const FGameplayAbilitySpecHandle Handle, const 
         AimTargetASC = nullptr;
     }
 
+
     AimTarget = nullptr;
 
     SendLocalGameplayEvent(Tags::Ability::Target_Updated, FGameplayEventData());

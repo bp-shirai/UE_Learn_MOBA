@@ -5,15 +5,13 @@
 #include "Crunch.h"
 #include "Components/SphereComponent.h"
 #include "Components/SceneComponent.h"
-#include "Engine/EngineTypes.h"
-#include "Engine/HitResult.h"
+
 #include "GenericTeamAgentInterface.h"
-#include "Math/MathFwd.h"
+
 #include "NiagaraComponent.h"
 #include "Net/UnrealNetwork.h"
 #include "Abilities/GameplayAbility.h"
 #include "Kismet/KismetMathLibrary.h"
-#include "UObject/WeakObjectPtrTemplates.h"
 
 ACTargetActor_Line::ACTargetActor_Line()
 {
@@ -61,7 +59,7 @@ void ACTargetActor_Line::StartTargeting(UGameplayAbility* Ability)
 
     if (HasAuthority())
     {
-        GetWorldTimerManager().SetTimer(Handle_PeriodicalTargeting, this, &ThisClass::DoTargetCheckAndReport, TargetingInterval, true);
+        GetWorldTimerManager().SetTimer(PeriodicalTargetingTimer, this, &ThisClass::DoTargetCheckAndReport, TargetingInterval, true, TargetingInterval / 2.f);
     }
 }
 
@@ -74,9 +72,9 @@ void ACTargetActor_Line::Tick(float DeltaTime)
 
 void ACTargetActor_Line::BeginDestroy()
 {
-    if (GetWorld() && Handle_PeriodicalTargeting.IsValid())
+    if (GetWorld() && PeriodicalTargetingTimer.IsValid())
     {
-        GetWorldTimerManager().ClearTimer(Handle_PeriodicalTargeting);
+        GetWorldTimerManager().ClearTimer(PeriodicalTargetingTimer);
     }
 
     Super::BeginDestroy();
