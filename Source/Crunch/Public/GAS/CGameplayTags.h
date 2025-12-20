@@ -39,10 +39,16 @@ namespace Tags
         UE_DECLARE_GAMEPLAY_TAG_EXTERN(Shoot_Hand_R);
         UE_DECLARE_GAMEPLAY_TAG_EXTERN(Shoot_Hand_L);
 
+        UE_DECLARE_GAMEPLAY_TAG_EXTERN(Laser_Shoot);
+        UE_DECLARE_GAMEPLAY_TAG_EXTERN(Laser_Cooldown);
+
         UE_DECLARE_GAMEPLAY_TAG_EXTERN(Data_Damage);
         UE_DECLARE_GAMEPLAY_TAG_EXTERN(Data_Duration);
 
-        UE_DECLARE_GAMEPLAY_TAG_EXTERN(Type_Melee);
+        UE_DECLARE_GAMEPLAY_TAG_EXTERN(Type_Attack_Melee);
+        UE_DECLARE_GAMEPLAY_TAG_EXTERN(Type_Attack_Ranged);
+        UE_DECLARE_GAMEPLAY_TAG_EXTERN(Type_StateChange);
+        UE_DECLARE_GAMEPLAY_TAG_EXTERN(Type_Passive);
 
         namespace Passive
         {

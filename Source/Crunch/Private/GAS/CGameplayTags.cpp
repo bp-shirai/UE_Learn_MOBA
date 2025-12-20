@@ -38,10 +38,16 @@ namespace Tags
         UE_DEFINE_GAMEPLAY_TAG(Shoot_Hand_L, "Ability.Shoot.Hand_L");
         UE_DEFINE_GAMEPLAY_TAG(Shoot_Hand_R, "Ability.Shoot.Hand_R");
 
+        UE_DEFINE_GAMEPLAY_TAG(Laser_Shoot, "Ability.Laser.Shoot");
+        UE_DEFINE_GAMEPLAY_TAG(Laser_Cooldown, "Ability.Laser.Cooldown");
+
         UE_DEFINE_GAMEPLAY_TAG(Data_Damage, "Ability.Data.Damage");
         UE_DEFINE_GAMEPLAY_TAG(Data_Duration, "Ability.Data.Duration");
 
-        UE_DEFINE_GAMEPLAY_TAG(Type_Melee, "Ability.Type.Melee");
+        UE_DEFINE_GAMEPLAY_TAG(Type_Attack_Melee, "Ability.Type.Attack.Melee");
+        UE_DEFINE_GAMEPLAY_TAG(Type_Attack_Ranged, "Ability.Type.Attack.Ranged");
+        UE_DEFINE_GAMEPLAY_TAG(Type_StateChange, "Ability.Type.StateChange");
+        UE_DEFINE_GAMEPLAY_TAG(Type_Passive, "Ability.Type.Passive");
 
         namespace Passive
         {

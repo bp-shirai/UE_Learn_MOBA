@@ -1,4 +1,4 @@
-# Create a MOBA Game with Unreal Engine Gameplay Ability System and Build the Dedicated Server infrastructure with AWS
+# Build a competitive 5v5 multiplayer game using Unreal Engine, Gameplay Ability System (GAS), and AWS for deployment to the cloud.
 
 - UnrealEngine version 5.6.1
 
