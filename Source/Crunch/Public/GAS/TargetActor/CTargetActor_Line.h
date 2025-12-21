@@ -10,7 +10,7 @@
 /**
  *
  */
-UCLASS()
+UCLASS(Abstract)
 class ACTargetActor_Line : public AGameplayAbilityTargetActor, public IGenericTeamAgentInterface
 {
     GENERATED_BODY()

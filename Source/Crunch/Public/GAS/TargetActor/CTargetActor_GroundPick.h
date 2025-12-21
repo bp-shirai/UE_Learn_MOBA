@@ -11,7 +11,7 @@ class UDecalComponent;
 /**
  *
  */
-UCLASS()
+UCLASS(Abstract)
 class CRUNCH_API ACTargetActor_GroundPick : public AGameplayAbilityTargetActor
 {
     GENERATED_BODY()
