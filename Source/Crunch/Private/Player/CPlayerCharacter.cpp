@@ -91,7 +91,7 @@ void ACPlayerCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerI
 }
 
 void ACPlayerCharacter::HandleLookInput(const FInputActionValue& Value)
-{
+{    
     const FVector2D LookAxis = Value.Get<FVector2D>();
 
     AddControllerPitchInput(LookAxis.Y);
@@ -100,6 +100,8 @@ void ACPlayerCharacter::HandleLookInput(const FInputActionValue& Value)
 
 void ACPlayerCharacter::HandleMoveInput(const FInputActionValue& Value)
 {
+    if (IsInFocusMode()) return;
+
     const FVector2D MoveAxis = Value.Get<FVector2D>().GetSafeNormal();
 
     AddMovementInput(GetMoveFwdDir() * MoveAxis.Y + GetLookRightDir() * MoveAxis.X);

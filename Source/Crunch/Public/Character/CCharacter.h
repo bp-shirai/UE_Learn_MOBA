@@ -83,6 +83,10 @@ private:
 
     bool bIsInFocusMode{false};
     
+public:
+    FORCEINLINE bool IsInFocusMode() const { return bIsInFocusMode; }
+
+    
 #pragma endregion
 #pragma region-------- UI ---------------------------------------------------------
 

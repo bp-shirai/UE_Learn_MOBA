@@ -2,14 +2,19 @@
 
 #include "GAS/Abilities/CAbility_Blackhole.h"
 
+#include "AbilitySystemComponent.h"
 #include "AbilitySystemBlueprintLibrary.h"
 #include "Abilities/GameplayAbilityTargetTypes.h"
 #include "Abilities/Tasks/AbilityTask_PlayMontageAndWait.h"
 #include "Abilities/Tasks/AbilityTask_WaitGameplayEvent.h"
 #include "Abilities/Tasks/AbilityTask_WaitTargetData.h"
 
+#include "Engine/HitResult.h"
+#include "GAS/CGameplayTags.h"
 #include "GAS/TargetActor/CTargetActor_GroundPick.h"
 #include "GAS/TargetActor/CTargetActor_Blackhole.h"
+#include "GAS/CAbilitySystemStatics.h"
+#include "GameplayEffectTypes.h"
 
 UCAbility_Blackhole::UCAbility_Blackhole()
 {
@@ -50,20 +55,23 @@ void UCAbility_Blackhole::ActivateAbility(const FGameplayAbilitySpecHandle Handl
 
 void UCAbility_Blackhole::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled)
 {
-    RemoveEffect();
+    RemoveAimEffect();
+    RemoveFocusEffect();
+
     Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
 }
 
 void UCAbility_Blackhole::PlaceBlackhole(const FGameplayAbilityTargetDataHandle& TargetData)
 {
-    
+
     if (!K2_CommitAbility())
     {
         K2_EndAbility();
         return;
     }
 
-    RemoveEffect();
+    RemoveAimEffect();
+    AddFocusEffect();
 
     if (PlayCastBlackholeMontageTask)
     {
@@ -98,7 +106,6 @@ void UCAbility_Blackhole::PlaceBlackhole(const FGameplayAbilityTargetDataHandle&
         Blackhole->SetActorLocation(UAbilitySystemBlueprintLibrary::GetHitResultFromTargetData(TargetData, 1).ImpactPoint);
 
     UE_LOG(LogTemp, Warning, TEXT("PlaceBlackhole"));
-
 }
 
 void UCAbility_Blackhole::PlacementCancelled(const FGameplayAbilityTargetDataHandle& TargetData)
@@ -106,12 +113,39 @@ void UCAbility_Blackhole::PlacementCancelled(const FGameplayAbilityTargetDataHan
     K2_EndAbility();
 }
 
+void UCAbility_Blackhole::FinalTargetsReceived(const FGameplayAbilityTargetDataHandle& TargetData)
+{
+    if (K2_HasAuthority())
+    {
+        BP_ApplyGameplayEffectToTarget(TargetData, GE_FinalBlowDamage, GetAbilityLevel());
+        const FVector BlowCenter = UAbilitySystemBlueprintLibrary::GetHitResultFromTargetData(TargetData, 1).ImpactPoint;
+        PushTargetsFromLocation(TargetData, BlowCenter, BlowPushSpeed);
+
+        UAbilityTask_PlayMontageAndWait* PlayFinalBlowMontage = UAbilityTask_PlayMontageAndWait::CreatePlayMontageAndWaitProxy(this, NAME_None, AM_FinalBlow);
+        PlayFinalBlowMontage->OnCancelled.AddDynamic(this, &ThisClass::K2_EndAbility);
+        PlayFinalBlowMontage->OnInterrupted.AddDynamic(this, &ThisClass::K2_EndAbility);
+        PlayFinalBlowMontage->OnCompleted.AddDynamic(this, &ThisClass::K2_EndAbility);
+        PlayFinalBlowMontage->ReadyForActivation();
+    }
+    else
+    {
+        PlayMontageLocally(AM_FinalBlow);
+    }
+
+    FGameplayCueParameters FinalBlowParams;
+    FinalBlowParams.Location     = UAbilitySystemBlueprintLibrary::GetHitResultFromTargetData(TargetData, 1).ImpactPoint;
+    FinalBlowParams.RawMagnitude = TargetAreaRadius;
+
+    GetAbilitySystemComponentFromActorInfo()->ExecuteGameplayCue(FinalBlowCueTag, FinalBlowParams);
+    GetAbilitySystemComponentFromActorInfo()->ExecuteGameplayCue(Tags::GameplayCue::CameraShake, FinalBlowParams);
+}
+
 void UCAbility_Blackhole::AddAimEffect()
 {
     AimHandle = BP_ApplyGameplayEffectToOwner(GE_Aim);
 }
 
-void UCAbility_Blackhole::RemoveEffect()
+void UCAbility_Blackhole::RemoveAimEffect()
 {
     if (AimHandle.IsValid())
     {
@@ -119,6 +153,15 @@ void UCAbility_Blackhole::RemoveEffect()
     }
 }
 
-void UCAbility_Blackhole::FinalTargetsReceived(const FGameplayAbilityTargetDataHandle& TargetData)
+void UCAbility_Blackhole::AddFocusEffect()
 {
+    FocusHandle = BP_ApplyGameplayEffectToOwner(GE_Focus);
+}
+
+void UCAbility_Blackhole::RemoveFocusEffect()
+{
+    if (FocusHandle.IsValid())
+    {
+        BP_RemoveGameplayEffectFromOwnerWithHandle(FocusHandle);
+    }
 }

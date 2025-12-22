@@ -19,6 +19,10 @@ public:
     void ConfigureBlackhole(float InBlackholeRange, float InPullSpeed, float InBlackholeDuration, const FGenericTeamId& InTeamId);
 
     virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+    virtual void StartTargeting(class UGameplayAbility* Ability) override;
+    virtual void Tick(float DeltaTime) override;
+    virtual void ConfirmTargetingAndContinue() override;
+    virtual void CancelTargeting() override;
 
     virtual void SetGenericTeamId(const FGenericTeamId& NewTeamID) override { TeamId = NewTeamID; }
     virtual FGenericTeamId GetGenericTeamId() const override { return TeamId; }
@@ -33,6 +37,9 @@ private:
     UPROPERTY(VisibleDefaultsOnly, Category = "Component")
     class UParticleSystemComponent* BlackholeVFX;
 
+    UPROPERTY(VisibleDefaultsOnly, Category = "Component")
+    class URadialForceComponent* RadialForce;
+
     UPROPERTY(Replicated)
     FGenericTeamId TeamId;
 
@@ -42,14 +49,27 @@ private:
     float BlackholeRange;
 
     float BlackholeDuration;
-	
-	UFUNCTION()
+
+    UFUNCTION()
     void OnRep_BlackholeRange();
 
+    UPROPERTY(EditDefaultsOnly, Category = "VFX")
+    class UNiagaraSystem* NS_BlackholeLink;
+
+    UPROPERTY(EditDefaultsOnly, Category = "VFX")
+    FName Name_BlackholeVFXOrigin{"Origin"};
 
     UFUNCTION()
     void ActorInBlackholeRange(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
     UFUNCTION()
     void ActorLeftBlackholeRange(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+
+    void TryAddTarget(AActor* OtherTarget);
+    void RemoveTarget(AActor* OtherTarget);
+
+    TMap<AActor*, class UNiagaraComponent*> ActorsInRangeMap;
+    FTimerHandle BlackholeDurationTimer;
+
+    void StopBlackhole();
 };

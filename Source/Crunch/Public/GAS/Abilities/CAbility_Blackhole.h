@@ -48,10 +48,26 @@ private:
     UPROPERTY(EditDefaultsOnly, Category = "Animation")
     UAnimMontage* AM_HoldBlackhole;
 
+    UPROPERTY(EditDefaultsOnly, Category = "Animation")
+    UAnimMontage* AM_FinalBlow;
+
     UPROPERTY(EditDefaultsOnly, Category = "Targeting")
     TSubclassOf<UGameplayEffect> GE_Aim;
 
+    UPROPERTY(EditDefaultsOnly, Category = "Effect")
+    TSubclassOf<UGameplayEffect> GE_FinalBlowDamage;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Effect")
+    float BlowPushSpeed{3000.f};
+
+    UPROPERTY(EditDefaultsOnly, Category = "Effect")
+    TSubclassOf<UGameplayEffect> GE_Focus;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Effect", meta = (Categories = "GameplayCue"))
+    FGameplayTag FinalBlowCueTag;
+
     FActiveGameplayEffectHandle AimHandle;
+    FActiveGameplayEffectHandle FocusHandle;
 
     UFUNCTION()
     void PlaceBlackhole(const FGameplayAbilityTargetDataHandle& TargetData);
@@ -60,7 +76,9 @@ private:
     void PlacementCancelled(const FGameplayAbilityTargetDataHandle& TargetData);
 
     void AddAimEffect();
-    void RemoveEffect();
+    void RemoveAimEffect();
+    void AddFocusEffect();
+    void RemoveFocusEffect();
 
     UPROPERTY()
     class UAbilityTask_PlayMontageAndWait* PlayCastBlackholeMontageTask;
