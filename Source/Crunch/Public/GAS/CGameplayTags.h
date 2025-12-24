@@ -50,6 +50,8 @@ namespace Tags
         UE_DECLARE_GAMEPLAY_TAG_EXTERN(Type_StateChange);
         UE_DECLARE_GAMEPLAY_TAG_EXTERN(Type_Passive);
 
+        UE_DECLARE_GAMEPLAY_TAG_EXTERN(Dash_Start);
+
         namespace Passive
         {
             UE_DECLARE_GAMEPLAY_TAG_EXTERN(Launch_Activate);

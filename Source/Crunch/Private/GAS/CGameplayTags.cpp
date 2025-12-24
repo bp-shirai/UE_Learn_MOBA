@@ -49,6 +49,8 @@ namespace Tags
         UE_DEFINE_GAMEPLAY_TAG(Type_StateChange, "Ability.Type.StateChange");
         UE_DEFINE_GAMEPLAY_TAG(Type_Passive, "Ability.Type.Passive");
 
+        UE_DEFINE_GAMEPLAY_TAG(Dash_Start, "Ability.Dash.Start");
+
         namespace Passive
         {
             UE_DEFINE_GAMEPLAY_TAG(Launch_Activate, "Ability.Passive.Launch.Activate");

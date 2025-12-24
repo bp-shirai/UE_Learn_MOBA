@@ -47,9 +47,6 @@ public:
     virtual void Tick(float DeltaTime) override;
     virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-
-
-
 #pragma region--------- Ability System ---------------------------------------------
 public:
     virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
@@ -78,15 +75,15 @@ private:
     virtual void OnAimStateChanged(bool bIsAiming);
 
     void MoveSpeed_Updated(const FOnAttributeChangeData& Data);
+    void MoveSpeedAcceleration_Updated(const FOnAttributeChangeData& Data);
     void MaxHealth_Updated(const FOnAttributeChangeData& Data);
     void MaxMana_Updated(const FOnAttributeChangeData& Data);
 
     bool bIsInFocusMode{false};
-    
+
 public:
     FORCEINLINE bool IsInFocusMode() const { return bIsInFocusMode; }
 
-    
 #pragma endregion
 #pragma region-------- UI ---------------------------------------------------------
 
@@ -169,14 +166,13 @@ public:
 
 #pragma endregion
 
-
 private:
     UPROPERTY(EditDefaultsOnly, Category = "Capture")
     FVector HeadShotCaptureLocalPosition;
 
     UPROPERTY(EditDefaultsOnly, Category = "Capture")
     FRotator HeadShotCaptureLocalRotation;
-    
+
 public:
     virtual FVector GetCaptureLocalPosition() const override { return HeadShotCaptureLocalPosition; }
     virtual FRotator GetCaptureLocalRotation() const override { return HeadShotCaptureLocalRotation; }

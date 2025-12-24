@@ -25,6 +25,7 @@ void UCAttributeSet::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLi
     DOREPLIFETIME_CONDITION_NOTIFY(ThisClass, Attack, COND_None, REPNOTIFY_Always);
     DOREPLIFETIME_CONDITION_NOTIFY(ThisClass, Armor, COND_None, REPNOTIFY_Always);
     DOREPLIFETIME_CONDITION_NOTIFY(ThisClass, MoveSpeed, COND_None, REPNOTIFY_Always);
+    DOREPLIFETIME_CONDITION_NOTIFY(ThisClass, MoveAcceleration, COND_None, REPNOTIFY_Always);
 }
 
 void UCAttributeSet::OnRep_Health(const FGameplayAttributeData& OldValue)
@@ -101,6 +102,11 @@ void UCAttributeSet::OnRep_MoveSpeed(const FGameplayAttributeData& OldValue)
     GAMEPLAYATTRIBUTE_REPNOTIFY(ThisClass, MoveSpeed, OldValue);
 }
 
+void UCAttributeSet::OnRep_MoveAcceleration(const FGameplayAttributeData& OldValue)
+{
+    GAMEPLAYATTRIBUTE_REPNOTIFY(ThisClass, MoveAcceleration, OldValue);
+}
+
 void UCAttributeSet::RescaleHealth()
 {
     if (!GetOwningActor()->HasAuthority()) return;
@@ -120,3 +126,5 @@ void UCAttributeSet::RescaleMana()
         SetMana(GetMaxMana() * GetCachedManaPercent());
     }
 }
+
+
