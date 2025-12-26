@@ -3,6 +3,8 @@
 #include "Framework/CAssetManager.h"
 #include "Engine/StreamableManager.h"
 
+#include "Character/PA_CharacterDefinition.h"
+
 #include UE_INLINE_GENERATED_CPP_BY_NAME(CAssetManager)
 
 UCAssetManager& UCAssetManager::Get()
@@ -90,4 +92,24 @@ const FItemCollection* UCAssetManager::GetCombinationForItem(const UPA_ShopItem*
 const FItemCollection* UCAssetManager::GetIngredientsForItem(const UPA_ShopItem* Item) const
 {
     return IngredientMap.Find(Item);
+}
+
+void UCAssetManager::LoadCharacterDefinitions(const FStreamableDelegate& LoadFinishedCallback)
+{
+    LoadPrimaryAssetsWithType(UPA_CharacterDefinition::GetCharacterDefinitionAssetType(), TArray<FName>(), LoadFinishedCallback);
+}
+
+bool UCAssetManager::GetLoadedCharacterDefinitions(TArray<UPA_CharacterDefinition*>& OutDefinitions) const
+{
+    TArray<UObject*> LoadedObjects;
+    bool bLoaded = GetPrimaryAssetObjectList(UPA_CharacterDefinition::GetCharacterDefinitionAssetType(), LoadedObjects);
+    if (bLoaded)
+    {
+        for(UObject* LoadedObject : LoadedObjects)
+        {
+            OutDefinitions.Add(Cast<UPA_CharacterDefinition>(LoadedObject));
+        }
+    }
+
+    return bLoaded;
 }

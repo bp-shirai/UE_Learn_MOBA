@@ -9,6 +9,7 @@
 
 #include "CAssetManager.generated.h"
 
+class UPA_CharacterDefinition;
 
 /**
  *
@@ -20,22 +21,23 @@ class CRUNCH_API UCAssetManager : public UAssetManager
 
 public:
     static UCAssetManager& Get();
-	void LoadShopItems(const FStreamableDelegate& LoadFinishedCallback);
-	bool GetLoadedShopItems(TArray<const UPA_ShopItem*>& OutItems) const;
+    void LoadShopItems(const FStreamableDelegate& LoadFinishedCallback);
+    bool GetLoadedShopItems(TArray<const UPA_ShopItem*>& OutItems) const;
 
-	const FItemCollection* GetCombinationForItem(const UPA_ShopItem* Item) const;
-	const FItemCollection* GetIngredientsForItem(const UPA_ShopItem* Item) const;
+    const FItemCollection* GetCombinationForItem(const UPA_ShopItem* Item) const;
+    const FItemCollection* GetIngredientsForItem(const UPA_ShopItem* Item) const;
+
+    void LoadCharacterDefinitions(const FStreamableDelegate& LoadFinishedCallback);
+    bool GetLoadedCharacterDefinitions(TArray<UPA_CharacterDefinition*>& OutDefinitions) const;
 
 private:
+    void ShopItemLoadFinished(FStreamableDelegate Callback);
+    void BuildItemMaps();
+    void AddToCombinationMap(const UPA_ShopItem* Ingredient, const UPA_ShopItem* CombinationItem);
 
-	void ShopItemLoadFinished(FStreamableDelegate Callback);
-	void BuildItemMaps();
-	void AddToCombinationMap(const UPA_ShopItem* Ingredient, const UPA_ShopItem* CombinationItem);
+    UPROPERTY()
+    TMap<const UPA_ShopItem*, FItemCollection> CombinationMap;
 
-	UPROPERTY()
-	TMap<const UPA_ShopItem*, FItemCollection> CombinationMap;
-
-	UPROPERTY()
-	TMap<const UPA_ShopItem*, FItemCollection> IngredientMap;
-
+    UPROPERTY()
+    TMap<const UPA_ShopItem*, FItemCollection> IngredientMap;
 };
