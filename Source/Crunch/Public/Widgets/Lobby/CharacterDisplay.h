@@ -8,7 +8,7 @@
 
 class UPA_CharacterDefinition;
 
-UCLASS()
+UCLASS(Abstract)
 class CRUNCH_API ACharacterDisplay : public AActor
 {
     GENERATED_BODY()

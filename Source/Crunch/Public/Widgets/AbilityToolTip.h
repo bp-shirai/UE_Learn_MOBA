@@ -7,28 +7,28 @@
 #include "AbilityToolTip.generated.h"
 
 /**
- * 
+ *
  */
-UCLASS()
+UCLASS(Abstract)
 class UAbilityToolTip : public UUserWidget
 {
-	GENERATED_BODY()
+    GENERATED_BODY()
 public:
-	void SetAbilityInfo(const FName& AbilityName, UTexture2D* AbilityTexture, const FText& AbilityDescription, float AbilityCooldown, float AbilityCost);
+    void SetAbilityInfo(const FName& AbilityName, UTexture2D* AbilityTexture, const FText& AbilityDescription, float AbilityCooldown, float AbilityCost);
 
-private:	
-	UPROPERTY(meta=(BindWidget))	
-	class UTextBlock* AbilityNameText;
+private:
+    UPROPERTY(meta = (BindWidget))
+    class UTextBlock* AbilityNameText;
 
-	UPROPERTY(meta=(BindWidget))	
-	class UImage* AbilityIcon;
+    UPROPERTY(meta = (BindWidget))
+    class UImage* AbilityIcon;
 
-	UPROPERTY(meta=(BindWidget))	
-	class UTextBlock* AbilityDescriptionText;
+    UPROPERTY(meta = (BindWidget))
+    class UTextBlock* AbilityDescriptionText;
 
-	UPROPERTY(meta=(BindWidget))	
-	class UTextBlock* AbilityCooldownText;
+    UPROPERTY(meta = (BindWidget))
+    class UTextBlock* AbilityCooldownText;
 
-	UPROPERTY(meta=(BindWidget))	
-	class UTextBlock* AbilityCostText;
+    UPROPERTY(meta = (BindWidget))
+    class UTextBlock* AbilityCostText;
 };

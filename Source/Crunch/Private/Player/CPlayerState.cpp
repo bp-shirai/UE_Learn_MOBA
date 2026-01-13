@@ -9,8 +9,9 @@
 
 ACPlayerState::ACPlayerState()
 {
-    bReplicates        = true;
-    NetUpdateFrequency = 100.f;
+    bReplicates = true;
+    // NetUpdateFrequency = 100.f; //Public access to NetUpdateFrequency has been deprecated.
+    SetNetUpdateFrequency(100.f);
 }
 
 void ACPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const

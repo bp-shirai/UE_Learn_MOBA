@@ -14,9 +14,11 @@
 #include "Player/LobbyPlayerController.h"
 #include "Player/PlayerInfoTypes.h"
 #include "Character/PA_CharacterDefinition.h"
+#include "Widgets/Lobby/PlayerTeamSlotWidget.h"
 #include "Widgets/Lobby/TeamSelectionWidget.h"
 #include "Widgets/Lobby/CharacterEntryWidget.h"
 #include "Widgets/Lobby/CharacterDisplay.h"
+#include "Widgets/Lobby/PlayerTeamLayoutWidget.h"
 #include "Widgets/AbilityListView.h"
 #include "Network/CNetStatics.h"
 #include "Framework/CGameState.h"
@@ -137,6 +139,11 @@ void ULobbyWidget::UpdatePlayerSelectionDisplay(const TArray<FPlayerSelection>& 
     if (CGameState)
     {
         StartHeroSelectionButton->SetIsEnabled(CGameState->CanStartHeroSelection());
+    }
+
+    if (PlayerTeamLayoutWidget)
+    {
+        PlayerTeamLayoutWidget->UpdatePlayerSelection(PlayerSelections);
     }
 }
 

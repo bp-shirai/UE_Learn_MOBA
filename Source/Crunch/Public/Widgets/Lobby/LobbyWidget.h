@@ -16,6 +16,7 @@ class ALobbyPlayerController;
 class ACGameState;
 class ACPlayerState;
 class UAbilityListView;
+class UPlayerTeamLayoutWidget;
 
 /**
  *
@@ -46,9 +47,11 @@ private:
     UPROPERTY(meta = (BindWidget))
     UTileView* CharacterSelectionTileView;
 
-    UPROPERTY(meta=(BindWidget))
+    UPROPERTY(meta = (BindWidget))
     UAbilityListView* AbilityListView;
 
+    UPROPERTY(meta = (BindWidget))
+    UPlayerTeamLayoutWidget* PlayerTeamLayoutWidget;
 
     UPROPERTY(EditDefaultsOnly, Category = "TeamSelection")
     TSubclassOf<UTeamSelectionWidget> TeamSelectionWidgetClass;
@@ -76,11 +79,9 @@ private:
     UFUNCTION()
     void StartHeroSelectionButtonClicked();
 
-    
     void SwitchToHeroSelection();
 
     void CharacterDefinitionsLoaded();
-
 
     void CharacterSelected(UObject* SelectedObject);
 
@@ -93,4 +94,3 @@ private:
     void SpawnCharacterDisplay();
     void UpdateCharacterDisplay(const FPlayerSelection& PlayerSelection);
 };
-
