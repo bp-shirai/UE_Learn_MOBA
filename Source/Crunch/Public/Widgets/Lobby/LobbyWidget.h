@@ -14,6 +14,8 @@ class UTeamSelectionWidget;
 class UTileView;
 class ALobbyPlayerController;
 class ACGameState;
+class ACPlayerState;
+
 /**
  *
  */
@@ -49,6 +51,9 @@ private:
     UPROPERTY()
     TArray<UTeamSelectionWidget*> TeamSelectionSlots;
 
+    UPROPERTY()
+    ACPlayerState* CPlayerState;
+
     void ClearAndPopulateTeamSelectionSlots();
     void SlotSelected(uint8 NewSlotID);
 
@@ -71,4 +76,16 @@ private:
 
     void CharacterDefinitionsLoaded();
 
+
+    void CharacterSelected(UObject* SelectedObject);
+
+    UPROPERTY(EditDefaultsOnly, Category = "Character Display")
+    TSubclassOf<class ACharacterDisplay> CharacterDisplayClass;
+
+    UPROPERTY()
+    class ACharacterDisplay* CharacterDisplay;
+
+    void SpawnCharacterDisplay();
+    void UpdateCharacterDisplay(const FPlayerSelection& PlayerSelection);
 };
+

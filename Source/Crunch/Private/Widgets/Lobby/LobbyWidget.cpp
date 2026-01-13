@@ -6,15 +6,20 @@
 #include "Components/UniformGridPanel.h"
 #include "Components/UniformGridSlot.h"
 #include "Components/TileView.h"
-
 #include "Engine/World.h"
+#include "Kismet/GameplayStatics.h"
+#include "GameFramework/PlayerStart.h"
+
+#include "Player/CPlayerState.h"
 #include "Player/LobbyPlayerController.h"
 #include "Player/PlayerInfoTypes.h"
+#include "Character/PA_CharacterDefinition.h"
 #include "Widgets/Lobby/TeamSelectionWidget.h"
+#include "Widgets/Lobby/CharacterEntryWidget.h"
+#include "Widgets/Lobby/CharacterDisplay.h"
 #include "Network/CNetStatics.h"
 #include "Framework/CGameState.h"
 #include "Framework/CAssetManager.h"
-#include "Character/PA_CharacterDefinition.h"
 
 void ULobbyWidget::NativeConstruct()
 {
@@ -34,6 +39,13 @@ void ULobbyWidget::NativeConstruct()
     StartHeroSelectionButton->OnClicked.AddDynamic(this, &ThisClass::StartHeroSelectionButtonClicked);
 
     UCAssetManager::Get().LoadCharacterDefinitions(FStreamableDelegate::CreateUObject(this, &ThisClass::CharacterDefinitionsLoaded));
+
+    if (CharacterSelectionTileView)
+    {
+        CharacterSelectionTileView->OnItemSelectionChanged().AddUObject(this, &ThisClass::CharacterSelected);
+    }
+
+    SpawnCharacterDisplay();
 }
 
 void ULobbyWidget::ClearAndPopulateTeamSelectionSlots()
@@ -91,6 +103,14 @@ void ULobbyWidget::UpdatePlayerSelectionDisplay(const TArray<FPlayerSelection>& 
         SelectionSlot->UpdateSlotInfo(TEXT("Empty"));
     }
 
+    for (UUserWidget* CharacterEntryAsWidget : CharacterSelectionTileView->GetDisplayedEntryWidgets())
+    {
+        if (UCharacterEntryWidget* CharacterEntry = Cast<UCharacterEntryWidget>(CharacterEntryAsWidget))
+        {
+            CharacterEntry->SetSelected(false);
+        }
+    }
+
     for (const FPlayerSelection& PlayerSelection : PlayerSelections)
     {
         if (!PlayerSelection.IsValid()) continue;
@@ -99,6 +119,17 @@ void ULobbyWidget::UpdatePlayerSelectionDisplay(const TArray<FPlayerSelection>& 
         if (SelectionSlot)
         {
             SelectionSlot->UpdateSlotInfo(PlayerSelection.GetPlayerNickName());
+        }
+
+        UCharacterEntryWidget* SelectedEntry = CharacterSelectionTileView->GetEntryWidgetFromItem<UCharacterEntryWidget>(PlayerSelection.GetCharacterDefinition());
+        if (SelectedEntry)
+        {
+            SelectedEntry->SetSelected(true);
+        }
+
+        if (PlayerSelection.IsForPlayer(GetOwningPlayerState()))
+        {
+            UpdateCharacterDisplay(PlayerSelection);
         }
     }
 
@@ -128,4 +159,50 @@ void ULobbyWidget::CharacterDefinitionsLoaded()
     {
         CharacterSelectionTileView->SetListItems(CharacterDefinitions);
     }
+}
+
+void ULobbyWidget::CharacterSelected(UObject* SelectedObject)
+{
+    if (!CPlayerState)
+    {
+        CPlayerState = GetOwningPlayerState<ACPlayerState>();
+    }
+
+    if (!CPlayerState) return;
+
+    if (const UPA_CharacterDefinition* CharacterDefinition = Cast<UPA_CharacterDefinition>(SelectedObject))
+    {
+        CPlayerState->Server_SetSelectedCharacterDefinition(CharacterDefinition);
+    }
+}
+
+void ULobbyWidget::SpawnCharacterDisplay()
+{
+    if (!CharacterDisplayClass) return;
+    if (CharacterDisplay) return;
+
+    FTransform SpawnTransform = FTransform::Identity;
+    AActor* PlayerStart = UGameplayStatics::GetActorOfClass(GetWorld(), APlayerStart::StaticClass());
+    if (PlayerStart)
+    {
+        SpawnTransform = PlayerStart->GetActorTransform();
+    }
+
+    FActorSpawnParameters SpawnParams;
+    SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+    CharacterDisplay = GetWorld()->SpawnActor<ACharacterDisplay>(CharacterDisplayClass, SpawnTransform, SpawnParams);
+    if (CharacterDisplay)
+    {
+        GetOwningPlayer()->SetViewTarget(CharacterDisplay);
+    }
+}
+
+void ULobbyWidget::UpdateCharacterDisplay(const FPlayerSelection& PlayerSelection)
+{
+    if (!PlayerSelection.GetCharacterDefinition()) return;
+    if (!CharacterDisplay) return;
+
+    CharacterDisplay->ConfigureWithCharacterDefinition(PlayerSelection.GetCharacterDefinition());
+    
 }

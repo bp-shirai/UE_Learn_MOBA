@@ -7,6 +7,12 @@
 #include "GameFramework/PlayerState.h"
 #include "Logging/LogVerbosity.h"
 
+
+ALobbyPlayerController::ALobbyPlayerController()
+{
+    bAutoManageActiveCameraTarget = false;
+}
+
 void ALobbyPlayerController::Server_RequestPlayerSelectionChange_Implementation(uint8 NewSlotID)
 {
     if (!GetWorld()) return;
@@ -45,3 +51,5 @@ void ALobbyPlayerController::Client_StartHeroSelection_Implementation()
 {
     OnSwitchToHeroSelection.ExecuteIfBound();
 }
+
+

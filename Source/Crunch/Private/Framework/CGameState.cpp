@@ -4,7 +4,8 @@
 #include "GameFramework/PlayerState.h"
 #include "Net/UnrealNetwork.h"
 #include "Player/PlayerInfoTypes.h"
-#include "UObject/CoreNetTypes.h"
+
+#include "Character/PA_CharacterDefinition.h"
 
 void ACGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
@@ -26,7 +27,7 @@ void ACGameState::RequestPlayerSelectionChange(const APlayerState* RequestPlayer
     }
 
     FPlayerSelection* PlayerSelectionPtr = PlayerSelections.FindByPredicate(
-        [RequestPlayer](const FPlayerSelection& PlayerSelection)
+        [&](const FPlayerSelection& PlayerSelection)
         {
             return PlayerSelection.IsForPlayer(RequestPlayer);
         });
@@ -59,4 +60,52 @@ bool ACGameState::IsSlotOccupied(uint8 SlotId) const
 bool ACGameState::CanStartHeroSelection() const
 {
     return PlayerSelections.Num() == PlayerArray.Num();
+}
+
+void ACGameState::SetCharacterSelected(const APlayerState* SelectingPlayer, const UPA_CharacterDefinition* SelectedDefinition)
+{
+    if (IsDefinitionSelected(SelectedDefinition))
+    {
+        return;
+    }
+
+    FPlayerSelection* FoundPlayerSelection = PlayerSelections.FindByPredicate(
+        [&](const FPlayerSelection& PlayerSelection)
+        {
+            return PlayerSelection.IsForPlayer(SelectingPlayer);
+        });
+
+    if (FoundPlayerSelection)
+    {
+        FoundPlayerSelection->SetCharacterDefinition(SelectedDefinition);
+        OnPlayerSelectionUpdated.Broadcast(PlayerSelections);
+    }
+}
+
+bool ACGameState::IsDefinitionSelected(const UPA_CharacterDefinition* Definition) const
+{
+    const FPlayerSelection* FoundPlayerSelection = PlayerSelections.FindByPredicate(
+        [&](const FPlayerSelection& PlayerSelection)
+        {
+            return PlayerSelection.GetCharacterDefinition() == Definition;
+        });
+
+    return FoundPlayerSelection != nullptr;
+}
+
+void ACGameState::SetCharacterDeselected(const UPA_CharacterDefinition* Definition)
+{
+    if (!Definition) return;
+
+    FPlayerSelection* FoundPlayerSelection = PlayerSelections.FindByPredicate(
+        [&](const FPlayerSelection& PlayerSelection)
+        {
+            return PlayerSelection.GetCharacterDefinition() == Definition;
+        });
+    
+    if (FoundPlayerSelection)
+    {
+        FoundPlayerSelection->SetCharacterDefinition(nullptr);
+        OnPlayerSelectionUpdated.Broadcast(PlayerSelections);   
+    }
 }

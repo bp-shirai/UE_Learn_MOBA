@@ -17,6 +17,10 @@ class CRUNCH_API ALobbyPlayerController : public AMenuPlayerController
     GENERATED_BODY()
 
 public:
+    ALobbyPlayerController();
+    
+
+
     UFUNCTION(Server, Reliable, WithValidation)
     void Server_RequestPlayerSelectionChange(uint8 NewSlotID);
 
