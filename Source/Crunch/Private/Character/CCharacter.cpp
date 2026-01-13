@@ -423,3 +423,8 @@ void ACCharacter::MoveSpeedAcceleration_Updated(const FOnAttributeChangeData& Da
 {
     GetCharacterMovement()->MaxAcceleration = Data.NewValue;
 }
+
+const TMap<ECAbilityInputID, TSubclassOf<class UGameplayAbility>>* ACCharacter::GetAbilities() const
+{
+    return AbilitySystemComponent ? &AbilitySystemComponent->GetAbilities() : nullptr;
+}

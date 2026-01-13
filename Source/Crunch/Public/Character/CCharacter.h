@@ -83,6 +83,7 @@ private:
 
 public:
     FORCEINLINE bool IsInFocusMode() const { return bIsInFocusMode; }
+    const TMap<ECAbilityInputID, TSubclassOf<class UGameplayAbility>>* GetAbilities() const;
 
 #pragma endregion
 #pragma region-------- UI ---------------------------------------------------------

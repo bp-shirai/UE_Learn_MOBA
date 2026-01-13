@@ -69,3 +69,15 @@ FPrimaryAssetType UPA_CharacterDefinition::GetCharacterDefinitionAssetType()
 {
     return FPrimaryAssetType(TEXT("CharacterDefinition"));
 }
+
+const TMap<ECAbilityInputID, TSubclassOf<UGameplayAbility>>* UPA_CharacterDefinition::GetAbilities() const
+{
+    if (TSubclassOf<ACCharacter> LoadedCharacterClass = LoadCharacterClass())
+    {
+        if (ACCharacter* Character = Cast<ACCharacter>(LoadedCharacterClass.GetDefaultObject()))
+        {
+            return Character->GetAbilities();
+        }
+    }
+    return nullptr;
+}

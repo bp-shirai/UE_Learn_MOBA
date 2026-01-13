@@ -17,6 +17,7 @@
 #include "Widgets/Lobby/TeamSelectionWidget.h"
 #include "Widgets/Lobby/CharacterEntryWidget.h"
 #include "Widgets/Lobby/CharacterDisplay.h"
+#include "Widgets/AbilityListView.h"
 #include "Network/CNetStatics.h"
 #include "Framework/CGameState.h"
 #include "Framework/CAssetManager.h"
@@ -182,7 +183,7 @@ void ULobbyWidget::SpawnCharacterDisplay()
     if (CharacterDisplay) return;
 
     FTransform SpawnTransform = FTransform::Identity;
-    AActor* PlayerStart = UGameplayStatics::GetActorOfClass(GetWorld(), APlayerStart::StaticClass());
+    AActor* PlayerStart       = UGameplayStatics::GetActorOfClass(GetWorld(), APlayerStart::StaticClass());
     if (PlayerStart)
     {
         SpawnTransform = PlayerStart->GetActorTransform();
@@ -204,5 +205,12 @@ void ULobbyWidget::UpdateCharacterDisplay(const FPlayerSelection& PlayerSelectio
     if (!CharacterDisplay) return;
 
     CharacterDisplay->ConfigureWithCharacterDefinition(PlayerSelection.GetCharacterDefinition());
-    
+
+    AbilityListView->ClearListItems();
+
+    const TMap<ECAbilityInputID, TSubclassOf<UGameplayAbility>>* Abilities = PlayerSelection.GetCharacterDefinition()->GetAbilities();
+    if (Abilities)
+    {
+        AbilityListView->ConfigureAbilities(*Abilities);
+    }
 }

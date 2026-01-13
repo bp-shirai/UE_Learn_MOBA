@@ -15,6 +15,7 @@ class UTileView;
 class ALobbyPlayerController;
 class ACGameState;
 class ACPlayerState;
+class UAbilityListView;
 
 /**
  *
@@ -44,6 +45,10 @@ private:
 
     UPROPERTY(meta = (BindWidget))
     UTileView* CharacterSelectionTileView;
+
+    UPROPERTY(meta=(BindWidget))
+    UAbilityListView* AbilityListView;
+
 
     UPROPERTY(EditDefaultsOnly, Category = "TeamSelection")
     TSubclassOf<UTeamSelectionWidget> TeamSelectionWidgetClass;
