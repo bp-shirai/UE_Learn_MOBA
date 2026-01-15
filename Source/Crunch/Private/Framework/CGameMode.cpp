@@ -2,10 +2,13 @@
 
 #include "Framework/CGameMode.h"
 #include "GameFramework/PlayerStart.h"
+#include "GameFramework/Controller.h"
 #include "EngineUtils.h"
 
 #include "Framework/StormCore.h"
+#include "GenericTeamAgentInterface.h"
 #include "Player/CPlayerController.h"
+#include "Player/CPlayerState.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(CGameMode)
 
@@ -21,14 +24,6 @@ APlayerController* ACGameMode::SpawnPlayerController(ENetRole InRemoteRole, cons
 
     NewPlayerController->StartSpot = FindNextStartSpotForTeam(TeamId);
     return NewPlayerController;
-}
-
-FGenericTeamId ACGameMode::GetTeamIDForPlayer(const APlayerController* PlayerController) const
-{
-    static int32 PlayerCount = 0;
-    ++PlayerCount;
-
-    return FGenericTeamId((PlayerCount % 2) + 1); // 1 or 2
 }
 
 AActor* ACGameMode::FindNextStartSpotForTeam(const FGenericTeamId& TeamID) const
@@ -87,4 +82,45 @@ void ACGameMode::MatchFinished(AActor* ViewTarget, int WiningTeam)
     {
         It->MatchFinished(ViewTarget, WiningTeam);
     }
+}
+
+UClass* ACGameMode::GetDefaultPawnClassForController_Implementation(AController* InController)
+{
+    ACPlayerState* PlayerState = InController->GetPlayerState<ACPlayerState>();
+    if (PlayerState && PlayerState->GetSelectedCharacterClass())
+    {
+        return PlayerState->GetSelectedCharacterClass();
+    }
+
+    return BackupPawnClass;
+}
+
+APawn* ACGameMode::SpawnDefaultPawnFor_Implementation(AController* NewPlayer, AActor* StartSpot)
+{
+    IGenericTeamAgentInterface* NewPlayerTeam = Cast<IGenericTeamAgentInterface>(NewPlayer);
+    FGenericTeamId TeamId                     = GetTeamIDForPlayer(NewPlayer);
+
+    if (NewPlayerTeam)
+    {
+        NewPlayerTeam->SetGenericTeamId(TeamId);
+    }
+
+    StartSpot            = FindNextStartSpotForTeam(TeamId);
+    NewPlayer->StartSpot = StartSpot;
+
+    return Super::SpawnDefaultPawnFor_Implementation(NewPlayer, StartSpot);
+}
+
+FGenericTeamId ACGameMode::GetTeamIDForPlayer(const AController* InController) const
+{
+    ACPlayerState* PlayerState = InController->GetPlayerState<ACPlayerState>();
+    if (PlayerState)
+    {
+        return PlayerState->GetTeamIdBaseOnSlot();
+    }
+
+    static int32 PlayerCount = 0;
+    ++PlayerCount;
+
+    return FGenericTeamId((PlayerCount % 2) + 1); // 1 or 2
 }
