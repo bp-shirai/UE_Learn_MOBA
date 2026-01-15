@@ -6,6 +6,7 @@
 #include "Player/MenuPlayerController.h"
 #include "LobbyPlayerController.generated.h"
 
+
 DECLARE_DELEGATE(FOnSwitchToHeroSelection);
 
 /**
@@ -18,8 +19,6 @@ class CRUNCH_API ALobbyPlayerController : public AMenuPlayerController
 
 public:
     ALobbyPlayerController();
-    
-
 
     UFUNCTION(Server, Reliable, WithValidation)
     void Server_RequestPlayerSelectionChange(uint8 NewSlotID);
@@ -27,8 +26,11 @@ public:
     UFUNCTION(Server, Reliable, WithValidation)
     void Server_StartHeroSelection();
 
-	UFUNCTION(Client, Reliable)
-	void Client_StartHeroSelection();
+    UFUNCTION(Client, Reliable)
+    void Client_StartHeroSelection();
 
-	FOnSwitchToHeroSelection OnSwitchToHeroSelection;
+    UFUNCTION(Server, Reliable, WithValidation)
+    void Server_RequestStartMatch();
+
+    FOnSwitchToHeroSelection OnSwitchToHeroSelection;
 };

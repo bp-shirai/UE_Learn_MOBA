@@ -32,6 +32,7 @@ public:
     const TArray<FPlayerSelection>& GetPlayerSelections() const { return PlayerSelections; }
 
     bool CanStartHeroSelection() const;
+    bool CanStartMatch() const;
 
 private:
     UPROPERTY(ReplicatedUsing = OnRep_PlayerSelections)

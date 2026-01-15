@@ -4,9 +4,9 @@
 
 #include "Engine/World.h"
 #include "Framework/CGameState.h"
-#include "GameFramework/PlayerState.h"
-#include "Logging/LogVerbosity.h"
+#include "Framework/CGameInstance.h"
 
+#include "GameFramework/PlayerState.h"
 
 ALobbyPlayerController::ALobbyPlayerController()
 {
@@ -52,4 +52,15 @@ void ALobbyPlayerController::Client_StartHeroSelection_Implementation()
     OnSwitchToHeroSelection.ExecuteIfBound();
 }
 
+void ALobbyPlayerController::Server_RequestStartMatch_Implementation()
+{
+    if (UCGameInstance* GameInstance = GetGameInstance<UCGameInstance>())
+    {
+        GameInstance->StartMatch();
+    }
+}
 
+bool ALobbyPlayerController::Server_RequestStartMatch_Validate()
+{
+    return true;
+}

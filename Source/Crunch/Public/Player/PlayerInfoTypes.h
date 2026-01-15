@@ -10,6 +10,9 @@ class APlayerState;
 class UPA_CharacterDefinition;
 
 
+
+
+
 USTRUCT()
 struct FPlayerSelection
 {

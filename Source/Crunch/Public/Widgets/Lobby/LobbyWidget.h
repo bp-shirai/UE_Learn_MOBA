@@ -53,6 +53,9 @@ private:
     UPROPERTY(meta = (BindWidget))
     UPlayerTeamLayoutWidget* PlayerTeamLayoutWidget;
 
+    UPROPERTY(meta = (BindWidget))
+    UButton* StartMatchButton;
+
     UPROPERTY(EditDefaultsOnly, Category = "TeamSelection")
     TSubclassOf<UTeamSelectionWidget> TeamSelectionWidgetClass;
 
@@ -78,6 +81,9 @@ private:
 
     UFUNCTION()
     void StartHeroSelectionButtonClicked();
+
+    UFUNCTION()
+    void StartMatchButtonClicked();
 
     void SwitchToHeroSelection();
 

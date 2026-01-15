@@ -6,6 +6,12 @@
 #include "Kismet/GameplayStatics.h"
 
 #include "Framework/CGameState.h"
+#include "Character/PA_CharacterDefinition.h"
+#include "Character/CCharacter.h"
+#include "Player/PlayerInfoTypes.h"
+#include "Network/CNetStatics.h"
+#include "Crunch.h"
+
 
 ACPlayerState::ACPlayerState()
 {
@@ -62,4 +68,29 @@ void ACPlayerState::Server_SetSelectedCharacterDefinition_Implementation(const U
 bool ACPlayerState::Server_SetSelectedCharacterDefinition_Validate(const UPA_CharacterDefinition* NewDefinition)
 {
     return true;
+}
+
+void ACPlayerState::CopyProperties(APlayerState* PlayerState)
+{
+    Super::CopyProperties(PlayerState);
+
+    if (ACPlayerState* NewPlayerState = Cast<ACPlayerState>(PlayerState))
+    {
+        NewPlayerState->PlayerSelection = PlayerSelection;
+    }
+}
+
+TSubclassOf<APawn> ACPlayerState::GetSelectedCharacterClass() const
+{
+    if (PlayerSelection.GetCharacterDefinition())
+    {
+        return PlayerSelection.GetCharacterDefinition()->LoadCharacterClass();
+    }
+
+    return nullptr;
+}
+
+FGenericTeamId ACPlayerState::GetTeamIdBaseOnSlot() const
+{
+    return PlayerSelection.GetPlayerSlot() < UCNetStatics::GetPlayerCountPerTeam() ? FGenericTeamId{TEAM_ONE} : FGenericTeamId{TEAM_TWO};
 }

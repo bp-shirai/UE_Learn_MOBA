@@ -41,6 +41,9 @@ void ULobbyWidget::NativeConstruct()
     StartHeroSelectionButton->SetIsEnabled(false);
     StartHeroSelectionButton->OnClicked.AddDynamic(this, &ThisClass::StartHeroSelectionButtonClicked);
 
+    StartMatchButton->SetIsEnabled(false);
+    StartMatchButton->OnClicked.AddDynamic(this, &ThisClass::StartMatchButtonClicked);
+
     UCAssetManager::Get().LoadCharacterDefinitions(FStreamableDelegate::CreateUObject(this, &ThisClass::CharacterDefinitionsLoaded));
 
     if (CharacterSelectionTileView)
@@ -139,6 +142,7 @@ void ULobbyWidget::UpdatePlayerSelectionDisplay(const TArray<FPlayerSelection>& 
     if (CGameState)
     {
         StartHeroSelectionButton->SetIsEnabled(CGameState->CanStartHeroSelection());
+        StartMatchButton->SetIsEnabled(CGameState->CanStartMatch());
     }
 
     if (PlayerTeamLayoutWidget)
@@ -219,5 +223,13 @@ void ULobbyWidget::UpdateCharacterDisplay(const FPlayerSelection& PlayerSelectio
     if (Abilities)
     {
         AbilityListView->ConfigureAbilities(*Abilities);
+    }
+}
+
+void ULobbyWidget::StartMatchButtonClicked()
+{
+    if (LobbyPlayerController)
+    {
+        LobbyPlayerController->Server_RequestStartMatch();
     }
 }

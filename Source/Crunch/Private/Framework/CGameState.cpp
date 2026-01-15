@@ -102,10 +102,23 @@ void ACGameState::SetCharacterDeselected(const UPA_CharacterDefinition* Definiti
         {
             return PlayerSelection.GetCharacterDefinition() == Definition;
         });
-    
+
     if (FoundPlayerSelection)
     {
         FoundPlayerSelection->SetCharacterDefinition(nullptr);
-        OnPlayerSelectionUpdated.Broadcast(PlayerSelections);   
+        OnPlayerSelectionUpdated.Broadcast(PlayerSelections);
     }
+}
+
+bool ACGameState::CanStartMatch() const
+{
+    for (const FPlayerSelection& PlayerSelection : PlayerSelections)
+    {
+        if (!PlayerSelection.GetCharacterDefinition())
+        {
+            return false;
+        }
+    }
+
+    return true;
 }

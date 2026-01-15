@@ -1,16 +1,17 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "Player/PlayerInfoTypes.h"
+#include "Character/PA_CharacterDefinition.h"
 #include "GameFramework/PlayerState.h"
 #include "Network/CNetStatics.h"
 
 FPlayerSelection::FPlayerSelection()
-    : Slot(GetInvalidSlot()), PlayerUniqueId(FUniqueNetIdRepl::Invalid())
+    : Slot{GetInvalidSlot()}, PlayerUniqueId{FUniqueNetIdRepl::Invalid()}, PlayerNickName{TEXT("")}, SelectedDefinition{nullptr}
 {
 }
 
 FPlayerSelection::FPlayerSelection(uint8 InSlot, const APlayerState* InPlayerState)
-    : Slot(InSlot)
+    : Slot{InSlot}, SelectedDefinition{nullptr}
 {
     if (InPlayerState)
     {
